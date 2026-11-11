@@ -578,6 +578,9 @@ function pageAjustes(main) {
     <div class="card"><h3><i class="fa-solid fa-file-excel" style="color:var(--green)"></i> Importar desde Excel</h3>
       <p class="muted small">Sube el archivo con las hojas <b>CORREDORES</b> (dorsal, name, category, team), <b>CATEGORIAS</b> (name, laps) y <b>Equipos</b> (name). Es el mismo formato del sistema anterior.</p>
       <label class="drop" id="drop"><i class="fa-solid fa-cloud-arrow-up"></i><p><b>Arrastra tu archivo .xlsx aquí</b><br><span class="muted small">o toca para elegirlo</span></p><input type="file" accept=".xlsx,.xls,.csv" hidden id="xls"></label>
+      <details style="margin-top:.8rem"><summary class="small" style="cursor:pointer;color:var(--amber);font-weight:700"><i class="fa-solid fa-paste"></i> O pega la lista (copiada de Excel, con encabezados)</summary>
+        <textarea id="rText" rows="6" placeholder="dorsal&#9;name&#9;category&#9;team&#10;1&#9;Raúl Chavira&#9;50+ Varonil&#9;Zorros" style="width:100%;margin-top:.5rem;font-family:ui-monospace,monospace;font-size:.8rem;background:var(--surface);border:1px solid var(--line2);border-radius:11px;padding:.6rem;color:var(--text)"></textarea>
+        <button class="btn btn-sm" id="rCheck" style="margin-top:.4rem"><i class="fa-solid fa-magnifying-glass"></i> Revisar lista</button></details>
       <div id="imp"></div></div>
     <div class="card" id="lapsCard" style="grid-column:1/-1"><h3><i class="fa-solid fa-flag-checkered" style="color:var(--lime)"></i> Importar pasos por meta (vueltas) a un evento</h3>
       <p class="muted small">Pega los registros de otro cronómetro, hoja de cálculo o app: <b>una línea por paso</b> con fecha/hora y dorsal, por ejemplo <code>11/1/2026 7:34:46&nbsp;&nbsp;103</code>. También sirve solo la hora (<code>7:34:46 103</code>) o subir un archivo Excel/CSV.</p>
@@ -599,6 +602,7 @@ function pageAjustes(main) {
   ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, () => drop.classList.remove('over')));
   drop.addEventListener('drop', (e) => { e.preventDefault(); e.dataTransfer.files[0] && handleXls(e.dataTransfer.files[0]); });
   $('#xls').onchange = (e) => e.target.files[0] && handleXls(e.target.files[0]);
+  $('#rCheck').onclick = () => handleRiderText($('#rText').value);
   $('#reset') && ($('#reset').onclick = async () => { if (await confirmDialog('Restablecer demo', 'Se borrarán tus cambios y se cargarán de nuevo los datos ficticios.')) { store.resetDemo(); S.eventId = D().events.find((x) => x.status === 'en_curso')?.id; localStorage.setItem(ACTIVE_KEY, S.eventId); await reloadLaps(); fillEventSelect(); renderPage(); toast('Demo restablecido'); } });
   setupLapImport();
   $('#backup').onclick = async () => {
@@ -665,20 +669,63 @@ function setupLapImport() {
 }
 
 async function handleXls(file) {
+  if (/\.(csv|txt|tsv)$/i.test(file.name)) return handleRiderText(await file.text());
   if (!window.XLSX) return toast('El lector de Excel aún está cargando, intenta de nuevo', 'warn');
   const wb = window.XLSX.read(await file.arrayBuffer(), { cellDates: true });
-  const sheet = (re) => { const n = wb.SheetNames.find((x) => re.test(x)); return n ? window.XLSX.utils.sheet_to_json(wb.Sheets[n], { defval: null }) : []; };
+  const toJson = (n) => window.XLSX.utils.sheet_to_json(wb.Sheets[n], { defval: null });
+  const hasDorsal = (n) => { const r = window.XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1 })[0] || []; return r.some((h) => /^(dorsal|n[uú]mero)$/i.test(String(h).trim())); };
+  const sheet = (re) => { const n = wb.SheetNames.find((x) => re.test(x)); return n ? toJson(n) : []; };
+  // Hoja de corredores: la que se llame CORREDORES… o, si no, la primera que tenga columna "dorsal"
+  const riderSheet = wb.SheetNames.find((x) => /corredor|rider|particip|inscri/i.test(x)) || wb.SheetNames.find(hasDorsal);
+  previewRiderImport({ riders: riderSheet ? toJson(riderSheet) : [], categories: sheet(/categor/i), teams: sheet(/equipo|team/i) });
+}
+/** Lista pegada (copiada de Excel): primera línea = encabezados (dorsal, name/nombre, category/categoría, team/equipo) */
+function handleRiderText(text) {
+  const lines = String(text).split(/\r?\n/).filter((l) => l.trim());
+  if (!lines.length) return toast('Pega la lista con encabezados: dorsal, nombre, categoría, equipo', 'warn');
+  const sep = lines[0].includes('\t') ? '\t' : lines[0].includes(';') ? ';' : ',';
+  const head = lines[0].split(sep).map((h) => h.trim());
+  if (!head.some((h) => /^(dorsal|n[uú]mero)$/i.test(h))) return toast('La primera línea debe tener los encabezados (dorsal, nombre, categoría, equipo)', 'warn', 5000);
+  const riders = lines.slice(1).map((l) => { const c = l.split(sep); return Object.fromEntries(head.map((h, i) => [h, (c[i] ?? '').trim() || null])); });
+  previewRiderImport({ riders, categories: [], teams: [] });
+}
+function previewRiderImport({ riders: raw, categories: rawCats, teams: rawTeams }) {
   const pick = (o, ...keys) => { for (const k of Object.keys(o)) if (keys.includes(k.toLowerCase().trim())) return o[k]; return null; };
-  const riders = sheet(/corredor|rider|particip/i).map((o) => ({ dorsal: pick(o, 'dorsal', 'numero', 'número'), name: pick(o, 'name', 'nombre'), category: pick(o, 'category', 'categoria', 'categoría'), team: pick(o, 'team', 'equipo') })).filter((r) => r.dorsal);
-  const categories = sheet(/categor/i).map((o) => ({ name: pick(o, 'name', 'nombre'), laps: pick(o, 'laps', 'vueltas') })).filter((c) => c.name);
-  const teams = sheet(/equipo|team/i).map((o) => ({ name: pick(o, 'name', 'nombre') })).filter((t) => t.name);
-  const valid = riders.filter((r) => r.name).length;
+  const clean = (v) => String(v ?? '').trim().replace(/\s+/g, ' ');
+  let riders = raw.map((o) => ({ dorsal: pick(o, 'dorsal', 'numero', 'número'), name: pick(o, 'name', 'nombre'), category: pick(o, 'category', 'categoria', 'categoría'), team: pick(o, 'team', 'equipo') }))
+    .filter((r) => parseInt(r.dorsal, 10));
+  const categories = rawCats.map((o) => ({ name: pick(o, 'name', 'nombre'), laps: pick(o, 'laps', 'vueltas') })).filter((c) => c.name);
+  const teams = rawTeams.map((o) => ({ name: pick(o, 'name', 'nombre') })).filter((t) => t.name);
+  // Sin nombre pero con categoría o equipo → se importa como "Corredor #N" para no perder sus tiempos
+  const placeholder = riders.filter((r) => !clean(r.name) && (clean(r.category) || clean(r.team)));
+  placeholder.forEach((r) => { r.name = `Corredor #${parseInt(r.dorsal, 10)}`; });
+  const empty = riders.filter((r) => !clean(r.name));
+  riders = riders.filter((r) => clean(r.name));
+  // Avisos
+  const byName = {}; riders.forEach((r) => { const k = clean(r.name).toLowerCase(); (byName[k] ||= []).push(r.dorsal); });
+  const dupNames = Object.entries(byName).filter(([, d]) => d.length > 1);
+  const byDorsal = {}; riders.forEach((r) => { const d = parseInt(r.dorsal, 10); byDorsal[d] = (byDorsal[d] || 0) + 1; });
+  const dupDorsal = Object.entries(byDorsal).filter(([, n]) => n > 1).map(([d]) => d);
+  const known = new Set(D().categories.map((c) => clean(c.name).toLowerCase()));
+  categories.forEach((c) => known.add(clean(c.name).toLowerCase()));
+  const newCats = [...new Set(riders.map((r) => clean(r.category)).filter((c) => c && !known.has(c.toLowerCase())).map((c) => c))];
+  const newCatsU = [...newCats.reduce((m, c) => (m.has(c.toLowerCase()) ? m : m.set(c.toLowerCase(), c)), new Map()).values()];
+  const noCat = riders.filter((r) => !clean(r.category)).map((r) => r.dorsal);
+  const noTeam = riders.filter((r) => !clean(r.team)).length;
+  const updates = riders.filter((r) => D().riders.some((x) => Number(x.dorsal) === parseInt(r.dorsal, 10))).length;
+  const w = (icon, html) => `<p class="small warn-t" style="margin:.35rem 0"><i class="fa-solid ${icon}"></i> ${html}</p>`;
   $('#imp').innerHTML = `<div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-top:1rem">
-    <div class="kpi"><i class="fa-solid fa-person-biking"></i><b>${valid}</b><span>Corredores</span></div><div class="kpi"><i class="fa-solid fa-layer-group"></i><b>${categories.length}</b><span>Categorías</span></div><div class="kpi"><i class="fa-solid fa-users"></i><b>${teams.length}</b><span>Equipos</span></div></div>
-    ${riders.length - valid ? `<p class="small warn-t"><i class="fa-solid fa-triangle-exclamation"></i> ${riders.length - valid} fila(s) sin nombre se omitirán.</p>` : ''}
-    <p class="muted small">Los dorsales que ya existan se actualizarán. Los datos se guardan <b>tal como vienen en el archivo</b> (los equipos no se unifican).</p>
-    <button class="btn btn-primary" id="doImp"><i class="fa-solid fa-file-import"></i> Importar ahora</button>`;
-  $('#doImp').onclick = async () => {
+    <div class="kpi"><i class="fa-solid fa-person-biking"></i><b>${riders.length}</b><span>Corredores</span></div><div class="kpi"><i class="fa-solid fa-layer-group"></i><b>${categories.length + newCatsU.length}</b><span>Categorías</span></div><div class="kpi"><i class="fa-solid fa-rotate"></i><b>${updates}</b><span>Ya existían (se actualizan)</span></div></div>
+    ${placeholder.length ? w('fa-user-pen', `${placeholder.length} sin nombre pero con categoría/equipo (dorsal ${placeholder.map((r) => r.dorsal).join(', ')}): se importan como <b>“Corredor #N”</b> para no perder sus tiempos. Edítalos después en Corredores.`) : ''}
+    ${empty.length ? `<p class="small muted" style="margin:.35rem 0"><i class="fa-solid fa-ban"></i> ${empty.length} fila(s) vacías se omiten (dorsal ${empty.map((r) => r.dorsal).join(', ')}).</p>` : ''}
+    ${dupDorsal.length ? w('fa-clone', `Dorsales repetidos en la lista: ${dupDorsal.join(', ')}. Se queda la <b>última</b> fila de cada uno.`) : ''}
+    ${dupNames.length ? w('fa-people-arrows', `Mismo nombre con distinto dorsal: ${dupNames.slice(0, 12).map(([n, d]) => `${esc(n)} (${d.join(', ')})`).join(' · ')}. Revisa si son la misma persona.`) : ''}
+    ${newCatsU.length ? w('fa-layer-group', `Categorías nuevas (se crean con <b>1 vuelta</b>; ajústalas en Categorías): ${newCatsU.map(esc).join(', ')}`) : ''}
+    ${noCat.length ? w('fa-circle-question', `Sin categoría: dorsal ${noCat.join(', ')} (no aparecerán en resultados hasta asignarles una).`) : ''}
+    ${noTeam ? `<p class="small muted" style="margin:.35rem 0"><i class="fa-solid fa-users-slash"></i> ${noTeam} sin equipo: aparecerán como “Independiente”.</p>` : ''}
+    <p class="muted small">Los dorsales que ya existan se actualizarán. Los datos se guardan <b>tal como vienen</b> (los equipos no se unifican).</p>
+    ${riders.length ? '<button class="btn btn-primary" id="doImp"><i class="fa-solid fa-file-import"></i> Importar ahora</button>' : '<p class="warn-t small">No se encontraron corredores: revisa que exista la columna <b>dorsal</b>.</p>'}`;
+  $('#doImp') && ($('#doImp').onclick = async () => {
     $('#doImp').disabled = true; $('#doImp').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importando…';
     try {
       const r = await store.bulkImport({ categories, teams, riders }, (msg) => { $('#doImp').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${esc(msg)}`; });
@@ -686,5 +733,5 @@ async function handleXls(file) {
       $('#imp').innerHTML = `<p class="small" style="color:var(--green);margin-top:1rem"><i class="fa-solid fa-circle-check"></i> Listo: ${r.riders} corredores, ${r.categories} categorías y ${r.teams} equipos nuevos.</p>`;
     }
     catch (err) { toast(err.message, 'err', 5000); $('#doImp').disabled = false; }
-  };
+  });
 }
