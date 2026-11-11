@@ -125,7 +125,9 @@ function leg(hip, foot, l1 = 16.5, l2 = 16.5) {
   return `M${hip[0]} ${hip[1]} L${knee[0].toFixed(2)} ${knee[1].toFixed(2)} L${foot[0].toFixed(2)} ${foot[1].toFixed(2)}`;
 }
 
-export function showSplash({ minMs = 1700 } = {}) {
+// SLOW = factor de duración de la animación (1.5 = 50 % más lenta)
+const SLOW = 1.5;
+export function showSplash({ minMs = 1700 * SLOW } = {}) {
   if (!document.getElementById('splash-css')) {
     const st = document.createElement('style'); st.id = 'splash-css'; st.textContent = CSS; document.head.appendChild(st);
   }
@@ -146,14 +148,16 @@ export function showSplash({ minMs = 1700 } = {}) {
   const L = scene.track.getTotalLength();
   const started = performance.now();
   let target = 0.06, shown = 0, finished = false, resolveDone, crankA = 0, last = started, raf;
+  let tDone = 0, sDone = 0, tEnd = 0; // tramo final: de donde va la bici hasta la meta
   const doneP = new Promise((r) => { resolveDone = r; });
 
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     // Mientras carga, el objetivo avanza solo (lento) hasta 90 % para que siempre haya movimiento
-    if (!finished) target = Math.min(0.9, target + dt * 0.08);
+    if (!finished) target = Math.min(0.9, target + dt * (0.08 / SLOW));
     const maxSpeed = 1 / (minMs / 1000); // nunca sube toda la montaña en menos de minMs
-    shown = Math.min(target, shown + Math.min(maxSpeed * dt, (target - shown) * 0.12 + 0.002));
+    if (tEnd) shown = sDone + (1 - sDone) * Math.min(1, (now - tDone) / (tEnd - tDone)); // sube parejo hasta la meta
+    else shown = Math.min(target, shown + Math.min(maxSpeed * dt, (target - shown) * (0.12 / SLOW) + 0.002 / SLOW));
     // Posición en el circuito
     const p = scene.track.getPointAtLength(shown * L);
     const p2 = scene.track.getPointAtLength(Math.min(L, shown * L + 2));
@@ -178,7 +182,7 @@ export function showSplash({ minMs = 1700 } = {}) {
     if (finished && shown >= 0.999) {
       msg.textContent = '¡Meta! Todo listo';
       cancelAnimationFrame(raf);
-      setTimeout(() => { wrap.classList.add('out'); setTimeout(() => { wrap.remove(); resolveDone(); }, 520); }, 280);
+      setTimeout(() => { wrap.classList.add('out'); setTimeout(() => { wrap.remove(); resolveDone(); }, 520); }, 280 * SLOW);
       return;
     }
     raf = requestAnimationFrame(frame);
@@ -192,8 +196,11 @@ export function showSplash({ minMs = 1700 } = {}) {
     done() {
       if (!finished) {
         finished = true; target = 1;
+        // Antes la bici llegaba ~2 s después de terminar la carga; ahora todo dura SLOW veces más (1.5 = 50 % más)
+        tDone = performance.now(); sDone = shown;
+        tEnd = Math.max(tDone + 600, started + SLOW * (tDone - started + 1500));
         // Seguro: si la animación no avanza (pestaña en segundo plano, ahorro de energía), se cierra igual
-        setTimeout(() => { if (document.body.contains(wrap)) { cancelAnimationFrame(raf); wrap.classList.add('out'); setTimeout(() => { wrap.remove(); resolveDone(); }, 520); } }, minMs + 2500);
+        setTimeout(() => { if (document.body.contains(wrap)) { cancelAnimationFrame(raf); wrap.classList.add('out'); setTimeout(() => { wrap.remove(); resolveDone(); }, 520); } }, Math.max(minMs, tEnd - performance.now()) + 2500 * SLOW);
       }
       return doneP;
     },
