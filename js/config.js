@@ -5,8 +5,8 @@
 //  Supabase (Project Settings → API) para usar la base de datos real.
 // ─────────────────────────────────────────────────────────────
 export const CONFIG = {
-  SUPABASE_URL: '',        // ej. 'https://abcdxyz.supabase.co'
-  SUPABASE_ANON_KEY: '',   // clave "anon public" (es segura para el navegador)
+  SUPABASE_URL: 'https://askklvaiuewmvmwcncan.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_SRhjBtBz0NsrpzmgC7yyRg_hN1H2WbD', // clave pública (publishable): segura en el navegador
 
   APP_NAME: 'ChronoBike',
   ORGANIZER: 'Serial MTB Sonora',
