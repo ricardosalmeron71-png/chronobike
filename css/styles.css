@@ -117,7 +117,8 @@ h1{font-size:2.2rem;font-weight:800} h2{font-size:1.7rem;font-weight:800} h3{fon
 .p1 .avatar{outline:3px solid var(--gold);outline-offset:3px} .p2 .avatar{outline:3px solid var(--silver);outline-offset:2px} .p3 .avatar{outline:3px solid var(--bronze);outline-offset:2px}
 .pod-name{font-size:.88rem;line-height:1.15;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .pod-team{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.pod-time{font-family:var(--display);font-size:1.2rem;font-weight:700} .pod-gap{font-size:.75rem;color:var(--muted)} .pod-gap.lead{color:var(--gold);font-weight:700}
+.pod-time{font-family:var(--display);font-size:1.2rem;font-weight:700}
+.pod-speed{font-size:.74rem;color:var(--muted);font-weight:700;white-space:nowrap} .pod-speed i{color:var(--orange);font-size:.7rem} .pod-gap{font-size:.75rem;color:var(--muted)} .pod-gap.lead{color:var(--gold);font-weight:700}
 .pod-step{width:100%;margin-top:.5rem;border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--display)}
 .pod-step span{font-size:2rem;font-weight:800;line-height:1} .pod-step small{font-size:.8rem;opacity:.75}
 .p1 .pod-step{height:96px;background:linear-gradient(180deg,rgba(255,211,77,.35),rgba(255,211,77,.06));color:var(--gold);border:1px solid rgba(255,211,77,.4);border-bottom:0}

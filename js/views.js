@@ -14,6 +14,7 @@ export const EVENT_STATUS = {
   proximo: { cls: 'ev-next', label: 'Próximo' },
 };
 
+export const fmtSpeed = (v) => (v ? `${v.toFixed(1)} km/h` : '—');
 export const statusBadge = (s) => { const u = STATUS_UI[s]; return `<span class="badge ${u.cls}"><i class="fa-solid ${u.icon}"></i>${u.label}</span>`; };
 
 export function eventCard(ev, { active = false, stats = null } = {}) {
@@ -49,7 +50,7 @@ export function podium(group) {
     ${order.map((r, i) => r ? `<div class="pod ${place[i]}" data-rider="${esc(r.rider.dorsal)}">
       <div class="pod-avatar">${avatar(r.rider, color, 'lg')}<span class="medal">${place[i].slice(1)}</span></div>
       <b class="pod-name">${esc(r.rider.name)}</b><span class="pod-team">${esc(r.team?.name || 'Independiente')}</span>
-      <span class="pod-time">${fmtDuration(r.total)}</span>${r.gap ? `<span class="pod-gap">${fmtGap(r.gap)}</span>` : '<span class="pod-gap lead">Ganador</span>'}
+      <span class="pod-time">${fmtDuration(r.total)}</span>${r.speed ? `<span class="pod-speed"><i class="fa-solid fa-gauge-high"></i> ${fmtSpeed(r.speed)}</span>` : ''}${r.gap ? `<span class="pod-gap">${fmtGap(r.gap)}</span>` : '<span class="pod-gap lead">Ganador</span>'}
       <div class="pod-step"><span>${place[i].slice(1)}°</span><small>#${esc(r.rider.dorsal)}</small></div></div>` : '<div class="pod empty-pod"></div>').join('')}
   </div></section>`;
 }
@@ -58,13 +59,14 @@ export function resultsTable(group, { showDns = true, admin = false } = {}) {
   const color = group.category.color || '#ff5a1f';
   const rows = group.rows.filter((r) => showDns || r.status !== STATUS.DNS);
   const maxLaps = group.targetLaps;
+  const hasSpeed = rows.some((r) => r.speed);
   return `<section class="table-card" style="--c:${esc(color)}">
     <div class="cat-head"><span class="cat-dot" style="--c:${esc(color)}"></span><h3>${esc(group.category.name)}</h3>
     <span class="muted">${group.targetLaps} ${group.targetLaps === 1 ? 'vuelta' : 'vueltas'} · Salida ${fmtClock(group.start)}</span>
     <span class="grow"></span><span class="chip">${rows.length} corredores</span></div>
     <div class="table-scroll"><table class="results">
     <thead><tr><th>Pos</th><th>Corredor</th><th class="hide-sm">Progreso</th>${Array.from({ length: maxLaps }, (_, i) => `<th class="num hide-sm">V${i + 1}</th>`).join('')}
-    <th class="num">Tiempo</th><th class="num hide-xs">Dif.</th><th>Estado</th></tr></thead><tbody>
+    <th class="num">Tiempo</th><th class="num hide-xs">Dif.</th>${hasSpeed ? '<th class="num hide-xs" title="Velocidad promedio">Vel. prom.</th>' : ''}<th>Estado</th></tr></thead><tbody>
     ${rows.map((r) => `<tr data-rider="${esc(r.rider.dorsal)}" class="${r.position && r.position <= 3 && r.status === STATUS.FINAL ? 'top' + r.position : ''}">
       <td class="pos">${r.position && r.status !== STATUS.DNS ? `<span class="pos-n">${r.position}</span>` : '—'}</td>
       <td><div class="who">${avatar(r.rider, color)}<div><b>${esc(r.rider.name)}</b><small><span class="bib">#${esc(r.rider.dorsal)}</span> ${esc(r.team?.name || 'Independiente')}</small></div></div></td>
@@ -72,7 +74,8 @@ export function resultsTable(group, { showDns = true, admin = false } = {}) {
       ${Array.from({ length: maxLaps }, (_, i) => { const s = r.splits[i]; return `<td class="num mono hide-sm ${s && s.ms === r.best && r.splits.length > 1 ? 'best' : ''}">${s ? fmtDuration(s.ms) : ''}</td>`; }).join('')}
       <td class="num mono strong">${r.status === STATUS.FINAL ? fmtDuration(r.total) : r.lapsDone ? `<span class="muted">${fmtDuration(r.splits.at(-1)?.cumulative)}</span>` : ''}</td>
       <td class="num mono hide-xs muted">${r.gap ? fmtGap(r.gap) : r.lapsBehind ? `-${r.lapsBehind}V` : ''}</td>
-      <td>${statusBadge(r.status)}</td></tr>`).join('') || `<tr><td colspan="${6 + maxLaps}" class="empty small">Sin corredores en esta categoría</td></tr>`}
+      ${hasSpeed ? `<td class="num mono hide-xs">${r.speed ? `${r.speed.toFixed(1)} <small class="muted">km/h</small>` : ''}</td>` : ''}
+      <td>${statusBadge(r.status)}</td></tr>`).join('') || `<tr><td colspan="${7 + maxLaps}" class="empty small">Sin corredores en esta categoría</td></tr>`}
     </tbody></table></div></section>`;
 }
 

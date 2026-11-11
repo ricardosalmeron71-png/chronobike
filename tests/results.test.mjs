@@ -72,3 +72,12 @@ test('datos ficticios generan podios completos y CSV válido', () => {
   const csv = resultsToCSV(event, groups);
   assert.match(csv, /Tiempo oficial/);
 });
+
+test('velocidad promedio = km recorridos / tiempo (requiere km por vuelta en el evento)', () => {
+  const d = base(); d.event.lap_km = 8;
+  d.laps = [lap(1, '08:25:00'), lap(1, '08:51:30'), lap(1, '09:17:10')]; // 3 vueltas · 24 km · 1:17:10
+  const ana = computeResults(d)[0].rows[0];
+  assert.equal(ana.speed.toFixed(1), '18.7');
+  d.event.lap_km = null;
+  assert.equal(computeResults(d)[0].rows[0].speed, null);
+});

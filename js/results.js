@@ -122,13 +122,13 @@ export function eventSummary(groups) {
 /** CSV con la clasificación (separador ; para Excel en español). */
 export function resultsToCSV(event, groups) {
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const head = ['Evento', 'Categoría', 'Posición', 'Dorsal', 'Corredor', 'Equipo', 'Vueltas', 'Tiempos por vuelta', 'Tiempo oficial', 'Diferencia', 'Estado'];
+  const head = ['Evento', 'Categoría', 'Posición', 'Dorsal', 'Corredor', 'Equipo', 'Vueltas', 'Tiempos por vuelta', 'Tiempo oficial', 'Diferencia', 'Velocidad promedio (km/h)', 'Estado'];
   const lines = [head.map(esc).join(';')];
   for (const g of groups) for (const r of g.rows) {
     lines.push([
       event.name, g.category.name, r.position ?? '', r.rider.dorsal, r.rider.name, r.team?.name ?? '',
       `${r.lapsDone}/${r.targetLaps}`, r.splits.map((s) => `V${s.n}: ${fmtDuration(s.ms)}`).join(' | '),
-      fmtDuration(r.total), fmtGap(r.gap), r.status,
+      fmtDuration(r.total), fmtGap(r.gap), r.speed ? r.speed.toFixed(1) : '', r.status,
     ].map(esc).join(';'));
   }
   return '﻿' + lines.join('\r\n');

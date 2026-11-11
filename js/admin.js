@@ -133,6 +133,7 @@ function renderLayout() {
       <div class="event-pill"><i class="fa-solid fa-flag-checkered" style="color:var(--orange)"></i><select id="eventSel2"></select></div>
       ${pages.slice(5).map((p) => `<button class="btn" data-go="${p.id}"><i class="fa-solid ${p.icon}"></i>${p.label}</button>`).join('')}
       <a class="btn" href="./index.html" target="_blank"><i class="fa-solid fa-eye"></i> Vista pública</a>
+      ${FORCED_DEMO ? '<a class="btn" href="./admin.html?demo=0"><i class="fa-solid fa-right-from-bracket"></i> Salir del modo demo</a>' : store.mode === 'cloud' ? '<a class="btn" href="./admin.html?demo=1"><i class="fa-solid fa-flask"></i> Modo demo (practicar)</a>' : ''}
       ${store.isAdmin() ? '<button class="btn" data-theme-pick><i class="fa-solid fa-palette"></i> Diseño de la app</button>' : ''}
       <a class="btn" href="./tv.html${S.eventId ? '?e=' + encodeURIComponent(S.eventId) : ''}" target="_blank"><i class="fa-solid fa-tv"></i> Pantalla TV de meta</a>
       <button class="btn btn-danger" data-logout><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión (${esc(displayUser(store.user.email))})</button></div>`);
@@ -602,7 +603,9 @@ function pageAjustes(main) {
       <p class="muted small">Modo actual: <b>${store.mode === 'demo' ? 'DEMO (navegador local)' : 'Supabase (nube)'}</b></p>
       ${store.mode === 'demo' ? `<ol class="steps small"><li>Crea un proyecto gratis en supabase.com</li><li>Ejecuta <code>supabase/schema.sql</code> en el SQL Editor</li><li>Pega la URL y la clave anon en <code>js/config.js</code></li><li>Publica el sitio (Netlify) y crea a tu staff en <b>Usuarios</b></li></ol>
         <button class="btn btn-danger" id="reset" style="margin-top:1rem"><i class="fa-solid fa-rotate"></i> Restablecer datos de demostración</button>` : '<p class="muted small">Conectado. Los cambios se ven en tiempo real en todos los dispositivos.</p>'}
-      <button class="btn" id="backup" style="margin-top:1rem"><i class="fa-solid fa-download"></i> Descargar respaldo completo (JSON)</button></div>
+      <button class="btn" id="backup" style="margin-top:1rem"><i class="fa-solid fa-download"></i> Descargar respaldo completo (JSON)</button>
+      ${FORCED_DEMO ? '<a class="btn btn-primary" href="./admin.html?demo=0" style="margin-top:.6rem"><i class="fa-solid fa-right-from-bracket"></i> Salir del modo demo</a>'
+        : store.mode === 'cloud' ? '<a class="btn" href="./admin.html?demo=1" style="margin-top:.6rem"><i class="fa-solid fa-flask"></i> Abrir modo demo (practicar sin tocar datos reales)</a>' : ''}</div>
   </div>`;
   const drop = $('#drop');
   ['dragover', 'dragenter'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
