@@ -2,7 +2,7 @@
 // Uso: npm run seed:sql
 import { buildDemoData } from '../js/demo-data.js';
 
-const d = buildDemoData();
+const d = buildDemoData(new Date('2026-11-11T17:20:00Z').getTime(), 2026); // semilla fija: el SQL es reproducible
 // En la nube no existe el "simulador": todas las vueltas quedan registradas tal cual
 const q = (v) => (v == null ? 'null' : typeof v === 'number' ? String(v) : `'${String(v).replace(/'/g, "''")}'`);
 // Los IDs del demo no son UUID: generamos UUID deterministas a partir del texto

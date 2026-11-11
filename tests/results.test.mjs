@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { computeResults, fmtDuration, resultsToCSV, STATUS, eventSummary } from '../js/results.js';
-import { buildDemoData } from '../js/demo-data.js';
+import { buildDemoData, randomSeed } from '../js/demo-data.js';
 
 const T = (hms) => `2026-09-22T${hms}-07:00`;
 const base = () => ({
@@ -64,11 +64,19 @@ test('pasos antes de la salida se ignoran y sin pasos = SIN PASO', () => {
 });
 
 test('datos ficticios generan podios completos y CSV válido', () => {
-  const data = buildDemoData(new Date('2026-11-11T12:00:00Z').getTime());
+  const data = buildDemoData(new Date('2026-11-11T12:00:00Z').getTime(), 2026);
   const event = data.events[0];
   const groups = computeResults({ event, ...data, eventCategories: data.event_categories });
   assert.ok(groups.length >= 10);
   assert.ok(groups.every((g) => g.rows.filter((r) => r.status === STATUS.FINAL).length >= 3));
+  // y con cualquier semilla, los eventos terminados tienen podio completo en todas las categorías
+  for (let i = 0; i < 15; i++) {
+    const dd = buildDemoData(new Date('2026-11-11T12:00:00Z').getTime(), randomSeed());
+    for (const ev of dd.events.filter((x) => x.status === 'finalizado')) {
+      const gs = computeResults({ event: ev, ...dd, eventCategories: dd.event_categories });
+      assert.ok(gs.every((g) => g.rows.filter((r) => r.status === STATUS.FINAL).length >= 3));
+    }
+  }
   const csv = resultsToCSV(event, groups);
   assert.match(csv, /Tiempo oficial/);
 });
@@ -111,4 +119,32 @@ test('un evento finalizado sin nadie en meta reporta DNF en el resumen', () => {
   assert.equal(sum.dnf, 1);
   assert.equal(sum.finished, 0);
   assert.equal(sum.racing, 0);
+});
+
+test('demo: cada generación es distinta y la carrera en vivo siempre está al 50 %', () => {
+  const NOW = new Date('2026-11-11T17:20:00Z').getTime();
+  const seen = new Set(); const names = new Set();
+  for (let i = 0; i < 25; i++) {
+    const d = buildDemoData(NOW, randomSeed());
+    const live = d.events.find((e) => e.status === 'en_curso');
+    const lapsLive = d.laps.filter((l) => l.event_id === live.id);
+    const done = lapsLive.filter((l) => Date.parse(l.ts) <= NOW).length;
+    const pct = done / lapsLive.length;
+    assert.ok(pct >= 0.48 && pct <= 0.54, `avance ${pct}`);                     // ~50 %
+    assert.ok(Date.parse(live.start_at) < NOW);                                  // ya salió
+    assert.ok(d.event_categories.filter((x) => x.event_id === live.id).every((x) => Date.parse(x.start_at) <= NOW)); // todas ya salieron
+    assert.ok(d.riders.length >= 55 && d.riders.length <= 110);
+    seen.add(d.riders.map((r) => r.name).join('|')); names.add(live.name);
+    // los pasos de eventos finalizados no se alteran: todo en el pasado
+    const past = d.events.filter((e) => e.status === 'finalizado').map((e) => e.id);
+    assert.ok(d.laps.filter((l) => past.includes(l.event_id)).every((l) => Date.parse(l.ts) < NOW));
+  }
+  assert.equal(seen.size, 25);   // 25 demos, 25 listas de corredores distintas
+  assert.ok(names.size > 1);     // y no siempre la misma carrera
+});
+
+test('demo: con la misma semilla es reproducible', () => {
+  const NOW = new Date('2026-11-11T17:20:00Z').getTime();
+  assert.deepEqual(buildDemoData(NOW, 7), buildDemoData(NOW, 7));
+  assert.notDeepEqual(buildDemoData(NOW, 7).riders, buildDemoData(NOW, 8).riders);
 });

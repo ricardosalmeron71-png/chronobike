@@ -10,7 +10,8 @@ Una app web que se abre en cualquier celular o computadora, con dos caras:
 
 > **Pruébala ya, sin instalar nada:** abre `index.html` o `admin.html` con cualquier servidor estático.
 > Sin configurar una base de datos, la app arranca en **modo demostración** con datos ficticios
-> (4 eventos, 12 categorías, 84 corredores, ~430 pasos). La carrera "en vivo" avanza sola.
+> (4 eventos, 12 categorías, ~70-95 corredores). **Los datos son aleatorios y distintos cada vez que
+> se entra al demo**, y la carrera "en vivo" siempre arranca al **50 % de avance** y sigue sola.
 > Entra al panel con usuario `admin` y la contraseña `demo`.
 
 ```bash

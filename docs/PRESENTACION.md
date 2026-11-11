@@ -120,7 +120,7 @@ flowchart LR
 
 ## 8. Demo con datos ficticios
 
-Todas las capturas de este documento y del manual usan **datos ficticios** generados por la app: 4 eventos (2 finalizados, 1 en vivo, 1 próximo), 12 categorías, 13 equipos y 84 corredores.
+Todas las capturas de este documento y del manual usan **datos ficticios** generados por la app: 4 eventos (2 finalizados, 1 en vivo, 1 próximo), 12 categorías, de 11 a 14 equipos y de 70 a 95 corredores. En la app, cada vez que se entra al modo demo se generan datos distintos al azar y la carrera en vivo arranca siempre al 50 % de avance.
 
 | Podios de un evento anterior | Clasificación con tiempos por vuelta |
 |---|---|

@@ -6,6 +6,8 @@ import { buildDemoData } from './demo-data.js';
 
 const TABLES = ['events', 'categories', 'teams', 'riders', 'event_categories'];
 const DEMO_KEY = 'chronobike_demo_v2';
+const DEMO_SEED_KEY = 'chronobike_demo_seed';
+const DEMO_MAX_AGE_MS = 3 * 3600 * 1000;
 const QUEUE_KEY = 'chronobike_queue_v2';
 const SESSION_KEY = 'chronobike_demo_session';
 const USERS_KEY = 'chronobike_demo_users';
@@ -35,7 +37,8 @@ const HAS_CLOUD = !!(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
   if (typeof location === 'undefined') return;
   const q = new URLSearchParams(location.search);
   if (!q.has('demo')) return;
-  if (q.get('demo') === '0') localStorage.removeItem(DEMO_FLAG); else localStorage.setItem(DEMO_FLAG, '1');
+  if (q.get('demo') === '0') localStorage.removeItem(DEMO_FLAG);
+  else { localStorage.setItem(DEMO_FLAG, '1'); localStorage.removeItem(DEMO_KEY); } // cada entrada al demo = datos nuevos al azar
   q.delete('demo'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash);
 })();
 export const FORCED_DEMO = HAS_CLOUD && typeof localStorage !== 'undefined' && localStorage.getItem(DEMO_FLAG) === '1';
@@ -193,9 +196,15 @@ const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('
 const demo = {
   db: null,
   init(s) {
-    const raw = localStorage.getItem(DEMO_KEY);
-    this.db = raw ? JSON.parse(raw) : buildDemoData();
-    if (!raw) this.persist(false);
+    let db = null;
+    try { db = JSON.parse(localStorage.getItem(DEMO_KEY) || 'null'); } catch { db = null; }
+    // Datos nuevos al azar si: no hay, son de una versión anterior (sin meta) o ya pasaron horas
+    // (así la carrera "en vivo" no queda terminada). Pruebas/capturas fijan la semilla con
+    // localStorage.chronobike_demo_seed.
+    const fresh = !db || !db.meta || Date.now() - db.meta.seededAt > DEMO_MAX_AGE_MS;
+    if (fresh) { const fixed = Number(localStorage.getItem(DEMO_SEED_KEY)); db = buildDemoData(Date.now(), fixed || undefined); }
+    this.db = db;
+    if (fresh) this.persist(false);
     this.load(s);
     const sess = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
     s.user = sess;

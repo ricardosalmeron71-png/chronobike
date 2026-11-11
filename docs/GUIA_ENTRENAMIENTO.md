@@ -24,7 +24,7 @@ flowchart LR
 - [ ] Imprimir 20 "dorsales" de papel con los números 1 a 20, más el 150 (no registrado).
 - [ ] En cada celular: **Ajustes → Fecha y hora → Automática**.
 
-💡 Para reiniciar la práctica: **Importar y ajustes → Restablecer datos de demostración**.
+💡 Para reiniciar la práctica: **Importar y ajustes → Restablecer datos de demostración**, o simplemente **vuelve a entrar al demo**: cada vez se generan datos nuevos al azar, con la carrera en vivo al **50 %**. Así cada participante practica con una carrera distinta y nadie se aprende las respuestas.
 
 ---
 
@@ -41,8 +41,8 @@ flowchart LR
 ![Vista pública](img/01-publico-inicio.png)
 
 **Ejercicios**
-1. **1.1** ¿Quién ganó *Élite Varonil* en la *5ª etapa*? ¿Con qué tiempo? → *Toca el evento → Podios*.
-2. **1.2** Busca el equipo *Halcones MTB*. ¿Cuántos corredores aparecen?
+1. **1.1** En el **último evento finalizado**, ¿quién ganó *Élite Varonil* y con qué tiempo? → *Toca el evento → Podios*. (Los datos del demo cambian cada vez: cada quien tiene una respuesta distinta.)
+2. **1.2** Elige el nombre de cualquier equipo que veas en la tabla y búscalo en el buscador. ¿Cuántos corredores aparecen?
 3. **1.3** Abre la ficha del ganador de *Élite Varonil*. ¿Cuál fue su mejor vuelta?
 4. **1.4** Agrega la app a la pantalla de inicio del celular.
 
@@ -106,7 +106,7 @@ Entra con usuario `admin` / `demo`.
 | 3.1 | Crea el evento **"Práctica · Etapa 1"** para hoy a las 09:00 con 6 km por vuelta | Eventos → Nuevo evento |
 | 3.2 | Vuélvelo **activo** (👆 Cronometrar) | Eventos |
 | 3.3 | Crea la categoría **"Gravel Mixto"**, 2 vueltas, color morado | Categorías |
-| 3.4 | Inscribe 3 corredores en *Gravel Mixto*. A uno ponle el equipo `halcones mtb` (en minúsculas) y comprueba que se unió a *Halcones MTB* | Corredores |
+| 3.4 | Inscribe 3 corredores en *Gravel Mixto*. A uno ponle un equipo que ya exista (elígelo de la lista) y a otro un equipo nuevo; comprueba en **Equipos** que se creó | Corredores |
 | 3.5 | Da salida a *Gravel Mixto* y registra 2 vueltas a cada corredor | Cronómetro |
 | 3.6 | Revisa el podio, exporta el CSV y ábrelo en Excel | Resultados |
 | 3.7 | Cierra el evento y verifica que en la vista pública aparece como **Finalizado** | Resultados → Cerrar evento |

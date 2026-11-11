@@ -12,7 +12,8 @@ const OUT = new URL('../docs/img/', import.meta.url).pathname;
 const NOW = new Date('2026-11-11T10:20:00-07:00');
 
 // Elegimos corredores reales del demo para que las capturas sean coherentes
-const data = buildDemoData(NOW.getTime());
+const SEED = 2026; // el demo ahora es aleatorio; las capturas fijan la semilla para ser reproducibles
+const data = buildDemoData(NOW.getTime(), SEED);
 const live = data.events.find((e) => e.status === 'en_curso');
 const visible = data.laps.filter((l) => !l.sim || new Date(l.ts) <= NOW);
 const groups = computeResults({ event: live, ...data, eventCategories: data.event_categories, laps: visible });
@@ -23,6 +24,7 @@ const browser = await chromium.launch();
 async function ctx(opts = {}) {
   const c = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1.5, locale: 'es-MX', timezoneId: 'America/Hermosillo', ...opts });
   const p = await c.newPage();
+  await c.addInitScript((seed) => localStorage.setItem('chronobike_demo_seed', String(seed)), SEED);
   await p.clock.setFixedTime(NOW);
   p.on('pageerror', (e) => console.error('pageerror', e.message));
   return { c, p };

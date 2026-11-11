@@ -335,7 +335,9 @@ Para capacitar al staff **sin tocar los datos reales**:
 | Salir del demo | 👆 **Salir del demo** en la franja amarilla de arriba, o abre `.../admin.html?demo=0` |
 
 ✅ Mientras estés en demo verás la franja amarilla **MODO DEMOSTRACIÓN**, y la Pantalla TV muestra la etiqueta **DEMO**.
-💡 El demo se queda activo en ese navegador hasta que salgas. Lo que hagas en el demo se guarda solo en ese navegador y **nunca** llega a la base de datos real. Para reiniciarlo: **Importar y ajustes → Restablecer datos de demostración**.
+🎲 **Cada vez que entras al demo se generan datos nuevos al azar**: otros corredores, equipos, tiempos, sede y nombre de la carrera. La carrera **"en vivo" siempre arranca al 50 % de avance** (la mitad de los pasos por meta ya ocurrió y el resto va apareciendo solo), así que siempre hay podios, gente en pista y pasos nuevos que ver.
+💡 Mientras sigas en el demo, los datos **se conservan** aunque cambies de pantalla (panel, vista pública, TV) o recargues: lo que registres no se pierde. Se generan otros nuevos al **volver a entrar** al demo, al usar **Importar y ajustes → Restablecer datos de demostración**, o si pasaron más de 3 horas (para que la carrera en vivo no quede ya terminada).
+💡 Lo que hagas en el demo se guarda solo en ese navegador y **nunca** llega a la base de datos real.
 ⚠️ El día de la carrera, revisa que **ningún** celular ni la TV tengan la franja o la etiqueta DEMO.
 
 ### C6f. Diseño de la app 🎨
