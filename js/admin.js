@@ -13,6 +13,7 @@ const PAGES = [
   { id: 'categorias', icon: 'fa-layer-group', label: 'Categorías', roles: ['admin'] },
   { id: 'equipos', icon: 'fa-users', label: 'Equipos', roles: ['admin'] },
   { id: 'resultados', icon: 'fa-trophy', label: 'Resultados', roles: ['admin', 'registrador'] },
+  { id: 'usuarios', icon: 'fa-user-shield', label: 'Usuarios', roles: ['admin'] },
   { id: 'ajustes', icon: 'fa-gear', label: 'Importar y ajustes', roles: ['admin'] },
 ];
 const S = { page: 'crono', eventId: localStorage.getItem(ACTIVE_KEY), dorsal: '', laps: [], groups: [], riderQ: '', riderCat: 'ALL', resView: 'podios', lastId: null };
@@ -56,23 +57,37 @@ async function reloadLaps() {
 }
 
 // ─────────────── Login ───────────────
-function renderLogin() {
+async function renderLogin() {
+  let status = { hasAdmin: true }; let setupError = null;
+  try { status = await store.staffStatus(); } catch (e) { setupError = e; }
+  const setup = !status.hasAdmin;
   root.innerHTML = `<div class="login">
     <div class="login-art"><div class="track"></div>${brand('Panel de staff')}
       <div><h1>Cada segundo<br><span>cuenta.</span></h1><p class="muted" style="max-width:44ch">Registra eventos, corredores y pasos por meta desde cualquier celular. Los resultados se publican al instante.</p></div>
       <div class="feat"><div><i class="fa-solid fa-bolt"></i>Registro de vuelta en un toque</div><div><i class="fa-solid fa-wifi"></i>Funciona aunque se caiga el internet</div><div><i class="fa-solid fa-trophy"></i>Podios automáticos por categoría</div></div></div>
     <div class="login-form"><form class="card form" id="loginForm">
-      <div style="text-align:center"><i class="fa-solid fa-user-shield" style="font-size:2rem;color:var(--orange)"></i><h2 style="margin-top:.4rem">Acceso de staff</h2><p class="muted small">Solo administradores y registradores</p></div>
+      ${setup ? `<div style="text-align:center"><i class="fa-solid fa-rocket" style="font-size:2rem;color:var(--lime)"></i><h2 style="margin-top:.4rem">Configuración inicial</h2>
+        <p class="muted small">Aún no hay administradores. Crea <b>tu cuenta de administrador</b>; después podrás dar de alta a tu staff desde <b>Usuarios</b>.</p></div>`
+      : `<div style="text-align:center"><i class="fa-solid fa-user-shield" style="font-size:2rem;color:var(--orange)"></i><h2 style="margin-top:.4rem">Acceso de staff</h2><p class="muted small">Solo administradores y registradores</p></div>`}
       <div class="field"><label>Correo</label><input name="email" type="email" required autocomplete="username" placeholder="tu@correo.com"></div>
-      <div class="field"><label>Contraseña</label><input name="password" type="password" required autocomplete="current-password" placeholder="••••••••"></div>
-      <button class="btn btn-primary" style="height:50px"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
+      <div class="field"><label>Contraseña</label><input name="password" type="password" required minlength="${setup ? 8 : 1}" autocomplete="${setup ? 'new-password' : 'current-password'}" placeholder="••••••••">${setup ? '<span class="hint">Mínimo 8 caracteres</span>' : ''}</div>
+      ${setup ? '<div class="field"><label>Repite la contraseña</label><input name="password2" type="password" required autocomplete="new-password" placeholder="••••••••"></div>' : ''}
+      <button class="btn ${setup ? 'btn-lime' : 'btn-primary'}" style="height:50px"><i class="fa-solid ${setup ? 'fa-user-plus' : 'fa-right-to-bracket'}"></i> ${setup ? 'Crear administrador y entrar' : 'Entrar'}</button>
       <a class="btn btn-ghost" href="./index.html"><i class="fa-solid fa-arrow-left"></i> Volver a resultados</a>
+      ${!setup ? '<p class="muted small" style="text-align:center;margin:0">¿No tienes cuenta? Pídela al administrador del evento.</p>' : ''}
+      ${setupError ? `<div class="demo-hint"><b><i class="fa-solid fa-triangle-exclamation"></i> Gestión de usuarios no disponible</b><br>${esc(setupError.message)}</div>` : ''}
       ${store.mode === 'demo' ? `<div class="demo-hint"><b><i class="fa-solid fa-flask"></i> Modo demo</b><br>Administrador: <code>admin@demo.mx</code><br>Registrador: <code>registro@demo.mx</code><br>Contraseña: <code>demo</code></div>` : ''}
     </form></div></div>`;
   $('#loginForm').onsubmit = async (e) => {
-    e.preventDefault(); const f = new FormData(e.target);
-    try { await store.signIn(f.get('email').trim(), f.get('password')); toast(`Bienvenido · ${store.user.role}`); await boot(); }
-    catch (err) { toast(err.message, 'err', 4000); }
+    e.preventDefault(); const f = new FormData(e.target); const btn = e.target.querySelector('button.btn');
+    const email = f.get('email').trim(); const pass = f.get('password');
+    if (setup && pass !== f.get('password2')) return toast('Las contraseñas no coinciden', 'err');
+    btn.disabled = true;
+    try {
+      if (setup) { await store.bootstrapAdmin(email, pass); toast('¡Cuenta de administrador creada!'); }
+      else await store.signIn(email, pass);
+      toast(`Bienvenido · ${store.user.role}`); await boot();
+    } catch (err) { toast(err.message, 'err', 4500); btn.disabled = false; }
   };
 }
 
@@ -139,7 +154,7 @@ function needEvent() {
 
 function renderPage(opts = {}) {
   const main = $('#main'); if (!main) return;
-  const fn = { crono: pageCrono, eventos: pageEventos, corredores: pageCorredores, categorias: pageCategorias, equipos: pageEquipos, resultados: pageResultados, ajustes: pageAjustes }[S.page];
+  const fn = { crono: pageCrono, eventos: pageEventos, corredores: pageCorredores, categorias: pageCategorias, equipos: pageEquipos, resultados: pageResultados, usuarios: pageUsuarios, ajustes: pageAjustes }[S.page];
   if (opts.soft && S.page === 'crono' && $('#keypad')) { renderCronoSide(); renderPreview(); return; }
   main.dataset.page = S.page; main.innerHTML = ''; fn(main);
   $$('[data-goto]', main).forEach((b) => b.onclick = () => go(b.dataset.goto));
@@ -472,6 +487,77 @@ function pageResultados(main) {
   $$('[data-rider]', main).forEach((el) => el.onclick = () => { const f = rowFor(el.dataset.rider); if (f) riderDetail(f.g, f.r, e); });
 }
 
+// ═════════════════════ USUARIOS (cuentas del staff) ═════════════════════
+const ROLE_INFO = {
+  admin: { label: 'Administrador', icon: 'fa-crown', desc: 'Todo: eventos, categorías, equipos, usuarios, importación' },
+  registrador: { label: 'Registrador', icon: 'fa-stopwatch', desc: 'Cronómetro, salidas, corredores y resultados' },
+};
+const genPassword = () => { const a = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const r = crypto.getRandomValues(new Uint32Array(10)); return Array.from(r, (n) => a[n % a.length]).join(''); };
+function credentialsCard(email, password) {
+  const text = `ChronoBike · acceso de staff\nPágina: ${location.origin}${location.pathname}\nCorreo: ${email}\nContraseña: ${password}`;
+  const m = modal(`<div class="confirm"><div class="confirm-ico" style="background:rgba(34,197,94,.15);color:#5ee08f"><i class="fa-solid fa-circle-check"></i></div>
+    <h3>Cuenta lista</h3><p>Comparte estos datos con la persona. <b>La contraseña no se volverá a mostrar.</b></p>
+    <pre class="card" style="text-align:left;white-space:pre-wrap;font-size:.9rem;margin:1rem 0">${esc(text)}</pre>
+    <div class="row-end"><button class="btn" id="cp"><i class="fa-regular fa-copy"></i> Copiar</button>
+    <a class="btn btn-lime" target="_blank" href="https://wa.me/?text=${encodeURIComponent(text)}"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+    <button class="btn btn-primary" data-close>Listo</button></div></div>`);
+  $('#cp', m.el).onclick = async () => { try { await navigator.clipboard.writeText(text); toast('Copiado'); } catch { toast('No se pudo copiar', 'warn'); } };
+}
+async function pageUsuarios(main) {
+  main.innerHTML = pageHead('fa-user-shield', 'Usuarios', 'Cuentas de las personas que registran datos. El público no necesita cuenta.', `<button class="btn btn-primary" id="newU"><i class="fa-solid fa-user-plus"></i> Nuevo usuario</button>`) +
+    `<div class="grid-cards" style="margin-bottom:1rem">${Object.values(ROLE_INFO).map((r) => `<div class="card" style="padding:.9rem 1rem"><b><i class="fa-solid ${r.icon}" style="color:var(--orange)"></i> ${r.label}</b><div class="muted small">${r.desc}</div></div>`).join('')}</div>
+    <div class="list" id="ulist"><div class="empty small"><i class="fa-solid fa-spinner fa-spin"></i> Cargando usuarios…</div></div>`;
+  $('#newU').onclick = () => userForm();
+  let users;
+  try { users = await store.listStaff(); } catch (e) { $('#ulist').innerHTML = `<div class="card"><div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>${esc(e.message)}</div></div>`; return; }
+  $('#ulist').innerHTML = users.map((u) => { const r = ROLE_INFO[u.role] || ROLE_INFO.registrador; return `<div class="list-item">
+    <span class="avatar lg" style="--c:${u.role === 'admin' ? '#ff5a1f' : '#3b82f6'}"><i class="fa-solid ${r.icon}"></i></span>
+    <div class="info"><b>${esc(u.email)} ${u.me ? '<span class="chip" style="margin-left:.3rem">Tú</span>' : ''}</b>
+      <small><span class="role-badge">${r.label}</span> · ${u.last_sign_in_at ? `último acceso ${fmtDate(u.last_sign_in_at)} ${fmtClock(u.last_sign_in_at)}` : 'nunca ha entrado'}</small></div>
+    <div class="acts">
+      ${u.me ? '' : `<select class="btn btn-sm" data-role="${esc(u.user_id)}" title="Cambiar rol">${Object.entries(ROLE_INFO).map(([k, v]) => `<option value="${k}" ${u.role === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select>`}
+      <button class="btn btn-sm btn-icon" data-pass="${esc(u.user_id)}" title="Cambiar contraseña"><i class="fa-solid fa-key"></i></button>
+      ${u.me ? '' : `<button class="btn btn-sm btn-icon btn-ghost" data-del="${esc(u.user_id)}" title="Eliminar cuenta"><i class="fa-solid fa-trash-can"></i></button>`}
+    </div></div>`; }).join('');
+  const byId = (id) => users.find((u) => u.user_id === id);
+  $$('[data-role]', main).forEach((sel) => sel.onchange = async () => {
+    try { await store.setStaffRole(sel.dataset.role, sel.value); toast(`Rol actualizado: ${ROLE_INFO[sel.value].label}`); } catch (e) { toast(e.message, 'err'); renderPage(); }
+  });
+  $$('[data-pass]', main).forEach((b) => b.onclick = () => {
+    const u = byId(b.dataset.pass); const pw = genPassword();
+    const m = modal(`<h2>Cambiar contraseña</h2><p class="muted">${esc(u.email)}</p><form class="form" id="f">
+      <div class="field"><label>Nueva contraseña</label><div class="row"><input name="password" required minlength="8" value="${pw}" class="grow" style="font-family:var(--display);font-size:1.2rem"><button type="button" class="btn" id="gen"><i class="fa-solid fa-dice"></i></button></div><span class="hint">Mínimo 8 caracteres</span></div>
+      <div class="row-end"><button type="button" class="btn btn-ghost" data-close>Cancelar</button><button class="btn btn-primary"><i class="fa-solid fa-key"></i> Guardar</button></div></form>`);
+    $('#gen', m.el).onclick = () => { $('[name=password]', m.el).value = genPassword(); };
+    $('#f', m.el).onsubmit = async (e) => {
+      e.preventDefault(); const p = new FormData(e.target).get('password');
+      try { await store.resetStaffPassword(u.user_id, p); m.close(); if (u.me) toast('Tu contraseña se actualizó'); else credentialsCard(u.email, p); } catch (err) { toast(err.message, 'err'); }
+    };
+  });
+  $$('[data-del]', main).forEach((b) => b.onclick = async () => {
+    const u = byId(b.dataset.del);
+    if (!(await confirmDialog('Eliminar cuenta', `${u.email} ya no podrá entrar al panel. Los pasos que registró se conservan.`))) return;
+    try { await store.deleteStaff(u.user_id); toast('Cuenta eliminada', 'info'); renderPage(); } catch (e) { toast(e.message, 'err'); }
+  });
+}
+function userForm() {
+  const pw = genPassword();
+  const m = modal(`<h2>Nuevo usuario</h2><p class="muted">La persona entrará con este correo y contraseña en <b>${esc(location.host + location.pathname)}</b></p>
+    <form class="form" id="f" style="margin-top:.5rem">
+      <div class="field"><label>Correo *</label><input name="email" type="email" required placeholder="registrador@correo.com" autocomplete="off"></div>
+      <div class="field"><label>Contraseña *</label><div class="row"><input name="password" required minlength="8" value="${pw}" class="grow" autocomplete="new-password" style="font-family:var(--display);font-size:1.2rem"><button type="button" class="btn" id="gen" title="Generar otra"><i class="fa-solid fa-dice"></i></button></div><span class="hint">Generada al azar; puedes cambiarla. Mínimo 8 caracteres.</span></div>
+      <div class="field"><label>Rol *</label><div class="seg" id="roleSeg" style="width:100%">${Object.entries(ROLE_INFO).map(([k, v]) => `<button type="button" data-r="${k}" class="${k === 'registrador' ? 'on' : ''}" style="flex:1"><i class="fa-solid ${v.icon}"></i> ${v.label}</button>`).join('')}</div><span class="hint" id="roleDesc">${ROLE_INFO.registrador.desc}</span></div>
+      <div class="row-end"><button type="button" class="btn btn-ghost" data-close>Cancelar</button><button class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Crear cuenta</button></div></form>`);
+  let role = 'registrador';
+  $$('#roleSeg button', m.el).forEach((b) => b.onclick = () => { role = b.dataset.r; $$('#roleSeg button', m.el).forEach((x) => x.classList.toggle('on', x === b)); $('#roleDesc', m.el).textContent = ROLE_INFO[role].desc; });
+  $('#gen', m.el).onclick = () => { $('[name=password]', m.el).value = genPassword(); };
+  $('#f', m.el).onsubmit = async (e) => {
+    e.preventDefault(); const f = Object.fromEntries(new FormData(e.target)); const btn = e.target.querySelector('.btn-primary'); btn.disabled = true;
+    try { await store.createStaff(f.email.trim(), f.password, role); m.close(); credentialsCard(f.email.trim().toLowerCase(), f.password); renderPage(); }
+    catch (err) { toast(err.message, 'err', 4500); btn.disabled = false; }
+  };
+}
+
 // ═════════════════════ IMPORTAR Y AJUSTES ═════════════════════
 function pageAjustes(main) {
   main.innerHTML = pageHead('fa-gear', 'Importar y ajustes', '') + `
@@ -482,7 +568,7 @@ function pageAjustes(main) {
       <div id="imp"></div></div>
     <div class="card"><h3><i class="fa-solid fa-database" style="color:var(--blue)"></i> Base de datos</h3>
       <p class="muted small">Modo actual: <b>${store.mode === 'demo' ? 'DEMO (navegador local)' : 'Supabase (nube)'}</b></p>
-      ${store.mode === 'demo' ? `<ol class="steps small"><li>Crea un proyecto gratis en supabase.com</li><li>Ejecuta <code>supabase/schema.sql</code> en el SQL Editor</li><li>Pega la URL y la clave anon en <code>js/config.js</code></li><li>Publica el sitio (Netlify) y crea a tu staff</li></ol>
+      ${store.mode === 'demo' ? `<ol class="steps small"><li>Crea un proyecto gratis en supabase.com</li><li>Ejecuta <code>supabase/schema.sql</code> en el SQL Editor</li><li>Pega la URL y la clave anon en <code>js/config.js</code></li><li>Publica el sitio (Netlify) y crea a tu staff en <b>Usuarios</b></li></ol>
         <button class="btn btn-danger" id="reset" style="margin-top:1rem"><i class="fa-solid fa-rotate"></i> Restablecer datos de demostración</button>` : '<p class="muted small">Conectado. Los cambios se ven en tiempo real en todos los dispositivos.</p>'}
       <button class="btn" id="backup" style="margin-top:1rem"><i class="fa-solid fa-download"></i> Descargar respaldo completo (JSON)</button></div>
   </div>`;

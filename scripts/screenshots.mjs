@@ -1,5 +1,5 @@
 // Genera las capturas del manual de usuario (docs/img) usando el modo demo.
-// Uso:  npm start  (en otra terminal)  →  npm run screenshots
+// Uso:  deja SUPABASE_URL vacío en js/config.js (modo demo), npm start en otra terminal → npm run screenshots
 // Requiere Playwright instalado (npm i -D playwright && npx playwright install chromium)
 import { createRequire } from 'node:module';
 import { computeResults, STATUS } from '../js/results.js';
@@ -87,13 +87,18 @@ const hideToasts = (p) => p.evaluate(() => document.querySelectorAll('.toast').f
   await shot(p, '16-crono-salida.png');
   await p.keyboard.press('Escape');
 
-  const pages = [['eventos', '20-eventos.png'], ['corredores', '22-corredores.png'], ['categorias', '24-categorias.png'], ['equipos', '26-equipos.png'], ['resultados', '27-resultados.png'], ['ajustes', '29-importar.png']];
+  const pages = [['eventos', '20-eventos.png'], ['corredores', '22-corredores.png'], ['categorias', '24-categorias.png'], ['equipos', '26-equipos.png'], ['resultados', '27-resultados.png'], ['ajustes', '29-importar.png'], ['usuarios', '30-usuarios.png']];
   for (const [pg, file] of pages) {
     await p.click(`.sidenav [data-page=${pg}]`); await hideToasts(p); await shot(p, file);
     if (pg === 'eventos') { await p.click('#newEv'); await shot(p, '21-evento-form.png'); await p.keyboard.press('Escape'); }
     if (pg === 'corredores') { await p.click('#newR'); await p.fill('[name=name]', 'Lucía Encinas Duarte'); await p.selectOption('[name=category_id]', { index: 5 }); await p.fill('[name=team]', 'Halcones MTB'); await shot(p, '23-corredor-form.png'); await p.keyboard.press('Escape'); }
     if (pg === 'categorias') { await p.click('[data-edit]'); await shot(p, '25-categoria-form.png'); await p.keyboard.press('Escape'); }
     if (pg === 'resultados') { await p.click('#rv [data-v=tabla]'); await shot(p, '28-resultados-tabla.png'); }
+    if (pg === 'usuarios') {
+      await p.waitForSelector('#ulist .list-item'); await shot(p, file);
+      await p.click('#newU'); await p.fill('[name=email]', 'laura.meta@serialmtb.mx'); await shot(p, '31-usuario-nuevo.png');
+      await p.click('.modal .btn-primary'); await p.waitForSelector('#cp'); await shot(p, '32-usuario-credenciales.png');
+    }
   }
   await c.close();
 }

@@ -156,14 +156,14 @@ left join public.categories c on c.id = r.category_id
 left join public.teams t on t.id = r.team_id;
 
 -- ═══════════════════════════════════════════════════════════════════
---  ALTA DEL PRIMER ADMINISTRADOR
---  1) Supabase → Authentication → Users → "Add user" (correo + contraseña,
---     marca "Auto Confirm User").
---  2) Ejecuta (cambiando el correo):
+--  CUENTAS DEL STAFF
+--  Se crean DESDE LA APP (sección "Usuarios"), mediante la Edge Function
+--  supabase/functions/staff. La primera vez que abras admin.html sin
+--  administradores, la app te pedirá crear el tuyo.
 --
+--  Alternativa manual (sin la función): crea el usuario en
+--  Authentication → Users y ejecuta:
 --  insert into public.staff (user_id, email, role)
 --  select id, email, 'admin' from auth.users where email = 'tu-correo@ejemplo.com'
 --  on conflict (user_id) do update set role = excluded.role;
---
---  Para un registrador usa 'registrador' en lugar de 'admin'.
 -- ═══════════════════════════════════════════════════════════════════

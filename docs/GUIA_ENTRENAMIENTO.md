@@ -112,6 +112,7 @@ Entra con `admin@demo.mx` / `demo`.
 | 3.7 | Cierra el evento y verifica que en la vista pública aparece como **Finalizado** | Resultados → Cerrar evento |
 | 3.8 | Importa el Excel del serial (hojas CORREDORES / CATEGORIAS / Equipos) | Importar y ajustes |
 | 3.9 | Descarga un respaldo JSON | Importar y ajustes |
+| 3.10 | Crea una cuenta de **registrador** para un compañero, envíale sus datos por WhatsApp, pídele que entre y luego cámbiale la contraseña | Usuarios |
 
 ![Eventos](img/20-eventos.png)
 
@@ -156,7 +157,7 @@ Reproduce un día real. Roles:
 - [ ] Evento creado, con fecha, hora de salida general y km por vuelta.
 - [ ] Corredores importados o inscritos, sin dorsales repetidos.
 - [ ] Vueltas de cada categoría revisadas (✏️ en el Cronómetro si cambian para este evento).
-- [ ] Usuarios del staff creados y probados.
+- [ ] Cuentas del staff creadas en **Usuarios** y probadas (cada quien entró una vez).
 - [ ] Abrir el panel de Supabase (para que no se pause el proyecto gratuito).
 
 ### En la meta, 30 minutos antes (registradores)
@@ -186,7 +187,8 @@ Reproduce un día real. Roles:
 | El corredor no sale en la tabla | Dorsal no inscrito o sin categoría | Corredores → inscribir o editar |
 | "SIN SALIDA" | La categoría y el evento no tienen hora de salida | Dar salida (▶) o editar la salida general del evento |
 | El público no ve los cambios | Sin internet en el registrador | Ver el punto de color. Los pasos se envían solos al volver la señal. |
-| "Tu usuario no está dado de alta como staff" | Falta el rol en la tabla `staff` | El admin ejecuta el `insert into staff…` |
+| "Tu usuario no está dado de alta como staff" | La cuenta no está en Usuarios | El admin la crea en **Usuarios → Nuevo usuario** |
+| Olvidé mi contraseña | — | El admin entra a **Usuarios → 🔑** y pone una nueva |
 | Equipos repetidos | Datos antiguos | Equipos → renombrar o eliminar el duplicado y reasignar |
 
 ---

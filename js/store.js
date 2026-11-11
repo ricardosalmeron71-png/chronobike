@@ -8,6 +8,7 @@ const TABLES = ['events', 'categories', 'teams', 'riders', 'event_categories'];
 const DEMO_KEY = 'chronobike_demo_v2';
 const QUEUE_KEY = 'chronobike_queue_v2';
 const SESSION_KEY = 'chronobike_demo_session';
+const USERS_KEY = 'chronobike_demo_users';
 const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2));
 const byName = (a, b) => (a.sort ?? 999) - (b.sort ?? 999) || String(a.name).localeCompare(String(b.name), 'es');
 
@@ -33,6 +34,19 @@ export const store = {
   async signIn(email, password) { this.user = await (this.mode === 'cloud' ? cloud.signIn(this, email, password) : demo.signIn(email, password)); return this.user; },
   async signOut() { if (this.mode === 'cloud') await this.sb.auth.signOut(); else localStorage.removeItem(SESSION_KEY); this.user = null; },
   isAdmin() { return this.user?.role === 'admin'; },
+
+  // ── Cuentas del staff (se crean desde la app) ──
+  /** ¿Ya existe al menos un administrador? Si no, la app ofrece crear el primero. */
+  async staffStatus() { return this.mode === 'cloud' ? cloud.staff(this, 'status') : { hasAdmin: true }; },
+  async bootstrapAdmin(email, password) {
+    if (this.mode === 'cloud') await cloud.staff(this, 'bootstrap', { email, password });
+    return this.signIn(email, password);
+  },
+  async listStaff() { return (this.mode === 'cloud' ? await cloud.staff(this, 'list') : demo.staff('list')).users; },
+  async createStaff(email, password, role) { return this.mode === 'cloud' ? cloud.staff(this, 'create', { email, password, role }) : demo.staff('create', { email, password, role }); },
+  async setStaffRole(user_id, role) { return this.mode === 'cloud' ? cloud.staff(this, 'set_role', { user_id, role }) : demo.staff('set_role', { user_id, role }); },
+  async resetStaffPassword(user_id, password) { return this.mode === 'cloud' ? cloud.staff(this, 'reset_password', { user_id, password }) : demo.staff('reset_password', { user_id, password }); },
+  async deleteStaff(user_id) { return this.mode === 'cloud' ? cloud.staff(this, 'delete', { user_id }) : demo.staff('delete', { user_id }); },
 
   // ── CRUD genérico ──
   async save(table, row) {
@@ -135,10 +149,40 @@ const demo = {
   getLaps(eventId) { const now = Date.now(); return this.db.laps.filter((l) => l.event_id === eventId && (!l.sim || new Date(l.ts).getTime() <= now)); },
   addLap(lap) { this.db.laps.push({ ...lap, created_at: new Date().toISOString() }); this.persist(); },
   removeLap(id) { this.db.laps = this.db.laps.filter((l) => l.id !== id); this.persist(); },
+  users() {
+    const raw = localStorage.getItem(USERS_KEY);
+    if (raw) return JSON.parse(raw);
+    const seed = [
+      { user_id: 'u-admin', email: 'admin@demo.mx', role: 'admin', password: 'demo', created_at: new Date().toISOString() },
+      { user_id: 'u-registro', email: 'registro@demo.mx', role: 'registrador', password: 'demo', created_at: new Date().toISOString() },
+    ];
+    localStorage.setItem(USERS_KEY, JSON.stringify(seed)); return seed;
+  },
   signIn(email, password) {
-    if (password !== 'demo') throw new Error('Contraseña incorrecta. En el modo demo la contraseña es: demo');
-    const role = /registro|staff|crono/i.test(email) ? 'registrador' : 'admin';
-    const user = { email, role }; localStorage.setItem(SESSION_KEY, JSON.stringify(user)); return user;
+    const u = this.users().find((x) => x.email === String(email).trim().toLowerCase());
+    if (!u || u.password !== password) throw new Error('Correo o contraseña incorrectos. En el demo: admin@demo.mx / demo');
+    const user = { id: u.user_id, email: u.email, role: u.role }; localStorage.setItem(SESSION_KEY, JSON.stringify(user)); u.last_sign_in_at = new Date().toISOString();
+    localStorage.setItem(USERS_KEY, JSON.stringify(this.users().map((x) => (x.user_id === u.user_id ? u : x)))); return user;
+  },
+  staff(action, p = {}) {
+    let list = this.users(); const me = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    const save = () => localStorage.setItem(USERS_KEY, JSON.stringify(list));
+    const email = String(p.email || '').trim().toLowerCase();
+    if ((p.user_id && p.user_id === me?.id) && ['set_role', 'delete'].includes(action)) throw new Error('No puedes hacer eso con tu propia cuenta');
+    if (action === 'list') return { users: list.map(({ password, ...u }) => ({ ...u, me: u.user_id === me?.id })) };
+    if (action === 'create') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Correo no válido');
+      if (String(p.password).length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres');
+      if (list.some((u) => u.email === email)) throw new Error('Ya existe una cuenta con ese correo');
+      list.push({ user_id: newId(), email, role: p.role, password: p.password, created_at: new Date().toISOString() });
+    }
+    if (action === 'set_role') list = list.map((u) => (u.user_id === p.user_id ? { ...u, role: p.role } : u));
+    if (action === 'reset_password') {
+      if (String(p.password).length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres');
+      list = list.map((u) => (u.user_id === p.user_id ? { ...u, password: p.password } : u));
+    }
+    if (action === 'delete') list = list.filter((u) => u.user_id !== p.user_id);
+    save(); return { ok: true };
   },
 };
 
@@ -154,7 +198,7 @@ const cloud = {
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
     s.sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     const { data } = await s.sb.auth.getSession();
-    if (data.session) s.user = await this.profile(s, data.session.user);
+    if (data.session) { const p = await this.profile(s, data.session.user); if (p.role) s.user = p; else await s.sb.auth.signOut(); }
     await this.loadAll(s);
     s.sb.channel('chronobike-live')
       .on('postgres_changes', { event: '*', schema: 'public' }, async (p) => {
@@ -171,6 +215,17 @@ const cloud = {
   async profile(s, u) {
     const { data } = await s.sb.from('staff').select('role').eq('user_id', u.id).maybeSingle();
     return { email: u.email, id: u.id, role: data?.role || null };
+  },
+  async staff(s, action, payload = {}) {
+    const { data, error } = await s.sb.functions.invoke('staff', { body: { action, ...payload } });
+    if (error) {
+      let msg = error.message; const status = error.context?.status;
+      try { const b = await error.context.json(); if (b?.error) msg = b.error; } catch { /* sin cuerpo */ }
+      if (status === 404 || /Failed to send|fetch/i.test(msg)) msg = 'Falta instalar la función "staff" en Supabase (ver docs/BASE_DE_DATOS_Y_DESPLIEGUE.md)';
+      const err = new Error(msg); err.notInstalled = status === 404 || /Failed to send/i.test(error.message); throw err;
+    }
+    if (data?.error) throw new Error(data.error);
+    return data;
   },
   async signIn(s, email, password) {
     const { data, error } = await s.sb.auth.signInWithPassword({ email, password });

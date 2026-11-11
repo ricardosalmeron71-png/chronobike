@@ -44,6 +44,7 @@ js/public.js, admin.js  Lógica de cada vista
 js/demo-data.js         Generador de datos ficticios
 supabase/schema.sql     Tablas, seguridad (RLS) y tiempo real
 supabase/seed.sql       Los mismos datos ficticios para cargarlos en la nube
+supabase/functions/staff  Función del servidor para crear cuentas del staff desde la app
 docs/                   Presentación, manual, guías e imágenes
 ```
 
@@ -52,7 +53,7 @@ docs/                   Presentación, manual, guías e imágenes
 1. Crea un proyecto gratuito en [supabase.com](https://supabase.com) y ejecuta `supabase/schema.sql` en el **SQL Editor**.
 2. Copia la **Project URL** y la clave **anon public** en `js/config.js`.
 3. Publica la carpeta en [Netlify](https://app.netlify.com/drop): arrastra la carpeta, o conecta este repositorio.
-4. Crea tu usuario en Supabase → Authentication y dale rol `admin` (instrucciones al final de `schema.sql`).
+4. Instala la función `supabase/functions/staff` (Supabase → Edge Functions → Via Editor, sin *Verify JWT*). Luego abre `admin.html`: la primera vez te pide crear la cuenta de administrador. Las demás cuentas se crean en **Usuarios**.
 5. En el panel: **Importar y ajustes**. Ahí subes tu Excel actual (`CORREDORES`, `CATEGORIAS`, `Equipos`).
 
 Detalle paso a paso en [docs/BASE_DE_DATOS_Y_DESPLIEGUE.md](docs/BASE_DE_DATOS_Y_DESPLIEGUE.md).

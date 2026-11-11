@@ -205,7 +205,7 @@ Menú inferior: **Cronómetro · Corredores · Resultados · Más**. En **Más**
 
 ## PARTE C · Administrar (administrador)
 
-El administrador ve, además: **Eventos, Categorías, Equipos e Importar y ajustes**.
+El administrador ve, además: **Eventos, Categorías, Equipos, Usuarios e Importar y ajustes**.
 
 ### C1. Eventos 📅
 ![Eventos](img/20-eventos.png)
@@ -266,13 +266,35 @@ La app lee las hojas **CORREDORES** (`dorsal, name, category, team`), **CATEGORI
 ### C7. Respaldo 💾
 👆 **Descargar respaldo completo (JSON)** después de cada evento. Guarda todo: eventos, corredores, categorías, equipos y todos los pasos.
 
-### C8. Dar de alta al staff 🔐
-Se hace en Supabase. Ver [Base de datos y despliegue § 4](BASE_DE_DATOS_Y_DESPLIEGUE.md#4-crear-usuarios-del-staff).
+### C8. Usuarios del staff 🔐
+Las cuentas se crean **aquí mismo**, en el panel. El público no necesita cuenta.
+
+**La primera vez**, cuando aún no hay administradores, la pantalla de entrada muestra **Configuración inicial**: escribes tu correo y tu contraseña y quedas como administrador.
+
+👆 **Usuarios** → verás a cada persona, su rol y su último acceso.
+
+![Usuarios](img/30-usuarios.png)
+
+**Dar de alta a alguien:** 👆 **Nuevo usuario** → correo → la contraseña se genera sola (🎲 para otra) → elige el rol → **Crear cuenta**.
+
+![Nuevo usuario](img/31-usuario-nuevo.png)
+
+✅ Aparecen sus datos de acceso: 👆 **Copiar** o **WhatsApp** para enviárselos. ⚠️ La contraseña no se vuelve a mostrar. Si se pierde, usa 🔑 para poner otra.
+
+![Credenciales](img/32-usuario-credenciales.png)
+
+| Acción | Cómo |
+|---|---|
+| Cambiar el rol | Selector *Registrador / Administrador* de la persona |
+| Cambiar la contraseña | 🔑 (también sirve para la tuya) |
+| Quitar el acceso | 🗑️ Los pasos que registró se conservan. |
 
 | Rol | Puede |
 |---|---|
-| **admin** | Todo |
-| **registrador** | Cronómetro (salidas y pasos), Corredores (alta y edición), Resultados |
+| **Administrador** | Todo: eventos, categorías, equipos, usuarios e importación |
+| **Registrador** | Cronómetro (salidas y pasos), Corredores (alta y edición), Resultados |
+
+💡 No puedes cambiar tu propio rol ni eliminar tu propia cuenta, así el sistema nunca se queda sin administrador.
 
 ---
 

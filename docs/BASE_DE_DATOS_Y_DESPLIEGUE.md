@@ -79,7 +79,7 @@ erDiagram
 | `CORREDORES` (dorsal, name, category, team, photo) | `riders` | Usa la categoría y el equipo por **ID** (no por texto). El dorsal es único. |
 | `Registro` (id, eventId, eventName, dorsal, timestamp, dateTime) | `laps` | Una sola columna `ts` con fecha, hora y milisegundos. + quién registró. |
 | `RESULTADOS` | *(se calcula)* | Ya no se guarda: se calcula al momento y siempre está correcto |
-| — | `staff` **(nueva)** | Usuarios autorizados y su rol |
+| — | `staff` **(nueva)** | Usuarios autorizados y su rol (se administran desde **Usuarios** en la app) |
 
 El archivo completo está en [`supabase/schema.sql`](../supabase/schema.sql). Ya se probó en PostgreSQL 16: se puede ejecutar dos veces, el público no puede escribir y el registrador no puede crear eventos.
 
@@ -100,17 +100,34 @@ El archivo completo está en [`supabase/schema.sql`](../supabase/schema.sql). Ya
    ```
    💡 La clave *anon* es pública por diseño. La seguridad la dan las políticas RLS del `schema.sql`. **Nunca** pongas la clave `service_role` en la app.
 
-## 4. Crear usuarios del staff
+## 4. Crear usuarios del staff (desde la app)
 
-1. Supabase → **Authentication → Users → Add user → Create new user**: correo, contraseña y ✅ *Auto Confirm User*.
-2. **SQL Editor**:
-   ```sql
-   insert into public.staff (user_id, email, role)
-   select id, email, 'admin' from auth.users where email = 'organizador@miserial.mx'
-   on conflict (user_id) do update set role = excluded.role;
-   ```
-   Para registradores, cambia `'admin'` por `'registrador'`.
-3. Recomendado: **Authentication → Providers → Email** → desactiva *"Allow new users to sign up"*. Así solo tú creas cuentas.
+Las cuentas se crean **dentro de ChronoBike**, no en Supabase. Para eso se instala una sola vez una pequeña función del servidor (`staff`). Esa función guarda la llave secreta que permite crear cuentas, así que la llave nunca llega al navegador.
+
+### 4.1 Instalar la función `staff` (una sola vez, 3 min)
+1. Supabase → menú izquierdo **Edge Functions** → **Deploy a new function** → **Via Editor**.
+2. **Name:** `staff` (exactamente así).
+3. Borra el código de ejemplo y pega **todo** el archivo [`supabase/functions/staff/index.ts`](../supabase/functions/staff/index.ts).
+4. Haz clic en **Deploy function**.
+5. Al terminar, entra a la función → **Settings (Details)** → **desactiva "Verify JWT with legacy secret"** (o *Enforce JWT Verification*) → **Save**.
+   La función comprueba por sí misma quién la llama. Sin este cambio, la app no podrá usarla.
+
+> Con la [CLI de Supabase](https://supabase.com/docs/guides/cli) es un solo comando:
+> `supabase functions deploy staff --no-verify-jwt --project-ref TU_PROJECT_ID`
+
+### 4.2 Crear el primer administrador
+1. Abre `https://tu-sitio.netlify.app/admin.html`.
+2. Como todavía no hay administradores, aparece **Configuración inicial**. Escribe tu correo y una contraseña (mínimo 8 caracteres) → **Crear administrador y entrar**.
+3. Esta pantalla **solo aparece una vez**. Cuando ya existe un administrador, nadie más puede usarla.
+
+⚠️ Hazlo justo después de instalar la función, para que nadie se adelante.
+
+### 4.3 Dar de alta al staff
+En el panel → **Usuarios** → **Nuevo usuario** → correo, contraseña (se genera una al azar) y rol → **Crear cuenta**.
+Luego **Copiar** o **WhatsApp** para enviarle sus datos de acceso. Desde ahí también puedes cambiar el rol, cambiar la contraseña o eliminar la cuenta.
+
+### 4.4 Recomendado
+Supabase → **Authentication → Sign In / Providers → Email** → **desactiva "Allow new users to sign up"**. Así nadie se puede registrar por su cuenta. La función `staff` sigue pudiendo crear cuentas.
 
 ## 5. Publicar la página (Netlify)
 

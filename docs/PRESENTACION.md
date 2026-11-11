@@ -50,7 +50,7 @@ Analizamos la app actual y el archivo `chronobike.xlsx`. Funciona como una sola 
 - 📶 **A prueba de mala señal**: cola offline con reintento automático.
 - 📥 **Migración inmediata**: importa el Excel actual (`CORREDORES`, `CATEGORIAS`, `Equipos`).
 - 📤 **Exporta** a Excel (CSV) y a PDF (imprimir).
-- 🔐 **Dos roles**: *Administrador* (todo) y *Registrador* (cronómetro, corredores, resultados).
+- 🔐 **Dos roles**: *Administrador* (todo) y *Registrador* (cronómetro, corredores, resultados). Las cuentas se crean **desde la app** y los datos de acceso se envían por WhatsApp.
 - 🧪 **Modo demostración** con datos ficticios para capacitar sin riesgo.
 
 ## 4. Ventajas frente a otras opciones
