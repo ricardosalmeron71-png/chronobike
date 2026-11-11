@@ -317,8 +317,10 @@ const cloud = {
   },
   async remove(s, table, id) { const { error } = await s.sb.from(table).delete().eq('id', id); if (error) throw new Error(error.message); },
   async saveMany(s, table, rows) {
-    const clean = rows.map((r) => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith('_'))));
-    const { error } = await s.sb.from(table).upsert(clean);
+    // Fuera columnas internas y las que pone el servidor; en un envío mixto (nuevos + existentes)
+    // las columnas que falten usan su valor por defecto en lugar de NULL.
+    const clean = rows.map((r) => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith('_') && k !== 'created_at')));
+    const { error } = await s.sb.from(table).upsert(clean, { defaultToNull: false });
     if (error) {
       if (error.code === '23505' && table === 'teams') throw new Error('La base de datos aún unifica equipos. Ejecuta en Supabase → SQL Editor:  drop index if exists public.teams_name_uq;  y vuelve a importar.');
       throw new Error(error.code === '23505' ? 'Hay datos duplicados (dorsal o nombre): ' + error.message : error.message);
