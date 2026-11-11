@@ -288,6 +288,16 @@ Conecta una laptop a una TV o proyector en la meta y abre **Pantalla TV** (arrib
 💡 No necesita iniciar sesión y se actualiza sola.
 💡 Opciones en la dirección: `tv.html?s=20` (segundos por categoría) · `tv.html?n=8` (filas) · `tv.html?c=<id de categoría>` (fijar una sola categoría).
 
+### C6c. Documentación dentro de la app 📚
+👆 **Documentación** en el menú. Ahí están este manual y las guías de entrenamiento, con índice para saltar a cada sección y botón **Imprimir / PDF**.
+
+![Documentación](img/37-documentacion-manual.png)
+
+| Documento | Lo ve |
+|---|---|
+| Manual de usuario · Guías de entrenamiento | Todo el staff |
+| Presentación y ventajas · Base de datos y despliegue | Solo administradores |
+
 ### C7. Respaldo 💾
 👆 **Descargar respaldo completo (JSON)** después de cada evento. Guarda todo: eventos, corredores, categorías, equipos y todos los pasos.
 

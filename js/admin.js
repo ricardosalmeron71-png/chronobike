@@ -4,6 +4,7 @@ import { CONFIG } from './config.js';
 import { computeResults, eventSummary, resultsToCSV, fmtDuration, STATUS } from './results.js';
 import { $, $$, esc, toast, modal, confirmDialog, fmtDate, fmtClock, toLocalInput, fromLocalInput, avatar, resizeImage, download, brand } from './ui.js';
 import { showSplash } from './splash.js';
+import { pageDocs } from './docs.js';
 import { podium, resultsTable, riderDetail, kpis, EVENT_STATUS } from './views.js';
 
 const ACTIVE_KEY = 'chronobike_active_event';
@@ -15,6 +16,7 @@ const PAGES = [
   { id: 'equipos', icon: 'fa-users', label: 'Equipos', roles: ['admin'] },
   { id: 'resultados', icon: 'fa-trophy', label: 'Resultados', roles: ['admin', 'registrador'] },
   { id: 'usuarios', icon: 'fa-user-shield', label: 'Usuarios', roles: ['admin'] },
+  { id: 'docs', icon: 'fa-book', label: 'Documentación', roles: ['admin', 'registrador'] },
   { id: 'ajustes', icon: 'fa-gear', label: 'Importar y ajustes', roles: ['admin'] },
 ];
 const S = { page: 'crono', eventId: localStorage.getItem(ACTIVE_KEY), dorsal: '', laps: [], groups: [], riderQ: '', riderCat: 'ALL', resView: 'podios', lastId: null };
@@ -161,7 +163,7 @@ function needEvent() {
 
 function renderPage(opts = {}) {
   const main = $('#main'); if (!main) return;
-  const fn = { crono: pageCrono, eventos: pageEventos, corredores: pageCorredores, categorias: pageCategorias, equipos: pageEquipos, resultados: pageResultados, usuarios: pageUsuarios, ajustes: pageAjustes }[S.page];
+  const fn = { crono: pageCrono, eventos: pageEventos, corredores: pageCorredores, categorias: pageCategorias, equipos: pageEquipos, resultados: pageResultados, usuarios: pageUsuarios, docs: (m) => pageDocs(m, store.user.role, pageHead), ajustes: pageAjustes }[S.page];
   if (opts.soft && S.page === 'crono' && $('#keypad')) { renderCronoSide(); renderPreview(); return; }
   main.dataset.page = S.page; main.innerHTML = ''; fn(main);
   $$('[data-goto]', main).forEach((b) => b.onclick = () => go(b.dataset.goto));
