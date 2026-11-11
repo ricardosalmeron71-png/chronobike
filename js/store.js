@@ -27,11 +27,25 @@ export function checkUsername(user) {
 const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2));
 const byName = (a, b) => (a.sort ?? 999) - (b.sort ?? 999) || String(a.name).localeCompare(String(b.name), 'es');
 
+// Interruptor del modo demo:  ?demo=1 lo activa (y se recuerda en este navegador), ?demo=0 lo apaga.
+// Así se puede practicar en la página real sin tocar la base de datos.
+const DEMO_FLAG = 'chronobike_force_demo';
+const HAS_CLOUD = !!(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
+(function readDemoSwitch() {
+  if (typeof location === 'undefined') return;
+  const q = new URLSearchParams(location.search);
+  if (!q.has('demo')) return;
+  if (q.get('demo') === '0') localStorage.removeItem(DEMO_FLAG); else localStorage.setItem(DEMO_FLAG, '1');
+  q.delete('demo'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash);
+})();
+export const FORCED_DEMO = HAS_CLOUD && typeof localStorage !== 'undefined' && localStorage.getItem(DEMO_FLAG) === '1';
+export const exitDemoLink = (page) => `./${page}?demo=0`;
+
 const listeners = new Set();
 const emit = (what) => listeners.forEach((fn) => { try { fn(what); } catch (e) { console.error(e); } });
 
 export const store = {
-  mode: CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY ? 'cloud' : 'demo',
+  mode: HAS_CLOUD && !FORCED_DEMO ? 'cloud' : 'demo',
   data: { events: [], categories: [], teams: [], riders: [], event_categories: [] },
   user: null,
   sb: null,

@@ -41,6 +41,7 @@ function shell() {
     <header class="tv-head">${brand('Pantalla de meta')}
       <div class="tv-event"><h1>${esc(e?.name || 'Sin eventos')}</h1><p>${e ? `<i class="fa-solid fa-location-dot"></i> ${esc(e.location || '')} · ${fmtDate(e.date)}` : ''}</p></div>
       ${e?.status === 'en_curso' ? '<span class="tv-live"><i class="live-dot"></i> EN VIVO</span>' : e?.status === 'finalizado' ? '<span class="tv-live" style="color:var(--muted);border-color:var(--line2);background:var(--surface)">RESULTADOS FINALES</span>' : ''}
+      ${store.mode === 'demo' ? '<span class="tv-live" style="color:var(--amber);border-color:rgba(255,178,31,.4);background:rgba(255,178,31,.1)"><i class="fa-solid fa-flask"></i> DEMO</span>' : ''}
       <span class="tv-clock" id="clock">${fmtClock(new Date().toISOString())}</span>
     </header>
     <main class="tv-main"><section class="tv-board" id="board"></section>

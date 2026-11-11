@@ -317,6 +317,19 @@ Para cargar de golpe los pasos de otro cronómetro, de una hoja de cálculo o de
 💡 **Fecha `11/1/2026`:** la app decide si es 1 de noviembre o 11 de enero comparando con la fecha del evento. Si se equivoca, cambia **Formato de fecha**.
 ⚠️ Después revisa en **Cronómetro → Salidas por categoría** que cada categoría tenga su hora de salida. Los pasos anteriores a la salida no cuentan.
 
+### C6e. Modo demo para practicar 🧪
+Para capacitar al staff **sin tocar los datos reales**:
+
+| Para | Cómo |
+|---|---|
+| Entrar al demo | En la pantalla de acceso, 👆 **Practicar en modo demo**, o abre `tu-sitio.netlify.app/admin.html?demo=1` |
+| Usuarios del demo | `admin` o `registro`, contraseña `demo` |
+| Salir del demo | 👆 **Salir del demo** en la franja amarilla de arriba, o abre `.../admin.html?demo=0` |
+
+✅ Mientras estés en demo verás la franja amarilla **MODO DEMOSTRACIÓN**, y la Pantalla TV muestra la etiqueta **DEMO**.
+💡 El demo se queda activo en ese navegador hasta que salgas. Lo que hagas en el demo se guarda solo en ese navegador y **nunca** llega a la base de datos real. Para reiniciarlo: **Importar y ajustes → Restablecer datos de demostración**.
+⚠️ El día de la carrera, revisa que **ningún** celular ni la TV tengan la franja o la etiqueta DEMO.
+
 ### C7. Respaldo 💾
 👆 **Descargar respaldo completo (JSON)** después de cada evento. Guarda todo: eventos, corredores, categorías, equipos y todos los pasos.
 

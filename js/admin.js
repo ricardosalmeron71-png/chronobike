@@ -1,5 +1,5 @@
 // Panel de STAFF: registro de eventos, corredores, categorías, equipos y cronometraje de vueltas
-import { store, displayUser } from './store.js';
+import { store, displayUser, FORCED_DEMO } from './store.js';
 import { CONFIG } from './config.js';
 import { computeResults, eventSummary, resultsToCSV, fmtDuration, STATUS } from './results.js';
 import { $, $$, esc, toast, modal, confirmDialog, fmtDate, fmtClock, toLocalInput, fromLocalInput, avatar, resizeImage, download, brand } from './ui.js';
@@ -32,7 +32,7 @@ const can = (pageId) => PAGES.find((p) => p.id === pageId)?.roles.includes(store
 const splash = showSplash();
 (async function main() {
   await store.init((p, m) => splash.step(p, m));
-  if (store.mode === 'demo') $('#demoBanner').innerHTML = `<div class="demo-banner"><i class="fa-solid fa-flask"></i> MODO DEMOSTRACIÓN · los cambios se guardan solo en este navegador · <a href="./index.html" target="_blank">Abrir vista pública en otra pestaña →</a></div>`;
+  if (store.mode === 'demo') $('#demoBanner').innerHTML = `<div class="demo-banner"><i class="fa-solid fa-flask"></i> MODO DEMOSTRACIÓN · datos ficticios, los cambios se guardan solo en este navegador · <a href="./index.html" target="_blank">Vista pública demo →</a>${FORCED_DEMO ? ' · <a href="./admin.html?demo=0"><b>Salir del demo (volver a datos reales)</b></a>' : ''}</div>`;
   if (!ev()) S.eventId = (D().events.find((e) => e.status === 'en_curso') || D().events[0])?.id || null;
   splash.step(0.88, store.user ? 'Cargando vueltas y resultados…' : 'Preparando acceso…');
   store.user ? await boot() : await renderLogin();
@@ -82,6 +82,7 @@ async function renderLogin() {
       <button class="btn ${setup ? 'btn-lime' : 'btn-primary'}" style="height:50px"><i class="fa-solid ${setup ? 'fa-user-plus' : 'fa-right-to-bracket'}"></i> ${setup ? 'Crear administrador y entrar' : 'Entrar'}</button>
       <a class="btn btn-ghost" href="./index.html"><i class="fa-solid fa-arrow-left"></i> Volver a resultados</a>
       ${!setup ? '<p class="muted small" style="text-align:center;margin:0">¿No tienes cuenta? Pídela al administrador del evento.</p>' : ''}
+      ${store.mode === 'cloud' ? '<a class="btn btn-ghost btn-sm" href="./admin.html?demo=1"><i class="fa-solid fa-flask"></i> Practicar en modo demo (datos ficticios)</a>' : ''}
       ${setupError ? `<div class="demo-hint"><b><i class="fa-solid fa-triangle-exclamation"></i> Gestión de usuarios no disponible</b><br>${esc(setupError.message)}</div>` : ''}
       ${store.mode === 'demo' ? `<div class="demo-hint"><b><i class="fa-solid fa-flask"></i> Modo demo</b><br>Administrador: usuario <code>admin</code><br>Registrador: usuario <code>registro</code><br>Contraseña: <code>demo</code></div>` : ''}
     </form></div></div>`;

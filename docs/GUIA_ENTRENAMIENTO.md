@@ -19,7 +19,7 @@ flowchart LR
 
 ## 🧰 Preparación del instructor
 - [ ] Un celular por participante y una laptop con proyector.
-- [ ] Abrir la app **en modo demo** (sin `SUPABASE_URL` en `js/config.js`), o la URL de práctica.
+- [ ] Abrir la app **en modo demo** en cada celular: `tu-sitio.netlify.app/admin.html?demo=1` (o el botón **Practicar en modo demo** en la pantalla de acceso). Al terminar, **Salir del demo**.
 - [ ] Imprimir la [tarjeta de bolsillo](#-tarjeta-de-bolsillo-imprimir) para cada registrador.
 - [ ] Imprimir 20 "dorsales" de papel con los números 1 a 20, más el 150 (no registrado).
 - [ ] En cada celular: **Ajustes → Fecha y hora → Automática**.
@@ -166,6 +166,7 @@ Reproduce un día real. Roles:
 - [ ] Hora automática activada.
 - [ ] Sesión iniciada, **evento correcto** seleccionado y punto 🟢.
 - [ ] Brillo al máximo y sonido activado.
+- [ ] **Sin franja amarilla de DEMO** (si aparece: *Salir del demo*).
 - [ ] Prueba: registra el dorsal de prueba y **bórralo**.
 - [ ] TV o proyector en la meta con `tv.html` en pantalla completa (tecla **F**).
 

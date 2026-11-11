@@ -1,5 +1,5 @@
 // Vista PÚBLICA: podios, clasificación y tiempos (solo lectura)
-import { store } from './store.js';
+import { store, FORCED_DEMO } from './store.js';
 import { computeResults, eventSummary } from './results.js';
 import { $, $$, esc, brand, fmtDate, fmtClock, toast } from './ui.js';
 import { showSplash } from './splash.js';
@@ -108,7 +108,7 @@ const splash = showSplash();
 (async function main() {
   $('#brand').innerHTML = brand('Resultados');
   await store.init((p, m) => splash.step(p, m));
-  if (store.mode === 'demo') $('#demoBanner').innerHTML = `<div class="demo-banner"><i class="fa-solid fa-flask"></i> MODO DEMOSTRACIÓN · datos ficticios · la carrera "en vivo" avanza sola. <a href="./admin.html">Probar el panel de staff →</a></div>`;
+  if (store.mode === 'demo') $('#demoBanner').innerHTML = `<div class="demo-banner"><i class="fa-solid fa-flask"></i> MODO DEMOSTRACIÓN · datos ficticios · la carrera "en vivo" avanza sola. <a href="./admin.html">Probar el panel de staff →</a>${FORCED_DEMO ? ' · <a href="./index.html?demo=0"><b>Salir del demo</b></a>' : ''}</div>`;
   readHash();
   if (!currentEvent()) state.eventId = orderedEvents()[0]?.id;
   splash.step(0.88, 'Calculando resultados…');
