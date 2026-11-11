@@ -2,7 +2,7 @@
   "name": "chronobike",
   "version": "2.0.0",
   "private": true,
-  "description": "Cronometraje y resultados en vivo para ciclismo de montaña",
+  "description": "Cronometraje de circuitos y resultados en vivo",
   "type": "module",
   "scripts": {
     "start": "npx --yes serve -l 5173 .",

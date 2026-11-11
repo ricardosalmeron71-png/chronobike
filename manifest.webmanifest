@@ -1,7 +1,7 @@
 {
   "name": "ChronoBike",
   "short_name": "ChronoBike",
-  "description": "Cronometraje y resultados para ciclismo de montaña",
+  "description": "Cronometraje de circuitos y resultados en vivo",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#070b16",

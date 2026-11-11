@@ -1,6 +1,6 @@
 # 🚴⏱️ ChronoBike 2.0
 
-**Cronometraje y resultados en vivo para ciclismo de montaña.**
+**Cronometraje de circuitos y resultados en vivo.**
 Una app web que se abre en cualquier celular o computadora, con dos caras:
 
 | 👀 Vista pública (`index.html`) | 🛡️ Panel de staff (`admin.html`) |

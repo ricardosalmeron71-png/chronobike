@@ -1,5 +1,5 @@
 # ChronoBike 2.0
-### Cronometraje y resultados en vivo para ciclismo de montaña
+### Cronometraje de circuitos y resultados en vivo
 
 ![Portada](img/01-publico-inicio.png)
 
