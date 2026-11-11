@@ -261,7 +261,28 @@ Renombra o elimina equipos. Al eliminar uno, sus corredores quedan como *Indepen
 
 La app lee las hojas **CORREDORES** (`dorsal, name, category, team`), **CATEGORIAS** (`name, laps`) y **Equipos** (`name`), el mismo formato del sistema anterior. Muestra cuántos registros encontró. 👆 **Importar ahora**.
 
-✅ Los dorsales existentes se actualizan. Las filas sin nombre se omiten. Los equipos duplicados se unifican.
+✅ Los dorsales existentes se actualizan y las filas sin nombre se omiten. Los datos se guardan **tal como vienen en el archivo**: si un equipo aparece escrito de varias formas (`Zorros MTB`, `ZORROS MTB`), quedan como equipos distintos. Puedes renombrarlos o eliminarlos después en **Equipos**.
+
+### C6b. Pantalla de TV en la meta 📺
+Conecta una laptop a una TV o proyector en la meta y abre **Pantalla TV** (arriba en el panel, o en **Resultados**). También puedes abrir directo `.../tv.html`.
+
+![Pantalla TV](img/34-pantalla-tv-paso.png)
+
+| Zona | Qué muestra |
+|---|---|
+| Izquierda | Clasificación de una categoría. **Cambia sola cada 12 segundos** (la barrita de color marca el tiempo). |
+| Derecha, arriba | **Último paso por meta** en grande: dorsal, nombre, vuelta, tiempo de vuelta y posición. Destella con cada paso y muestra **🏁 ¡META!** al terminar. |
+| Derecha, abajo | Los pasos anteriores |
+| Abajo | **Código QR**: el público lo escanea y ve los resultados en su celular |
+
+| Tecla | Hace |
+|---|---|
+| Clic o `F` | Pantalla completa |
+| `←` `→` | Categoría anterior / siguiente |
+| `Espacio` | Pausar o reanudar la rotación |
+
+💡 No necesita iniciar sesión y se actualiza sola.
+💡 Opciones en la dirección: `tv.html?s=20` (segundos por categoría) · `tv.html?n=8` (filas) · `tv.html?c=<id de categoría>` (fijar una sola categoría).
 
 ### C7. Respaldo 💾
 👆 **Descargar respaldo completo (JSON)** después de cada evento. Guarda todo: eventos, corredores, categorías, equipos y todos los pasos.

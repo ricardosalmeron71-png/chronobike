@@ -26,7 +26,7 @@ Analizamos la app actual y el archivo `chronobike.xlsx`. Funciona como una sola 
 | 4 | **No hay usuarios.** La URL de la base de datos va dentro del código público. | Cualquiera puede borrar o alterar resultados. | Login de staff (Supabase Auth) y **seguridad por filas**: el público solo lee. |
 | 5 | Los pasos solo guardan la hora `HH:MM:SS`. | Pierde la fecha y las décimas, y falla al pasar la medianoche. | Marca de tiempo completa con milisegundos. |
 | 6 | No hay control de dobles toques. | Pasos duplicados que alteran los tiempos. | Aviso si el mismo dorsal se registra en menos de 30 s, y aviso si ya terminó. |
-| 7 | Hay 95 "equipos", muchos duplicados (`Zorros MTB`, `ZORROS MTB`, `Zorros mtb`). | Estadísticas por equipo inservibles. | El equipo se unifica solo, sin importar mayúsculas ni acentos. Índice único en la base. |
+| 7 | Hay 95 "equipos", muchos duplicados (`Zorros MTB`, `ZORROS MTB`, `Zorros mtb`). | Estadísticas por equipo inservibles. | La importación respeta los datos tal como vienen. Desde **Equipos** se renombran o eliminan los duplicados. |
 | 8 | Hay filas de corredores sin nombre ni categoría (dorsal 18, 23, 32…). | Huecos en los resultados. | Nombre y categoría obligatorios. La importación omite filas vacías y avisa. |
 | 9 | Si falla el internet, los datos quedan solo en el teléfono, sin reintento claro. | Riesgo de perder vueltas. | **Cola offline**: cada paso se guarda en el teléfono y se reenvía solo al volver la señal. |
 
@@ -46,6 +46,7 @@ Analizamos la app actual y el archivo `chronobike.xlsx`. Funciona como una sola 
 - 🏆 **Podios automáticos** (oro, plata, bronce) por categoría, con foto.
 - 📊 **Tabla en vivo** con progreso de vueltas, tiempo de cada vuelta, mejor vuelta resaltada, diferencia con el líder y estado (En pista / Meta / Sin paso).
 - 👤 **Ficha del corredor** con gráfica de vueltas y velocidad promedio.
+- 📺 **Pantalla de TV para la meta**: clasificación que rota por categoría, último paso en grande y QR para el público.
 - 📡 **Tiempo real**: lo que registra el staff aparece en los celulares del público en 1 o 2 segundos.
 - 📶 **A prueba de mala señal**: cola offline con reintento automático.
 - 📥 **Migración inmediata**: importa el Excel actual (`CORREDORES`, `CATEGORIAS`, `Equipos`).
@@ -113,7 +114,7 @@ flowchart LR
 ## 7. Hoja de ruta sugerida
 
 1. **Fase 1 (lista):** app pública + staff, importación de Excel, demo, documentación.
-2. **Fase 2:** pantalla TV a pantalla completa para la meta, con rotación de categorías. Inscripción en línea de corredores. Fotos en Supabase Storage.
+2. **Fase 2:** inscripción en línea de corredores. Fotos en Supabase Storage.
 3. **Fase 3:** campeonato del serial (puntos acumulados por etapa), estados DNF/DSQ, penalizaciones.
 4. **Fase 4:** integración con lector RFID o código QR en el número. Notificaciones por WhatsApp.
 

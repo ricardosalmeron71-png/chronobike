@@ -89,25 +89,50 @@ export const store = {
   },
   pending() { return queue.all().length; },
 
+  /** Guarda muchos registros de una vez (en bloques), para importaciones rápidas. */
+  async saveMany(table, rows) {
+    if (!rows.length) return;
+    if (this.mode === 'cloud') { for (let i = 0; i < rows.length; i += 400) await cloud.saveMany(this, table, rows.slice(i, i + 400)); }
+    else demo.saveMany(table, rows);
+    const list = this.data[table];
+    for (const rec of rows) { const i = list.findIndex((x) => x.id === rec.id); if (i >= 0) list[i] = { ...list[i], ...rec }; else list.push(rec); }
+    sortAll(this.data); emit(table);
+  },
+
   // ── Importación masiva (Excel) ──
-  async bulkImport({ categories = [], teams = [], riders = [] }) {
+  // Los datos se guardan TAL COMO VIENEN en el archivo: los equipos con distinta
+  // escritura ("Zorros MTB" / "ZORROS MTB") se conservan como equipos distintos.
+  async bulkImport({ categories = [], teams = [], riders = [] }, onProgress = () => {}) {
     const res = { categories: 0, teams: 0, riders: 0, skipped: 0 };
-    for (const c of categories) {
-      if (!c.name) continue;
-      const hit = this.data.categories.find((x) => x.name.toLowerCase() === String(c.name).trim().toLowerCase());
-      if (!hit) { await this.save('categories', { name: String(c.name).trim(), laps: Number(c.laps) || 1, color: c.color || randomColor() }); res.categories++; }
-    }
-    for (const t of teams) { const before = this.data.teams.length; await this.ensureTeam(t.name); if (this.data.teams.length > before) res.teams++; }
+    const clean = (v) => String(v ?? '').trim().replace(/\s+/g, ' ');
+    const catByName = new Map(this.data.categories.map((c) => [clean(c.name).toLowerCase(), c]));
+    const newCats = [];
+    const addCat = (name, laps) => {
+      const k = clean(name).toLowerCase(); if (!k) return null;
+      if (!catByName.has(k)) { const c = { id: newId(), name: clean(name), laps: Number(laps) || 1, color: randomColor(), sort: catByName.size + 1 }; catByName.set(k, c); newCats.push(c); }
+      return catByName.get(k);
+    };
+    const teamByName = new Map(this.data.teams.map((t) => [clean(t.name), t])); // coincidencia EXACTA
+    const newTeams = [];
+    const addTeam = (name) => {
+      const k = clean(name); if (!k) return null;
+      if (!teamByName.has(k)) { const t = { id: newId(), name: k }; teamByName.set(k, t); newTeams.push(t); }
+      return teamByName.get(k);
+    };
+    categories.forEach((c) => addCat(c.name, c.laps));
+    teams.forEach((t) => addTeam(t.name));
+    const byDorsal = new Map();
     for (const p of riders) {
       const dorsal = parseInt(p.dorsal, 10);
-      if (!dorsal || !p.name) { res.skipped++; continue; }
-      let cat = this.data.categories.find((x) => x.name.toLowerCase() === String(p.category || '').trim().toLowerCase());
-      if (!cat && p.category) { cat = await this.save('categories', { name: String(p.category).trim(), laps: 1, color: randomColor() }); res.categories++; }
-      const team = await this.ensureTeam(p.team);
+      if (!dorsal || !clean(p.name)) { res.skipped++; continue; }
+      const cat = addCat(p.category, 1); const team = addTeam(p.team);
       const cur = this.data.riders.find((x) => Number(x.dorsal) === dorsal);
-      await this.save('riders', { ...(cur || {}), dorsal, name: String(p.name).trim(), category_id: cat?.id || null, team_id: team?.id || null });
-      res.riders++;
+      byDorsal.set(dorsal, { ...(cur || { id: newId(), photo_url: null }), dorsal, name: clean(p.name), category_id: cat?.id || null, team_id: team?.id || null });
     }
+    onProgress('Guardando categorías…'); await this.saveMany('categories', newCats);
+    onProgress(`Guardando ${newTeams.length} equipos…`); await this.saveMany('teams', newTeams);
+    onProgress(`Guardando ${byDorsal.size} corredores…`); await this.saveMany('riders', [...byDorsal.values()]);
+    res.categories = newCats.length; res.teams = newTeams.length; res.riders = byDorsal.size;
     return res;
   },
 
@@ -146,6 +171,11 @@ const demo = {
     this.persist();
   },
   remove(s, table, id) { this.db[table] = this.db[table].filter((x) => x.id !== id); this.persist(); },
+  saveMany(table, rows) {
+    const list = this.db[table];
+    for (const rec of rows) { const i = list.findIndex((x) => x.id === rec.id); if (i >= 0) list[i] = { ...list[i], ...rec }; else list.push(rec); }
+    this.persist();
+  },
   getLaps(eventId) { const now = Date.now(); return this.db.laps.filter((l) => l.event_id === eventId && (!l.sim || new Date(l.ts).getTime() <= now)); },
   addLap(lap) { this.db.laps.push({ ...lap, created_at: new Date().toISOString() }); this.persist(); },
   removeLap(id) { this.db.laps = this.db.laps.filter((l) => l.id !== id); this.persist(); },
@@ -240,6 +270,14 @@ const cloud = {
     if (error) throw new Error(error.code === '23505' ? 'Ya existe un registro con ese dato (¿dorsal o nombre duplicado?)' : error.message);
   },
   async remove(s, table, id) { const { error } = await s.sb.from(table).delete().eq('id', id); if (error) throw new Error(error.message); },
+  async saveMany(s, table, rows) {
+    const clean = rows.map((r) => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith('_'))));
+    const { error } = await s.sb.from(table).upsert(clean);
+    if (error) {
+      if (error.code === '23505' && table === 'teams') throw new Error('La base de datos aún unifica equipos. Ejecuta en Supabase → SQL Editor:  drop index if exists public.teams_name_uq;  y vuelve a importar.');
+      throw new Error(error.code === '23505' ? 'Hay datos duplicados (dorsal o nombre): ' + error.message : error.message);
+    }
+  },
   async getLaps(s, eventId) {
     const all = []; let from = 0;
     for (;;) { // paginado por si hay miles de pasos

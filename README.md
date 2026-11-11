@@ -35,6 +35,7 @@ npm test           # pruebas del motor de tiempos
 ```
 index.html              Vista pública
 admin.html              Panel de staff
+tv.html                 Pantalla de TV para la meta (rotación por categoría + último paso + QR)
 css/styles.css          Diseño visual (tema oscuro, responsivo, imprimible)
 js/config.js            ← Aquí se pegan los datos de Supabase
 js/store.js             Datos: modo demo (navegador) o Supabase (nube) + cola offline

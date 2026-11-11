@@ -36,8 +36,8 @@ create table if not exists public.teams (
   sort        int,
   created_at  timestamptz not null default now()
 );
--- Evita duplicados tipo "Zorros MTB" / "ZORROS MTB"
-create unique index if not exists teams_name_uq on public.teams (lower(trim(name)));
+-- Los equipos se guardan tal como se escriben (sin unificar mayúsculas/acentos)
+drop index if exists public.teams_name_uq;
 
 -- CORREDORES (antes hoja "CORREDORES")
 create table if not exists public.riders (

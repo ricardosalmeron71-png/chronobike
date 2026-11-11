@@ -112,6 +112,7 @@ Entra con `admin@demo.mx` / `demo`.
 | 3.7 | Cierra el evento y verifica que en la vista pública aparece como **Finalizado** | Resultados → Cerrar evento |
 | 3.8 | Importa el Excel del serial (hojas CORREDORES / CATEGORIAS / Equipos) | Importar y ajustes |
 | 3.9 | Descarga un respaldo JSON | Importar y ajustes |
+| 3.11 | Abre la **Pantalla TV** en otra ventana, registra un paso en el Cronómetro y comprueba que aparece en grande | Pantalla TV |
 | 3.10 | Crea una cuenta de **registrador** para un compañero, envíale sus datos por WhatsApp, pídele que entre y luego cámbiale la contraseña | Usuarios |
 
 ![Eventos](img/20-eventos.png)
@@ -166,6 +167,7 @@ Reproduce un día real. Roles:
 - [ ] Sesión iniciada, **evento correcto** seleccionado y punto 🟢.
 - [ ] Brillo al máximo y sonido activado.
 - [ ] Prueba: registra el dorsal de prueba y **bórralo**.
+- [ ] TV o proyector en la meta con `tv.html` en pantalla completa (tecla **F**).
 
 ### En la salida (admin)
 - [ ] ▶ en el instante del disparo de cada categoría.

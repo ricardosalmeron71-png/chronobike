@@ -100,6 +100,7 @@ function renderLayout() {
     <span class="spacer"></span>
     <span class="sync" id="sync"><span class="dot"></span><span></span></span>
     <span class="clock hide-m" id="clock">${fmtClock(new Date().toISOString())}</span>
+    <a class="btn btn-sm btn-ghost hide-m" href="./tv.html" target="_blank" id="tvLink"><i class="fa-solid fa-tv"></i> Pantalla TV</a>
     <a class="btn btn-sm btn-ghost hide-m" href="./index.html" target="_blank"><i class="fa-solid fa-eye"></i> Vista pública</a>
   </header>
   <div class="admin-layout">
@@ -112,6 +113,7 @@ function renderLayout() {
   <nav class="bottomnav">${pages.slice(0, 5).map((p) => `<button data-page="${p.id}"><i class="fa-solid ${p.icon}"></i>${p.label.split(' ')[0]}</button>`).join('')}
     <button id="moreBtn"><i class="fa-solid fa-ellipsis"></i>Más</button></nav>`;
   fillEventSelect();
+  if (S.eventId) $('#tvLink').href = `./tv.html?e=${encodeURIComponent(S.eventId)}`;
   $$('[data-page]').forEach((b) => b.onclick = () => go(b.dataset.page));
   $('#logout').onclick = async () => { await store.signOut(); location.hash = ''; location.reload(); };
   $('#moreBtn').onclick = () => {
@@ -119,6 +121,7 @@ function renderLayout() {
       <div class="event-pill"><i class="fa-solid fa-flag-checkered" style="color:var(--orange)"></i><select id="eventSel2"></select></div>
       ${pages.slice(5).map((p) => `<button class="btn" data-go="${p.id}"><i class="fa-solid ${p.icon}"></i>${p.label}</button>`).join('')}
       <a class="btn" href="./index.html" target="_blank"><i class="fa-solid fa-eye"></i> Vista pública</a>
+      <a class="btn" href="./tv.html${S.eventId ? '?e=' + encodeURIComponent(S.eventId) : ''}" target="_blank"><i class="fa-solid fa-tv"></i> Pantalla TV de meta</a>
       <button class="btn btn-danger" data-logout><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión (${esc(store.user.email)})</button></div>`);
     fillEventSelect($('#eventSel2', m.el));
     $$('[data-go]', m.el).forEach((b) => b.onclick = () => { m.close(); go(b.dataset.go); });
@@ -132,7 +135,7 @@ function fillEventSelect(sel = $('#eventSel')) {
   sel.onchange = async () => { await setEvent(sel.value); };
 }
 async function setEvent(id) {
-  S.eventId = id; localStorage.setItem(ACTIVE_KEY, id); await reloadLaps(); fillEventSelect(); renderPage();
+  S.eventId = id; const tl = $('#tvLink'); if (tl) tl.href = `./tv.html?e=${encodeURIComponent(id)}`; localStorage.setItem(ACTIVE_KEY, id); await reloadLaps(); fillEventSelect(); renderPage();
   toast(`Evento activo: ${ev()?.name}`, 'info');
 }
 async function go(page) { S.page = page; history.replaceState(null, '', '#' + page); updateNav(); renderPage(); window.scrollTo(0, 0); }
@@ -477,6 +480,7 @@ function pageResultados(main) {
   main.innerHTML = pageHead('fa-trophy', 'Resultados', `${esc(e.name)} · ${fmtDate(e.date)}`, `
     <button class="btn btn-sm" id="csv"><i class="fa-solid fa-file-csv"></i> Exportar Excel (CSV)</button>
     <button class="btn btn-sm" id="prt"><i class="fa-solid fa-print"></i> Imprimir / PDF</button>
+    <a class="btn btn-sm" href="./tv.html?e=${encodeURIComponent(e.id)}" target="_blank"><i class="fa-solid fa-tv"></i> Pantalla TV</a>
     ${can('eventos') && e.status !== 'finalizado' ? '<button class="btn btn-sm btn-primary" id="fin"><i class="fa-solid fa-flag-checkered"></i> Cerrar evento</button>' : ''}`) +
     `${kpis(eventSummary(S.groups))}<div class="toolbar"><div class="seg" id="rv"><button data-v="podios" class="${S.resView === 'podios' ? 'on' : ''}"><i class="fa-solid fa-trophy"></i> Podios</button><button data-v="tabla" class="${S.resView === 'tabla' ? 'on' : ''}"><i class="fa-solid fa-list-ol"></i> Clasificación</button></div></div><div id="rbody"></div>`;
   $('#rbody').innerHTML = S.resView === 'podios' ? `<div class="podium-grid">${S.groups.map(podium).join('')}</div>` : S.groups.map((g) => resultsTable(g, { admin: true })).join('');
@@ -595,11 +599,15 @@ async function handleXls(file) {
   $('#imp').innerHTML = `<div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-top:1rem">
     <div class="kpi"><i class="fa-solid fa-person-biking"></i><b>${valid}</b><span>Corredores</span></div><div class="kpi"><i class="fa-solid fa-layer-group"></i><b>${categories.length}</b><span>Categorías</span></div><div class="kpi"><i class="fa-solid fa-users"></i><b>${teams.length}</b><span>Equipos</span></div></div>
     ${riders.length - valid ? `<p class="small warn-t"><i class="fa-solid fa-triangle-exclamation"></i> ${riders.length - valid} fila(s) sin nombre se omitirán.</p>` : ''}
-    <p class="muted small">Los dorsales que ya existan se actualizarán. Los equipos repetidos con distinta escritura (ej. "Zorros MTB" y "ZORROS MTB") se unifican.</p>
+    <p class="muted small">Los dorsales que ya existan se actualizarán. Los datos se guardan <b>tal como vienen en el archivo</b> (los equipos no se unifican).</p>
     <button class="btn btn-primary" id="doImp"><i class="fa-solid fa-file-import"></i> Importar ahora</button>`;
   $('#doImp').onclick = async () => {
     $('#doImp').disabled = true; $('#doImp').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importando…';
-    try { const r = await store.bulkImport({ categories, teams, riders }); toast(`Importados: ${r.riders} corredores, ${r.categories} categorías nuevas, ${r.teams} equipos nuevos`, 'ok', 5000); await reloadLaps(); $('#imp').innerHTML = ''; }
+    try {
+      const r = await store.bulkImport({ categories, teams, riders }, (msg) => { $('#doImp').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${esc(msg)}`; });
+      toast(`Importados: ${r.riders} corredores, ${r.categories} categorías nuevas, ${r.teams} equipos nuevos`, 'ok', 6000); await reloadLaps();
+      $('#imp').innerHTML = `<p class="small" style="color:var(--green);margin-top:1rem"><i class="fa-solid fa-circle-check"></i> Listo: ${r.riders} corredores, ${r.categories} categorías y ${r.teams} equipos nuevos.</p>`;
+    }
     catch (err) { toast(err.message, 'err', 5000); $('#doImp').disabled = false; }
   };
 }
