@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070b16">
+  <link rel="icon" href="./img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./css/styles.css">
+  <title>ChronoBike · Resultados en vivo</title>
+  <meta name="description" content="Resultados, podios y tiempos por vuelta de carreras de ciclismo de montaña.">
+</head>
+<body>
+  <div id="demoBanner"></div>
+  <header class="topbar">
+    <div id="brand"></div>
+    <span class="spacer"></span>
+    <span class="chip hide-m" id="liveChip"></span>
+    <a class="btn btn-sm" href="./admin.html"><i class="fa-solid fa-user-shield"></i><span class="hide-m">Acceso staff</span></a>
+  </header>
+  <main class="wrap" id="app"><div class="empty"><i class="fa-solid fa-spinner fa-spin"></i>Cargando resultados…</div></main>
+  <footer class="footer">ChronoBike · Cronometraje para ciclismo de montaña</footer>
+  <script type="module" src="./js/public.js"></script>
+</body>
+</html>
