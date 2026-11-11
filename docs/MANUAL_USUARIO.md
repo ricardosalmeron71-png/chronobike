@@ -298,6 +298,25 @@ Conecta una laptop a una TV o proyector en la meta y abre **Pantalla TV** (arrib
 | Manual de usuario · Guías de entrenamiento | Todo el staff |
 | Presentación y ventajas · Base de datos y despliegue | Solo administradores |
 
+### C6d. Importar pasos (vueltas) en lote 🏁
+Para cargar de golpe los pasos de otro cronómetro, de una hoja de cálculo o de una carrera que se registró en papel.
+
+1. En el **Cronómetro**, 👆 **Importar pasos**, o ve a **Importar y ajustes**.
+2. Elige el **evento destino**.
+3. Pega los pasos, **una línea por paso**, con fecha/hora y dorsal. O sube un archivo Excel/CSV.
+   ```
+   11/1/2026 7:34:46    103
+   11/1/2026 7:34:51    194
+   ```
+   También sirve solo la hora (`7:34:46 103`), el dorsal primero (`103;7:34:46`) o `a. m.`/`p. m.`.
+4. 👆 **Revisar**. Verás cuántos pasos son nuevos, cuántos **ya estaban cargados** (no se duplican), los dorsales no inscritos y las líneas con error.
+5. 👆 **Importar**.
+
+![Importar pasos](img/38-importar-pasos.png)
+
+💡 **Fecha `11/1/2026`:** la app decide si es 1 de noviembre o 11 de enero comparando con la fecha del evento. Si se equivoca, cambia **Formato de fecha**.
+⚠️ Después revisa en **Cronómetro → Salidas por categoría** que cada categoría tenga su hora de salida. Los pasos anteriores a la salida no cuentan.
+
 ### C7. Respaldo 💾
 👆 **Descargar respaldo completo (JSON)** después de cada evento. Guarda todo: eventos, corredores, categorías, equipos y todos los pasos.
 

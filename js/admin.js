@@ -5,6 +5,7 @@ import { computeResults, eventSummary, resultsToCSV, fmtDuration, STATUS } from 
 import { $, $$, esc, toast, modal, confirmDialog, fmtDate, fmtClock, toLocalInput, fromLocalInput, avatar, resizeImage, download, brand } from './ui.js';
 import { showSplash } from './splash.js';
 import { pageDocs } from './docs.js';
+import { parseLaps } from './lapimport.js';
 import { podium, resultsTable, riderDetail, kpis, EVENT_STATUS } from './views.js';
 
 const ACTIVE_KEY = 'chronobike_active_event';
@@ -175,7 +176,8 @@ function pageCrono(main) {
   if (!e) { main.innerHTML = pageHead('fa-stopwatch', 'Cronómetro', '') + needEvent(); return; }
   const st = EVENT_STATUS[e.status];
   main.innerHTML = pageHead('fa-stopwatch', 'Cronómetro', `<span class="badge ${e.status === 'en_curso' ? 'st-racing' : 'st-dns'}">${e.status === 'en_curso' ? '<i class="live-dot"></i>' : ''}${st.label}</span> &nbsp;${esc(e.name)} · ${esc(e.location || '')}`,
-    e.status !== 'en_curso' && can('eventos') ? `<button class="btn btn-lime" id="goLive"><i class="fa-solid fa-play"></i> Marcar evento EN VIVO</button>` : '') + `
+    (can('ajustes') ? `<button class="btn btn-sm" id="goImpLaps"><i class="fa-solid fa-file-import"></i> Importar pasos</button>` : '') +
+    (e.status !== 'en_curso' && can('eventos') ? `<button class="btn btn-lime" id="goLive"><i class="fa-solid fa-play"></i> Marcar evento EN VIVO</button>` : '')) + `
   <div class="timing">
     <div class="card pad-card">
       <div class="dorsal-display" id="dDisplay"><small>Dorsal</small><div class="dorsal-num" id="dNum"></div></div>
@@ -190,6 +192,7 @@ function pageCrono(main) {
     </div>
     <div id="cronoSide"></div>
   </div>`;
+  $('#goImpLaps') && ($('#goImpLaps').onclick = async () => { await go('ajustes'); $('#lapsCard')?.scrollIntoView({ behavior: 'smooth' }); });
   $('#goLive') && ($('#goLive').onclick = async () => { await store.save('events', { ...e, status: 'en_curso' }); toast('Evento en vivo'); renderPage(); });
   $$('#keypad .key').forEach((b) => b.onpointerdown = (ev2) => { ev2.preventDefault(); keyPress(b.dataset.k); });
   $('#regBtn').onclick = registerLap;
@@ -576,6 +579,15 @@ function pageAjustes(main) {
       <p class="muted small">Sube el archivo con las hojas <b>CORREDORES</b> (dorsal, name, category, team), <b>CATEGORIAS</b> (name, laps) y <b>Equipos</b> (name). Es el mismo formato del sistema anterior.</p>
       <label class="drop" id="drop"><i class="fa-solid fa-cloud-arrow-up"></i><p><b>Arrastra tu archivo .xlsx aquí</b><br><span class="muted small">o toca para elegirlo</span></p><input type="file" accept=".xlsx,.xls,.csv" hidden id="xls"></label>
       <div id="imp"></div></div>
+    <div class="card" id="lapsCard" style="grid-column:1/-1"><h3><i class="fa-solid fa-flag-checkered" style="color:var(--lime)"></i> Importar pasos por meta (vueltas) a un evento</h3>
+      <p class="muted small">Pega los registros de otro cronómetro, hoja de cálculo o app: <b>una línea por paso</b> con fecha/hora y dorsal, por ejemplo <code>11/1/2026 7:34:46&nbsp;&nbsp;103</code>. También sirve solo la hora (<code>7:34:46 103</code>) o subir un archivo Excel/CSV.</p>
+      <div class="form">
+        <div class="two"><div class="field"><label>Evento destino *</label><select id="lpEvent">${D().events.map((x) => `<option value="${esc(x.id)}" ${x.id === S.eventId ? 'selected' : ''}>${esc(x.name)} · ${fmtDate(x.date)}</option>`).join('') || '<option value="">Primero crea un evento</option>'}</select></div>
+          <div class="field"><label>Formato de fecha</label><select id="lpFmt"><option value="auto">Automático (según la fecha del evento)</option><option value="mdy">Mes/Día/Año (11/1/2026 = 1 nov)</option><option value="dmy">Día/Mes/Año (11/1/2026 = 11 ene)</option></select></div></div>
+        <div class="field"><label>Pasos</label><textarea id="lpText" rows="8" placeholder="11/1/2026 7:34:46	103&#10;11/1/2026 7:34:51	194&#10;…" style="font-family:ui-monospace,monospace;font-size:.85rem"></textarea></div>
+        <div class="row"><button class="btn" id="lpCheck"><i class="fa-solid fa-magnifying-glass"></i> Revisar</button>
+          <label class="btn btn-ghost"><i class="fa-solid fa-file-excel"></i> Subir Excel/CSV<input type="file" id="lpFile" accept=".xlsx,.xls,.csv,.txt" hidden></label></div>
+      </div><div id="lpPrev"></div></div>
     <div class="card"><h3><i class="fa-solid fa-database" style="color:var(--blue)"></i> Base de datos</h3>
       <p class="muted small">Modo actual: <b>${store.mode === 'demo' ? 'DEMO (navegador local)' : 'Supabase (nube)'}</b></p>
       ${store.mode === 'demo' ? `<ol class="steps small"><li>Crea un proyecto gratis en supabase.com</li><li>Ejecuta <code>supabase/schema.sql</code> en el SQL Editor</li><li>Pega la URL y la clave anon en <code>js/config.js</code></li><li>Publica el sitio (Netlify) y crea a tu staff en <b>Usuarios</b></li></ol>
@@ -588,11 +600,70 @@ function pageAjustes(main) {
   drop.addEventListener('drop', (e) => { e.preventDefault(); e.dataTransfer.files[0] && handleXls(e.dataTransfer.files[0]); });
   $('#xls').onchange = (e) => e.target.files[0] && handleXls(e.target.files[0]);
   $('#reset') && ($('#reset').onclick = async () => { if (await confirmDialog('Restablecer demo', 'Se borrarán tus cambios y se cargarán de nuevo los datos ficticios.')) { store.resetDemo(); S.eventId = D().events.find((x) => x.status === 'en_curso')?.id; localStorage.setItem(ACTIVE_KEY, S.eventId); await reloadLaps(); fillEventSelect(); renderPage(); toast('Demo restablecido'); } });
+  setupLapImport();
   $('#backup').onclick = async () => {
     const laps = []; for (const e of D().events) laps.push(...(await store.getLaps(e.id)));
     download(`chronobike-respaldo-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ ...D(), laps }, null, 2), 'application/json');
   };
 }
+// ── Importación masiva de pasos ──
+function setupLapImport() {
+  const check = async () => {
+    const evId = $('#lpEvent').value; const e = D().events.find((x) => x.id === evId);
+    if (!e) return toast('Primero crea el evento en Eventos', 'warn');
+    const lines = $('#lpText').value.split(/\r?\n/);
+    if (!lines.some((l) => l.trim())) return toast('Pega los pasos o sube un archivo', 'warn');
+    const existing = await store.getLaps(e.id);
+    const r = parseLaps(lines, { eventDate: e.date, format: $('#lpFmt').value, existing });
+    const riderBy = new Map(D().riders.map((x) => [Number(x.dorsal), x]));
+    const unknown = [...new Set(r.ok.filter((x) => !riderBy.has(x.dorsal)).map((x) => x.dorsal))].sort((a, b) => a - b);
+    const days = [...new Set(r.ok.map((x) => new Date(x.ts).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })))];
+    const otherDay = r.ok.some((x) => { const d = new Date(x.ts); const loc = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; return loc !== String(e.date).slice(0, 10); });
+    const fmtName = { mdy: 'Mes/Día/Año', dmy: 'Día/Mes/Año', ymd: 'Año-Mes-Día' }[r.format];
+    const byDorsal = {}; r.ok.forEach((x) => { byDorsal[x.dorsal] = (byDorsal[x.dorsal] || 0) + 1; });
+    $('#lpPrev').innerHTML = `<div class="kpis" style="grid-template-columns:repeat(4,1fr);margin-top:1rem">
+        <div class="kpi k-green"><i class="fa-solid fa-circle-check"></i><b>${r.ok.length}</b><span>Pasos nuevos</span></div>
+        <div class="kpi"><i class="fa-solid fa-users"></i><b>${Object.keys(byDorsal).length}</b><span>Dorsales</span></div>
+        <div class="kpi"><i class="fa-solid fa-clone"></i><b>${r.dup.length}</b><span>Ya cargados (se omiten)</span></div>
+        <div class="kpi ${r.bad.length ? 'k-orange' : ''}"><i class="fa-solid fa-triangle-exclamation"></i><b>${r.bad.length}</b><span>Líneas con error</span></div></div>
+      <p class="small muted"><i class="fa-regular fa-calendar"></i> Fechas leídas como <b>${fmtName}</b>: ${esc(days.join(', ') || '—')} · de <b>${r.ok.length ? fmtClock(r.ok[0].ts) : '—'}</b> a <b>${r.ok.length ? fmtClock(r.ok.at(-1).ts) : '—'}</b></p>
+      ${otherDay ? `<p class="small warn-t"><i class="fa-solid fa-triangle-exclamation"></i> Algunas fechas no coinciden con la del evento (${fmtDate(e.date)}). Revisa el formato de fecha.</p>` : ''}
+      ${unknown.length ? `<p class="small warn-t"><i class="fa-solid fa-user-slash"></i> ${unknown.length} dorsal(es) no inscritos: ${unknown.slice(0, 30).join(', ')}${unknown.length > 30 ? '…' : ''}. Se importan igual; da de alta a esos corredores para que aparezcan en resultados.</p>` : ''}
+      ${r.bad.length ? `<details class="small"><summary class="warn-t" style="cursor:pointer">Ver líneas con error</summary><pre class="card" style="white-space:pre-wrap;font-size:.8rem">${r.bad.slice(0, 50).map((b) => `Línea ${b.n}: ${esc(b.line)}`).join('\n')}</pre></details>` : ''}
+      ${r.ok.length ? `<div class="table-scroll" style="max-height:260px;overflow:auto;margin:.6rem 0;border:1px solid var(--line);border-radius:12px"><table class="results"><thead><tr><th>#</th><th>Hora</th><th>Dorsal</th><th>Corredor</th><th>Vuelta en archivo</th></tr></thead><tbody>
+        ${(() => { const cnt = {}; return r.ok.slice(0, 400).map((x, i) => { cnt[x.dorsal] = (cnt[x.dorsal] || 0) + 1; const rd = riderBy.get(x.dorsal); return `<tr><td class="muted">${i + 1}</td><td class="mono">${fmtClock(x.ts)}</td><td><span class="bib">#${x.dorsal}</span></td><td>${rd ? esc(rd.name) : '<span class="warn-t">no inscrito</span>'}</td><td class="muted">V${cnt[x.dorsal]}</td></tr>`; }).join(''); })()}
+        </tbody></table></div>
+        <div class="row"><button class="btn btn-primary" id="lpGo"><i class="fa-solid fa-file-import"></i> Importar ${r.ok.length} pasos a "${esc(e.name)}"</button></div>
+        <p class="muted small"><i class="fa-solid fa-circle-info"></i> Después revisa en <b>Cronómetro → Salidas por categoría</b> que cada categoría tenga su hora de salida: los pasos anteriores a la salida no cuentan.</p>` : ''}`;
+    $('#lpGo') && ($('#lpGo').onclick = async () => {
+      const b = $('#lpGo'); b.disabled = true;
+      try {
+        const n = await store.addLaps(e.id, r.ok, (done, total) => { b.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando ${done}/${total}…`; });
+        toast(`${n} pasos importados a ${e.name}`, 'ok', 5000);
+        if (S.eventId !== e.id) { S.eventId = e.id; localStorage.setItem(ACTIVE_KEY, e.id); fillEventSelect(); }
+        await reloadLaps();
+        $('#lpText').value = '';
+        $('#lpPrev').innerHTML = `<p class="small" style="color:var(--green);margin-top:1rem"><i class="fa-solid fa-circle-check"></i> Listo: ${n} pasos importados. <button class="btn btn-sm" data-goto="crono">Revisar salidas en el Cronómetro</button> <button class="btn btn-sm" data-goto="resultados">Ver resultados</button></p>`;
+        $$('#lpPrev [data-goto]').forEach((x) => x.onclick = () => go(x.dataset.goto));
+      } catch (err) { toast(err.message, 'err', 6000); b.disabled = false; b.textContent = 'Reintentar'; }
+    });
+  };
+  $('#lpCheck').onclick = check;
+  $('#lpFmt').onchange = () => $('#lpPrev').innerHTML && check();
+  $('#lpEvent').onchange = () => $('#lpPrev').innerHTML && check();
+  $('#lpFile').onchange = async (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    if (/\.(csv|txt)$/i.test(f.name)) $('#lpText').value = await f.text();
+    else {
+      if (!window.XLSX) return toast('El lector de Excel aún está cargando, intenta de nuevo', 'warn');
+      const wb = window.XLSX.read(await f.arrayBuffer());
+      const rows = window.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, dateNF: 'yyyy-mm-dd hh:mm:ss', defval: '' });
+      $('#lpText').value = rows.map((r) => r.join('\t')).join('\n');
+    }
+    ev.target.value = ''; check();
+  };
+}
+
 async function handleXls(file) {
   if (!window.XLSX) return toast('El lector de Excel aún está cargando, intenta de nuevo', 'warn');
   const wb = window.XLSX.read(await file.arrayBuffer(), { cellDates: true });

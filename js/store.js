@@ -103,6 +103,18 @@ export const store = {
     if (this.mode === 'cloud') { queue.drop(id); await cloud.remove(this, 'laps', id); } else demo.removeLap(id);
     emit('laps');
   },
+  /** Alta masiva de pasos (importación). list = [{dorsal, ts}] */
+  async addLaps(eventId, list, onProgress = () => {}) {
+    const rows = list.map((l) => ({ id: newId(), event_id: eventId, dorsal: Number(l.dorsal), ts: l.ts }));
+    if (this.mode === 'cloud') {
+      for (let i = 0; i < rows.length; i += 500) {
+        const { error } = await this.sb.from('laps').insert(rows.slice(i, i + 500));
+        if (error) throw new Error('No se pudieron guardar los pasos: ' + error.message);
+        onProgress(Math.min(rows.length, i + 500), rows.length);
+      }
+    } else { demo.db.laps.push(...rows.map((r) => ({ ...r, created_at: new Date().toISOString() }))); demo.persist(); }
+    emit('laps'); return rows.length;
+  },
   pending() { return queue.all().length; },
 
   /** Guarda muchos registros de una vez (en bloques), para importaciones rápidas. */
