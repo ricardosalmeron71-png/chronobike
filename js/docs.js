@@ -8,6 +8,7 @@ export const DOCS = [
   { file: 'GUIA_ENTRENAMIENTO.md', title: 'Guías de entrenamiento', icon: 'fa-graduation-cap', desc: 'Módulos, ejercicios, simulacro, checklists y evaluación', roles: ['admin', 'registrador'] },
   { file: 'PRESENTACION.md', title: 'Presentación y ventajas', icon: 'fa-person-chalkboard', desc: 'El proyecto, diagnóstico del sistema anterior, comparativa y costos', roles: ['admin'] },
   { file: 'BASE_DE_DATOS_Y_DESPLIEGUE.md', title: 'Base de datos y despliegue', icon: 'fa-database', desc: 'Supabase, Netlify, función de usuarios y mantenimiento', roles: ['admin'] },
+  { file: 'SISTEMA_CHIP.md', title: 'Sistema con chip (propuesta)', icon: 'fa-wifi', desc: 'Esquema, plano de la meta, animación y prompts de imagen', roles: ['admin'] },
 ];
 
 let markedLib = null, mermaidLib = null;

@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChronoBike con chip · esquema y animación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b16;--bg2:#0c1222;--surface:#111a2e;--surface2:#16213a;--line:#22304d;--line2:#2d3d60;--text:#e8eefc;--muted:#8b9ab8;--dim:#5d6b88;
+  --orange:#ff5a1f;--amber:#ffb21f;--lime:#c6f432;--green:#22c55e;--red:#f43f5e;--blue:#3b82f6;--display:'Barlow Condensed','Inter',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1100px 500px at 85% -10%,rgba(255,90,31,.13),transparent 60%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:1.4rem clamp(1rem,3vw,2rem) 4rem}
+h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:.01em}
+h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;text-transform:uppercase;line-height:.95}
+h1 span{color:var(--orange)} h2{font-size:1.9rem;font-weight:800;margin:2.6rem 0 .3rem} h2 i{font-style:normal;color:var(--orange)}
+.sub{color:var(--muted);max-width:75ch;margin:.4rem 0 1rem}
+.badge{display:inline-flex;gap:.4rem;align-items:center;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .6rem;border-radius:7px;background:rgba(255,178,31,.12);color:var(--amber);border:1px solid rgba(255,178,31,.35)}
+.card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:1rem}
+.controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:1rem 0}
+button{font:inherit;color:var(--text);background:var(--surface2);border:1px solid var(--line2);border-radius:11px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+button:hover{border-color:var(--muted)} button.on{background:var(--orange);border-color:var(--orange);color:#1a0b02}
+button.warn.on{background:var(--red);border-color:var(--red);color:#fff}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:11px;overflow:hidden} .seg button{border:0;border-radius:0}
+.steps{display:flex;gap:.4rem;flex-wrap:wrap;margin:.2rem 0 .8rem} .steps span{font-size:.78rem;font-weight:700;padding:.3rem .6rem;border-radius:99px;border:1px solid var(--line2);color:var(--muted);transition:.2s}
+.steps span.on{background:var(--orange);border-color:var(--orange);color:#1a0b02}
+.narr{min-height:3.2rem;padding:.7rem 1rem;border-radius:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--orange);font-weight:600}
+
+/* ── Escenario animado ── */
+.stage{position:relative;display:grid;gap:26px 34px;grid-template-columns:1.55fr 1fr .9fr 1.15fr;
+  grid-template-areas:"gate reader cloud tv" "gate laptop cloud phone" "gate laptop cloud staff";margin-top:.6rem}
+.node{position:relative;z-index:2;background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:.7rem .8rem;transition:box-shadow .25s,border-color .25s;min-width:0}
+.node.hit{border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,90,31,.35)}
+.node h4{font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.4rem} .node h4 b{color:var(--orange)}
+#nGate{grid-area:gate} #nReader{grid-area:reader} #nLaptop{grid-area:laptop} #nCloud{grid-area:cloud} #nTv{grid-area:tv} #nPhone{grid-area:phone} #nStaff{grid-area:staff}
+#gateSvg{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line)}
+.kv{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted)} .kv b{color:var(--text);font-variant-numeric:tabular-nums}
+.led{display:inline-block;width:10px;height:10px;border-radius:50%;background:#334;margin-right:.35rem;vertical-align:middle} .led.on{background:var(--lime)}
+.log{margin:.4rem 0 0;padding:0;list-style:none;font:500 .72rem/1.45 ui-monospace,Menlo,Consolas,monospace;color:#b9c6e6;min-height:7.6em}
+.log li{animation:fade .4s} .log li b{color:var(--lime)}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}}
+.pill{display:inline-block;font-size:.7rem;font-weight:800;padding:.15rem .5rem;border-radius:99px;background:rgba(34,197,94,.15);color:#5ee08f} .pill.off{background:rgba(244,63,94,.18);color:#ff8fa3}
+.cloud{text-align:center} .cloud svg{width:110px;height:auto} .big{font-family:var(--display);font-size:2.2rem;font-weight:800;line-height:1}
+.tv{border:4px solid #05070d;border-radius:10px;background:#0a1020;padding:.4rem .5rem;box-shadow:0 0 0 1px var(--line2)}
+.tv .row{display:grid;grid-template-columns:1.4em 2.6em 1fr auto;gap:.4rem;font-size:.78rem;padding:.12rem 0;border-bottom:1px solid #16213a;transition:background .6s}
+.tv .row.flash{background:rgba(198,244,50,.22)} .tv .pos{font-family:var(--display);font-weight:800;color:var(--amber)} .tv .bib{font-weight:800;background:#fff;color:#0b1020;border-radius:3px;text-align:center;font-size:.7rem;line-height:1.5}
+.tv .t{color:var(--muted);font-variant-numeric:tabular-nums}
+.phone{max-width:190px;margin:0 auto;border:3px solid #05070d;border-radius:18px;background:#0a1020;padding:.5rem .6rem;box-shadow:0 0 0 1px var(--line2);text-align:center;font-size:.78rem}
+.phone .num{font-family:var(--display);font-size:1.8rem;font-weight:800;background:#fff;color:#0b1020;border-radius:6px;padding:0 .5rem;display:inline-block}
+.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+.overlay .link{stroke:#34456b;stroke-width:2;stroke-dasharray:5 6;fill:none;animation:march 1.2s linear infinite} @keyframes march{to{stroke-dashoffset:-22}}
+.overlay circle.pk{stroke:#fff;stroke-width:1.5}
+.over{position:absolute;inset:0;z-index:5;display:none;place-items:center;background:rgba(7,11,22,.7);border-radius:14px;font-family:var(--display);font-size:2.2rem;font-weight:800;text-transform:uppercase;text-align:center;padding:1rem}
+.over.show{display:grid}
+@media (max-width:980px){.stage{grid-template-columns:1fr 1fr;grid-template-areas:"gate gate" "reader laptop" "cloud cloud" "tv phone" "staff staff"}}
+@media (max-width:560px){.stage{grid-template-columns:1fr;grid-template-areas:"gate" "reader" "laptop" "cloud" "tv" "phone" "staff"}}
+
+/* ── Esquemas estáticos ── */
+.diagram{width:100%;height:auto;display:block;background:var(--bg2);border:1px solid var(--line);border-radius:16px}
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin:.6rem 0;font-size:.85rem;color:var(--muted)} .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:.4rem;vertical-align:-1px}
+table{width:100%;border-collapse:collapse;font-size:.92rem;margin:.6rem 0} th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top} th{background:var(--surface2);color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+a{color:var(--amber)} ul.refs{padding-left:1.1rem} ul.refs li{margin:.3rem 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1rem} @media (max-width:820px){.two{grid-template-columns:1fr}}
+.note{color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion:reduce){.overlay .link{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">Propuesta · concepto</span>
+    <h1 style="margin-top:.6rem">ChronoBike <span>con chip</span></h1>
+    <p class="sub">Así funcionaría el sistema cuando se le agrega lectura automática con chips UHF en la meta: del tag en la placa de la bici hasta la pantalla de TV y el celular del público.
+      <b>El chip todavía no está construido</b>: hoy el registro por dorsal (manual) sí funciona y quedaría como respaldo.</p>
+  </header>
+
+  <h2><i>1</i> · Animación del flujo completo</h2>
+  <p class="sub">Cada ciclista lleva un tag en su placa. Al cruzar la meta, las antenas lo leen y el paso viaja hasta las pantallas en segundos. Prueba también qué pasa si <b>se cae el internet</b>.</p>
+  <div class="controls">
+    <button id="bPlay" class="on">⏸ Pausar</button>
+    <span class="seg" id="spd"><button data-s="0.5">0.5×</button><button data-s="1" class="on">1×</button><button data-s="2">2×</button></span>
+    <button id="bNet" class="warn">📡 Simular caída de internet</button>
+    <button id="bReset">↺ Reiniciar</button>
+  </div>
+  <div class="steps" id="steps"><span data-k="tag">① Tag en la placa</span><span data-k="ant">② Antenas → lector</span><span data-k="pue">③ Puente (laptop)</span><span data-k="nub">④ Nube</span><span data-k="pan">⑤ Pantallas</span></div>
+  <div class="narr" id="narr" aria-live="polite">Iniciando…</div>
+
+  <section class="stage" id="stage" aria-label="Animación del sistema">
+    <div class="node" id="nGate"><h4><b>①</b> La meta (vista superior)</h4><svg id="gateSvg" viewBox="0 0 420 300" role="img" aria-label="Meta con cuatro antenas y ciclistas cruzando"></svg>
+      <div class="kv"><span>Tag UHF en cada placa</span><span>4 antenas</span></div></div>
+    <div class="node" id="nReader"><h4><b>②</b> Lector UHF</h4>
+      <div class="kv"><span><i class="led" id="led"></i>Lecturas del tag</span><b id="cRaw">0</b></div>
+      <div class="kv"><span>Repetidas descartadas</span><b id="cDup">0</b></div>
+      <div class="kv"><span>Protocolo</span><b>LLRP</b></div></div>
+    <div class="node" id="nLaptop"><h4><b>③</b> Puente en la laptop</h4>
+      <div class="kv"><span>Internet</span><span class="pill" id="net">en línea</span></div>
+      <div class="kv"><span>En cola local</span><b id="cQ">0</b></div>
+      <ul class="log" id="log"></ul></div>
+    <div class="node cloud" id="nCloud"><h4><b>④</b> Nube</h4>
+      <svg viewBox="0 0 120 80"><path d="M30 62h62a22 22 0 0 0 2-44 28 28 0 0 0-53-6 24 24 0 0 0-11 50z" fill="#16213a" stroke="#ff5a1f" stroke-width="3"/><text x="60" y="46" text-anchor="middle" font-size="13" font-weight="800" fill="#e8eefc">DB</text></svg>
+      <div class="big" id="cDb">0</div><div class="note">pasos guardados · tiempo real ⚡</div></div>
+    <div class="node" id="nTv"><h4><b>⑤</b> Pantalla TV en la meta</h4><div class="tv" id="tv"></div></div>
+    <div class="node" id="nPhone"><h4><b>⑤</b> Público (celular)</h4>
+      <div class="phone"><div class="note">Último paso</div><div class="num" id="pNum">—</div><div id="pName" style="font-weight:700;margin-top:.2rem">Esperando…</div><div class="note" id="pInfo">&nbsp;</div></div></div>
+    <div class="node" id="nStaff"><h4><b>⑤</b> Panel del staff</h4>
+      <div class="kv"><span>Pasos recibidos</span><b id="sCnt">0</b></div><div class="kv"><span>Último</span><b id="sLast">—</b></div><div class="kv"><span>Fuente</span><b>chip 🟠 / manual</b></div></div>
+    <svg class="overlay" id="overlay"><g id="links"></g><g id="pk"></g></svg>
+    <div class="over" id="over"></div>
+  </section>
+
+  <h2><i>2</i> · Esquema de bloques</h2>
+  <p class="sub">Qué parte ya existe en ChronoBike, qué hay que construir y qué hardware hay que comprar.</p>
+  <svg class="diagram" id="dBlocks" viewBox="0 0 1200 440" role="img" aria-label="Diagrama de bloques del sistema con chip"></svg>
+  <div class="legend"><span><i style="background:#22c55e"></i>Ya funciona hoy</span><span><i style="background:#ff5a1f"></i>Por construir (software)</span><span><i style="background:#8b9ab8"></i>Hardware a comprar</span></div>
+
+  <h2><i>3</i> · Plano de la meta (vista superior)</h2>
+  <p class="sub">Posición sugerida de equipos. Las medidas son <b>valores iniciales para probar</b> en campo, no garantizadas.</p>
+  <svg class="diagram" id="dPlan" viewBox="0 0 1000 560" role="img" aria-label="Plano de la zona de meta"></svg>
+
+  <h2><i>4</i> · El tag en la placa</h2>
+  <div class="two">
+    <svg class="diagram" id="dTag" viewBox="0 0 720 300" role="img" aria-label="Placa de número con tag UHF en el reverso"></svg>
+    <div class="card"><h3>Dónde ponerlo</h3>
+      <ul class="refs"><li><b>XC y circuitos:</b> tag UHF pasivo pegado al <b>reverso de la placa</b>, centrado.</li>
+      <li>Que <b>no toque ni quede cubierto</b> por el manubrio o los cables de freno: pierde alcance.</li>
+      <li><b>Enduro y descenso:</b> normalmente se usa un chip activo (con batería) en la horquilla; es otro equipo y otro costo.</li>
+      <li>El metal de la bici y el lodo reflejan la señal: <b>probar con bicis reales antes del evento</b>.</li></ul></div>
+  </div>
+
+  <h2><i>5</i> · Equipo por punto de meta</h2>
+  <table><thead><tr><th>Equipo</th><th>Cant.</th><th>Para qué sirve</th></tr></thead><tbody>
+    <tr><td>Lector UHF de 4 puertos (compatible LLRP)</td><td>1</td><td>Recibe las lecturas de las antenas y las manda a la laptop</td></tr>
+    <tr><td>Antenas UHF con tripié</td><td>4</td><td>Cubren el ancho de la meta (2 por lado)</td></tr>
+    <tr><td>Cables coaxiales de baja pérdida</td><td>4</td><td>Antena ↔ lector</td></tr>
+    <tr><td>Fuente PoE, switch pequeño y cables de red</td><td>1</td><td>Alimentar y conectar el lector</td></tr>
+    <tr><td>Estación de energía portátil</td><td>1</td><td>Energía en campo (lector + laptop)</td></tr>
+    <tr><td>Laptop con el Puente ChronoBike <i style="color:var(--orange)">(por construir)</i></td><td>1</td><td>Filtra duplicados, asigna dorsal y sube a la nube</td></tr>
+    <tr><td>Internet 4G/5G de respaldo</td><td>1</td><td>Conexión a la nube; si falla, el puente guarda en cola</td></tr>
+    <tr><td>Tags UHF pasivos</td><td>1 por corredor</td><td>Identifican a cada ciclista (EPC único)</td></tr>
+    <tr><td>Carpa, maleta, lastres, protectores de cable</td><td>—</td><td>Proteger el equipo del sol, el polvo y el paso de bicis</td></tr>
+    <tr><td>Pantalla TV/proyector + celular o tablet de respaldo</td><td>1 + 1</td><td>Resultados en vivo y registro manual si falla el chip</td></tr>
+  </tbody></table>
+
+  <h2><i>6</i> · Referencias visuales</h2>
+  <p class="sub">Fotos y guías reales de montajes parecidos (cada sitio muestra su propio equipo; el nuestro sería de otra marca).</p>
+  <ul class="refs">
+    <li><a href="https://www.atlasrfidstore.com/rfid-insider/from-marathons-to-mountain-bikes-to-motocross-timing-your-race-with-rfid" target="_blank" rel="noopener">Atlas RFID: cronometraje con RFID de maratones a bicicleta de montaña</a></li>
+    <li><a href="https://thetimingteam.co.nz/mountain-biking/" target="_blank" rel="noopener">The Timing Team (NZ): cronometraje de MTB con tags en placa</a></li>
+    <li><a href="https://www.webscorer.com/blog/post/2020/01/16/RECOMMENDED-RFID-TIMING-HARDWARE-SETUP" target="_blank" rel="noopener">Webscorer: montaje recomendado de hardware RFID (antenas y tapetes)</a></li>
+    <li><a href="https://www.atlasrfidstore.com/rfid-resources/race-timing-series-part-one/" target="_blank" rel="noopener">Atlas RFID: serie "Race Timing" (componentes y ejemplos)</a></li>
+    <li><a href="https://raceresult.com/en//solutions/trackdays" target="_blank" rel="noopener">RACE RESULT: sistema pasivo con antenas</a></li>
+  </ul>
+  <p class="note">Términos para buscar imágenes: <i>"RFID race timing finish line antenna tripod"</i>, <i>"UHF ground mat antenna race timing"</i>, <i>"MTB number plate RFID tag"</i>.</p>
+</div>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, attrs = {}, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+const T = (parent, x, y, txt, o = {}) => { const t = el('text', { x, y, 'text-anchor': o.a || 'middle', 'font-size': o.s || 13, 'font-weight': o.w || 600, fill: o.c || '#e8eefc', 'font-family': 'Inter,sans-serif' }, parent); t.textContent = txt; return t; };
+
+/* ═════════════ Esquema de bloques ═════════════ */
+(function blocks() {
+  const svg = $('#dBlocks'); const C = { ok: '#22c55e', new: '#ff5a1f', hw: '#8b9ab8' };
+  el('defs', {}, svg).innerHTML = '<marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8b9ab8"/></marker>';
+  const box = (x, y, w, h, title, sub, k) => {
+    el('rect', { x, y, width: w, height: h, rx: 12, fill: '#111a2e', stroke: C[k], 'stroke-width': 2.5 }, svg);
+    title.split('\n').forEach((l, i, a) => T(svg, x + w / 2, y + h / 2 - (a.length - 1) * 9 + i * 18 - (sub ? 8 : -5), l, { s: 15, w: 800 }));
+    if (sub) T(svg, x + w / 2, y + h - 14, sub, { s: 11, c: '#8b9ab8' });
+  };
+  const arrow = (x1, y1, x2, y2, cap, cx, cy) => { el('path', { d: `M${x1} ${y1} L${x2} ${y2}`, stroke: '#8b9ab8', 'stroke-width': 2.2, fill: 'none', 'marker-end': 'url(#ar)' }, svg); if (cap) T(svg, cx ?? (x1 + x2) / 2, cy ?? y1 + 26, cap, { s: 10.5, c: '#8b9ab8' }); };
+  box(20, 150, 150, 90, 'Placa con\ntag UHF', 'EPC único por corredor', 'hw');
+  box(215, 150, 150, 90, '4 antenas UHF\n+ cables', 'tripiés en la meta', 'hw');
+  box(410, 150, 150, 90, 'Lector UHF\n(LLRP)', 'PoE · 4 puertos', 'hw');
+  box(605, 150, 175, 90, 'Laptop\nPuente ChronoBike', 'NUEVO', 'new');
+  box(825, 150, 175, 90, 'Supabase\nBD + tiempo real', 'ya instalado', 'ok');
+  [[60, 'Panel de staff', 'admin.html'], [175, 'Vista pública', 'index.html'], [290, 'Pantalla de meta', 'tv.html']].forEach(([y, a, b]) => box(1040, y, 150, 70, a, b, 'ok'));
+  arrow(170, 195, 213, 195, 'radio UHF', 192, 262); arrow(365, 195, 408, 195, 'coaxial', 387, 262); arrow(560, 195, 603, 195, 'Ethernet', 582, 262);
+  arrow(780, 195, 823, 195, 'internet', 802, 262);
+  [95, 210, 325].forEach((y) => arrow(1000, 195, 1038, y + 35));
+  box(605, 320, 175, 80, 'Registro manual\n(celular · dorsal)', 'respaldo', 'ok');
+  el('path', { d: 'M780 360 L912 360 L912 242', stroke: '#8b9ab8', 'stroke-width': 2.2, fill: 'none', 'stroke-dasharray': '6 5', 'marker-end': 'url(#ar)' }, svg);
+  T(svg, 850, 350, 'paso manual', { s: 10.5, c: '#8b9ab8' });
+  [['Tabla de tags (dorsal ↔ EPC)', 20], ['Pantalla "Chips" en el panel', 20]].forEach(([t, x], i) => { el('rect', { x: 20 + i * 255, y: 330, width: 240, height: 50, rx: 10, fill: '#111a2e', stroke: C.new, 'stroke-width': 2.2, 'stroke-dasharray': '5 4' }, svg); T(svg, 140 + i * 255, 360, t, { s: 12.5, w: 700 }); });
+  T(svg, 20, 420, 'Lo nuevo (naranja): puente de lectura, tabla de tags y pantalla "Chips". Todo lo demás ya funciona hoy.', { a: 'start', s: 12, c: '#8b9ab8' });
+})();
+
+/* ═════════════ Plano de la meta ═════════════ */
+(function plan() {
+  const svg = $('#dPlan'); const M = 44.4; // unidades por metro
+  el('defs', {}, svg).innerHTML = '<marker id="dm" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M0 0L8 4L0 8z" fill="#c6f432"/></marker><linearGradient id="bm" x1="0" x2="1"><stop offset="0" stop-color="#ff5a1f" stop-opacity=".0"/><stop offset="1" stop-color="#ff5a1f" stop-opacity=".35"/></linearGradient>';
+  el('rect', { width: 1000, height: 560, fill: '#0b1222' }, svg);
+  el('rect', { x: 0, y: 200, width: 1000, height: 160, fill: '#3a2f2a' }, svg);
+  [200, 360].forEach((y) => el('line', { x1: 0, x2: 1000, y1: y, y2: y, stroke: '#5a4636', 'stroke-width': 5 }, svg));
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 2; c++) el('rect', { x: 494 + c * 6, y: 200 + r * 20, width: 6, height: 20, fill: (r + c) % 2 ? '#0b1020' : '#fff' }, svg);
+  T(svg, 500, 192, 'LÍNEA DE META', { s: 12, w: 800, c: '#c6f432' });
+  el('path', { d: 'M60 178 L240 178', stroke: '#8b9ab8', 'stroke-width': 3, 'marker-end': 'url(#dm)' }, svg); T(svg, 150, 166, 'dirección de carrera', { s: 12, c: '#8b9ab8' });
+  // antenas (2 arriba, 2 abajo)
+  [[455, 140, 1], [545, 140, 1], [455, 420, -1], [545, 420, -1]].forEach(([x, y, d], i) => {
+    el('path', { d: `M${x} ${y + 10 * d} L${x - 70} ${y + 90 * d} L${x + 70} ${y + 90 * d} Z`, fill: 'url(#bm)' }, svg);
+    el('rect', { x: x - 22, y: y - 6, width: 44, height: 12, rx: 3, fill: '#1b2540', stroke: '#ff5a1f', 'stroke-width': 2.5 }, svg);
+    [[-12, 0], [12, 0]].forEach(([dx]) => el('line', { x1: x, y1: y + 6 * d, x2: x + dx * 1.6, y2: y + 24 * d, stroke: '#8b9ab8', 'stroke-width': 2 }, svg));
+    T(svg, x + (d < 0 ? 34 : 0), y - 12 * d + (d < 0 ? 16 : 0), 'A' + (i + 1), { s: 13, w: 800, c: '#ff5a1f' });
+  });
+  // cotas
+  const dim = (x1, y1, x2, y2, txt, tx, ty) => { el('path', { d: `M${x1} ${y1} L${x2} ${y2}`, stroke: '#c6f432', 'stroke-width': 2, 'marker-start': 'url(#dm)', 'marker-end': 'url(#dm)' }, svg); T(svg, tx, ty, txt, { s: 12, c: '#c6f432', w: 700 }); };
+  dim(400, 200, 400, 360, '', 0, 0); T(svg, 360, 285, 'ancho', { s: 12, c: '#c6f432', w: 700 }); T(svg, 360, 301, '≈ 3.6 m', { s: 12, c: '#c6f432', w: 700 });
+  dim(455, 100, 545, 100, '≈ 2 m entre antenas', 500, 88);
+  T(svg, 40, 70, 'Altura de antenas 1.2–1.5 m, inclinadas ≈ 15°', { a: 'start', s: 12, c: '#8b9ab8' }); T(svg, 40, 88, 'hacia el carril (valores a probar en campo)', { a: 'start', s: 12, c: '#8b9ab8' });
+  // carpa con equipo
+  el('rect', { x: 330, y: 470, width: 340, height: 70, rx: 10, fill: '#111a2e', stroke: '#8b9ab8', 'stroke-width': 2, 'stroke-dasharray': '6 5' }, svg);
+  T(svg, 500, 494, 'CARPA · mesa con lector, laptop (puente) y energía', { s: 13, w: 800 }); T(svg, 500, 514, 'los cables de A1 y A2 cruzan la pista con protector (rampa)', { s: 11.5, c: '#8b9ab8' });
+  [[455, 440], [545, 440]].forEach(([x, y]) => el('path', { d: `M${x} ${y} L${x} 470`, stroke: '#ff5a1f', 'stroke-width': 2, 'stroke-dasharray': '4 4' }, svg));
+  // TV y público
+  el('rect', { x: 780, y: 20, width: 200, height: 56, rx: 6, fill: '#05070d', stroke: '#2d3d60', 'stroke-width': 3 }, svg);
+  [0, 1, 2].forEach((i) => el('rect', { x: 792, y: 30 + i * 13, width: 176, height: 8, rx: 2, fill: i ? '#16213a' : '#c6f432', opacity: i ? 1 : .6 }, svg));
+  T(svg, 880, 96, 'TV con resultados + QR', { s: 12, w: 700 });
+  for (let i = 0; i < 7; i++) el('circle', { cx: 800 + i * 26, cy: 110 + (i % 2) * 8, r: 6, fill: '#3b82f6' }, svg);
+  // registrador manual y público
+  el('circle', { cx: 640, cy: 410, r: 9, fill: '#ffb21f' }, svg); el('rect', { x: 632, y: 420, width: 16, height: 20, rx: 4, fill: '#ffb21f' }, svg);
+  T(svg, 662, 414, 'Registrador manual', { a: 'start', s: 12, w: 700, c: '#ffb21f' }); T(svg, 662, 431, '(respaldo del chip)', { a: 'start', s: 11, c: '#8b9ab8' });
+  // pelotón
+  [[110, 235], [160, 270], [135, 310], [215, 245], [260, 300], [300, 258]].forEach(([x, y], i) => {
+    el('line', { x1: x - 16, y1: y, x2: x + 16, y2: y, stroke: '#cfd8e6', 'stroke-width': 3 }, svg);
+    el('ellipse', { cx: x - 2, cy: y, rx: 11, ry: 7, fill: ['#ff5a1f', '#3b82f6', '#22c55e', '#ec4899', '#eab308', '#14b8a6'][i] }, svg);
+    el('rect', { x: x + 13, y: y - 6, width: 8, height: 12, fill: '#fff', stroke: '#0b1020' }, svg); el('circle', { cx: x + 22, cy: y, r: 2.2, fill: '#ff5a1f' }, svg);
+  });
+  T(svg, 200, 395, 'pelotón con tags en las placas', { s: 12, c: '#8b9ab8' });
+  // escala
+  el('line', { x1: 40, y1: 520, x2: 40 + M, y2: 520, stroke: '#e8eefc', 'stroke-width': 3 }, svg); T(svg, 40 + M / 2, 540, '1 m', { s: 12, w: 700 });
+})();
+
+/* ═════════════ Tag en la placa ═════════════ */
+(function tag() {
+  const svg = $('#dTag'); el('rect', { width: 720, height: 300, fill: '#0b1222' }, svg);
+  el('rect', { x: 30, y: 40, width: 280, height: 200, rx: 18, fill: '#fff', stroke: '#0b1020', 'stroke-width': 4 }, svg);
+  el('rect', { x: 30, y: 40, width: 280, height: 34, rx: 18, fill: '#ff5a1f' }, svg);
+  T(svg, 170, 190, '12', { s: 120, w: 900, c: '#0b1020' }); T(svg, 170, 62, 'FRENTE', { s: 14, w: 800, c: '#fff' }); T(svg, 170, 268, 'lo que ve el público', { s: 12, c: '#8b9ab8' });
+  el('rect', { x: 410, y: 40, width: 280, height: 200, rx: 18, fill: '#e9edf5', stroke: '#0b1020', 'stroke-width': 4 }, svg);
+  T(svg, 550, 62, 'REVERSO', { s: 14, w: 800, c: '#0b1020' });
+  el('rect', { x: 460, y: 105, width: 180, height: 64, rx: 10, fill: '#fff', stroke: '#ff5a1f', 'stroke-width': 3 }, svg);
+  el('path', { d: 'M475 137 h20 v-18 h20 v36 h20 v-36 h20 v36 h20 v-36 h20 v36 h20 v-18 h20', stroke: '#ff5a1f', 'stroke-width': 3, fill: 'none', 'stroke-linejoin': 'round' }, svg);
+  el('rect', { x: 580, y: 126, width: 16, height: 16, rx: 3, fill: '#0b1020' }, svg);
+  T(svg, 550, 195, 'Tag UHF pasivo', { s: 14, w: 800, c: '#0b1020' }); T(svg, 550, 214, 'pegado al centro', { s: 12, c: '#374151' });
+  el('path', { d: 'M310 140 L405 140', stroke: '#8b9ab8', 'stroke-width': 2, 'stroke-dasharray': '5 5' }, svg); T(svg, 358, 130, 'misma placa', { s: 11, c: '#8b9ab8' });
+  T(svg, 550, 268, 'EPC único ↔ dorsal 12 en la base de datos', { s: 12, c: '#c6f432' });
+})();
+
+/* ═════════════ Animación ═════════════ */
+const RIDERS = [
+  { d: 12, n: 'Valeria Salazar', c: '#ec4899', epc: 'E280·11A4F2' }, { d: 7, n: 'Mateo Ibarra', c: '#3b82f6', epc: 'E280·1B07C9' },
+  { d: 25, n: 'Marco Barrios', c: '#22c55e', epc: 'E280·3D91E0' }, { d: 31, n: 'Renata Ibarra', c: '#eab308', epc: 'E280·44C2A7' },
+  { d: 4, n: 'Diego Quintero', c: '#ff5a1f', epc: 'E280·05F6B3' }, { d: 18, n: 'Camila Duarte', c: '#14b8a6', epc: 'E280·2E8D14' },
+];
+const LAPS = 3, FIN_X = 240, LANES = [118, 152, 186], SPEED = 150, T0 = (7 * 3600 + 34 * 60 + 46) * 1000;
+const S = { t: 0, paused: false, speed: 1, online: true, tasks: [], packets: [], pulses: [], actors: [], queue: [], db: [], nextSpawn: 600, cursor: 0, finished: false, overAt: 0, raw: 0, dup: 0, shown: [] };
+RIDERS.forEach((r) => { r.cross = 0; });
+const fmt = (ms) => { const s = (T0 + ms) / 1000, h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${x.toFixed(2).padStart(5, '0')}`; };
+const gate = $('#gateSvg'), stage = $('#stage'), links = $('#links'), pk = $('#pk');
+const after = (ms, fn) => S.tasks.push({ at: S.t + ms, fn });
+
+// Escena de la meta
+(function buildGate() {
+  el('rect', { width: 420, height: 300, fill: '#0c1222' }, gate);
+  el('rect', { y: 95, width: 420, height: 115, fill: '#3a2f2a' }, gate);
+  [95, 210].forEach((y) => el('line', { x1: 0, x2: 420, y1: y, y2: y, stroke: '#5a4636', 'stroke-width': 4 }, gate));
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 2; c++) el('rect', { x: FIN_X - 5 + c * 5, y: 95 + r * 14.4, width: 5, height: 14.4, fill: (r + c) % 2 ? '#0b1020' : '#fff' }, gate);
+  [[205, 62, 1, 'A1'], [275, 62, 1, 'A2'], [205, 243, -1, 'A3'], [275, 243, -1, 'A4']].forEach(([x, y, d, n]) => {
+    el('path', { d: `M${x} ${y + 6 * d} L${x - 38} ${y + 40 * d} L${x + 38} ${y + 40 * d}Z`, fill: '#ff5a1f', opacity: .08 }, gate);
+    el('rect', { class: 'ant', x: x - 17, y: y - 5, width: 34, height: 10, rx: 2.5, fill: '#1b2540', stroke: '#ff5a1f', 'stroke-width': 2 }, gate);
+    el('line', { x1: x, y1: y + 5 * d, x2: x - 9, y2: y + 19 * d, stroke: '#8b9ab8', 'stroke-width': 1.5 }, gate); el('line', { x1: x, y1: y + 5 * d, x2: x + 9, y2: y + 19 * d, stroke: '#8b9ab8', 'stroke-width': 1.5 }, gate);
+    T(gate, x, y + (d > 0 ? -10 : 22), n, { s: 9, c: '#ff5a1f', w: 800 });
+  });
+  T(gate, FIN_X, 288, 'META', { s: 10, c: '#c6f432', w: 800 });
+  el('g', { id: 'pulses' }, gate); el('g', { id: 'riders' }, gate);
+})();
+const gRiders = $('#riders'), gPulses = $('#pulses');
+function makeActor(r, lane, delay) {
+  const g = el('g', {}, gRiders);
+  el('ellipse', { cx: -15, cy: 0, rx: 8, ry: 3, fill: '#0b1020' }, g); el('ellipse', { cx: 15, cy: 0, rx: 8, ry: 3, fill: '#0b1020' }, g);
+  el('line', { x1: -15, y1: 0, x2: 15, y2: 0, stroke: '#cfd8e6', 'stroke-width': 2.5 }, g);
+  el('ellipse', { cx: -2, cy: 0, rx: 12, ry: 8, fill: r.c }, g); el('circle', { cx: 8, cy: 0, r: 5, fill: '#e0a06a' }, g);
+  el('rect', { x: 15, y: -7, width: 11, height: 14, fill: '#fff', stroke: '#0b1020' }, g);
+  const t = T(g, 21, 3.5, r.d, { s: 8, w: 800, c: '#0b1020' });
+  const dot = el('circle', { cx: 26, cy: 0, r: 2.6, fill: '#ff5a1f' }, g);
+  const a = { r, g, dot, x: -40 - delay * SPEED / 1000, y: LANES[lane], crossed: false };
+  g.setAttribute('transform', `translate(${a.x} ${a.y})`); S.actors.push(a); return a;
+}
+const narr = (m, step) => { $('#narr').textContent = m; document.querySelectorAll('#steps span').forEach((s) => s.classList.toggle('on', s.dataset.k === step)); };
+const hit = (id) => { const n = $(id); n.classList.add('hit'); after(500, () => n.classList.remove('hit')); };
+
+// Posiciones de los nodos (borde más cercano) y paquetes
+function anchor(a, b) {
+  const R = stage.getBoundingClientRect(), ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+  const e = (r) => [[r.left + r.width / 2, r.top], [r.left + r.width / 2, r.bottom], [r.left, r.top + r.height / 2], [r.right, r.top + r.height / 2]].map(([x, y]) => [x - R.left, y - R.top]);
+  let best = null; for (const p of e(ra)) for (const q of e(rb)) { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (!best || d < best[0]) best = [d, p, q]; } return [best[1], best[2]];
+}
+function drawLinks() {
+  links.innerHTML = '';
+  [['#nGate', '#nReader'], ['#nReader', '#nLaptop'], ['#nLaptop', '#nCloud'], ['#nCloud', '#nTv'], ['#nCloud', '#nPhone'], ['#nCloud', '#nStaff']].forEach(([a, b]) => {
+    const [p, q] = anchor($(a), $(b)); el('path', { class: 'link', d: `M${p[0]} ${p[1]} L${q[0]} ${q[1]}` }, links);
+  });
+}
+function send(from, to, color, ms, done) {
+  const [p, q] = anchor($(from), $(to)); const c = el('circle', { class: 'pk', r: 7, cx: p[0], cy: p[1], fill: color }, pk);
+  S.packets.push({ c, p, q, t: 0, dur: ms, done });
+}
+
+// Lectura → viaje completo del dato
+function onCross(a) {
+  const r = a.r; r.cross++; const when = S.t, lap = r.cross, reads = 3 + Math.floor(Math.random() * 5);
+  S.raw += reads; S.dup += reads - 1; $('#cRaw').textContent = S.raw; $('#cDup').textContent = S.dup;
+  $('#led').classList.add('on'); after(250, () => $('#led').classList.remove('on'));
+  document.querySelectorAll('.ant').forEach((n) => { n.setAttribute('stroke', '#c6f432'); after(350, () => n.setAttribute('stroke', '#ff5a1f')); });
+  S.pulses.push({ x: FIN_X, y: a.y, t: 0, el: el('circle', { cx: FIN_X, cy: a.y, r: 4, fill: 'none', stroke: '#ff5a1f', 'stroke-width': 2 }, gPulses) });
+  a.dot.setAttribute('fill', '#c6f432'); after(400, () => a.dot.setAttribute('fill', '#ff5a1f'));
+  narr(`#${r.d} ${r.n} cruza la meta: el tag de su placa responde a las antenas (${reads} lecturas en una fracción de segundo).`, 'tag'); hit('#nGate');
+  after(250, () => send('#nGate', '#nReader', '#ff5a1f', 450, () => {
+    hit('#nReader'); narr('El lector manda las lecturas al puente; las repetidas se descartan y queda una sola por paso.', 'ant');
+    send('#nReader', '#nLaptop', '#ff5a1f', 450, () => {
+      hit('#nLaptop'); const item = { d: r.d, n: r.n, lap, when, epc: r.epc };
+      const li = document.createElement('li'); li.innerHTML = `${fmt(when)} <b>${r.epc}</b> → #${r.d} V${lap}`; $('#log').prepend(li); while ($('#log').children.length > 5) $('#log').lastChild.remove();
+      narr('El puente asigna el dorsal y sube el paso a la nube.', 'pue');
+      if (S.online) toCloud(item); else { S.queue.push(item); $('#cQ').textContent = S.queue.length; narr('Sin internet: el paso queda guardado en la laptop y se enviará solo cuando vuelva la conexión.', 'pue'); }
+    });
+  }));
+}
+function toCloud(item) {
+  send('#nLaptop', '#nCloud', '#ff5a1f', 500, () => {
+    S.db.push(item); $('#cDb').textContent = S.db.length; hit('#nCloud'); narr('La base de datos avisa en tiempo real a la TV, los celulares y el panel del staff.', 'nub');
+    after(200, () => ['#nTv', '#nPhone', '#nStaff'].forEach((id, i) => send('#nCloud', id, '#c6f432', 500, () => { hit(id); if (i === 0) renderTv(item.d); if (i === 1) renderPhone(item); if (i === 2) renderStaff(item); narr('Las pantallas se actualizan: el público ve su resultado casi al instante.', 'pan'); })));
+  });
+}
+function standings() {
+  return RIDERS.map((r) => { const ps = S.db.filter((x) => x.d === r.d); return { r, laps: ps.length, last: ps.length ? Math.max(...ps.map((x) => x.when)) : Infinity }; })
+    .filter((x) => x.laps).sort((a, b) => b.laps - a.laps || a.last - b.last).slice(0, 5);
+}
+function renderTv(flashD) {
+  $('#tv').innerHTML = standings().map((s, i) => `<div class="row${s.r.d === flashD ? ' flash' : ''}"><span class="pos">${i + 1}</span><span class="bib">${s.r.d}</span><span>${s.r.n}</span><span class="t">V${s.laps}/${LAPS} · ${fmt(s.last).slice(3)}</span></div>`).join('') || '<div class="note" style="padding:.4rem">Esperando el primer paso…</div>';
+  setTimeout(() => document.querySelectorAll('#tv .flash').forEach((n) => n.classList.remove('flash')), 700);
+}
+function renderPhone(it) { $('#pNum').textContent = it.d; $('#pName').textContent = it.n; $('#pInfo').textContent = `Vuelta ${it.lap} de ${LAPS} · ${fmt(it.when).slice(3)}`; }
+function renderStaff(it) { $('#sCnt').textContent = S.db.length; $('#sLast').textContent = `#${it.d}`; }
+function flushQueue() { S.queue.splice(0).forEach((it, i) => after(i * 350, () => toCloud(it))); $('#cQ').textContent = 0; }
+
+// Generador de ciclistas
+function spawn() {
+  const due = RIDERS.filter((r) => r.cross + S.actors.filter((a) => a.r === r && !a.crossed).length < LAPS);
+  if (!due.length) return;
+  const pack = Math.random() < 0.3 ? Math.min(due.length, 2 + Math.floor(Math.random() * 2)) : 1;
+  for (let k = 0; k < pack; k++) { const r = due[(S.cursor++) % due.length]; if (S.actors.some((a) => a.r === r && a.x < 440)) continue; makeActor(r, k % 3, k * 180); }
+}
+function step(dt) {
+  S.t += dt;
+  // Se separan primero los vencidos y luego se ejecutan: así lo que programan no se pierde
+  const due = S.tasks.filter((k) => k.at <= S.t); S.tasks = S.tasks.filter((k) => k.at > S.t); due.forEach((k) => k.fn());
+  if (!S.finished && S.t >= S.nextSpawn) { spawn(); S.nextSpawn = S.t + 1500 + Math.random() * 1400; }
+  S.actors = S.actors.filter((a) => {
+    const prev = a.x; a.x += SPEED * dt / 1000; a.g.setAttribute('transform', `translate(${a.x.toFixed(1)} ${a.y})`);
+    if (!a.crossed && prev < FIN_X && a.x >= FIN_X) { a.crossed = true; onCross(a); }
+    if (a.x > 470) { a.g.remove(); return false; } return true;
+  });
+  S.pulses = S.pulses.filter((p) => { p.t += dt; const k = p.t / 650; if (k >= 1) { p.el.remove(); return false; } p.el.setAttribute('r', 4 + k * 70); p.el.setAttribute('opacity', 1 - k); return true; });
+  const arrived = [];
+  S.packets = S.packets.filter((p) => { p.t += dt; const k = Math.min(1, p.t / p.dur); p.c.setAttribute('cx', p.p[0] + (p.q[0] - p.p[0]) * k); p.c.setAttribute('cy', p.p[1] + (p.q[1] - p.p[1]) * k); if (k >= 1) { p.c.remove(); arrived.push(p); return false; } return true; });
+  arrived.forEach((p) => p.done && p.done()); // después de filtrar: los nuevos paquetes que envíen no se pierden
+  const allDone = RIDERS.every((r) => r.cross >= LAPS);
+  if (allDone && !S.finished && !S.actors.length && !S.packets.length && !S.queue.length) {
+    S.finished = true; S.overAt = S.t + 4200; $('#over').textContent = '🏁 Carrera finalizada · todos los pasos llegaron a la nube'; $('#over').classList.add('show');
+  }
+  if (S.finished && S.t >= S.overAt) reset();
+}
+function reset() {
+  Object.assign(S, { t: 0, tasks: [], packets: [], pulses: [], actors: [], queue: [], db: [], nextSpawn: 600, cursor: 0, finished: false, raw: 0, dup: 0 });
+  RIDERS.forEach((r) => { r.cross = 0; }); gRiders.innerHTML = ''; gPulses.innerHTML = ''; pk.innerHTML = ''; $('#log').innerHTML = '';
+  ['#cRaw', '#cDup', '#cQ', '#cDb', '#sCnt'].forEach((s) => { $(s).textContent = 0; }); $('#sLast').textContent = '—'; $('#pNum').textContent = '—'; $('#pName').textContent = 'Esperando…'; $('#pInfo').innerHTML = '&nbsp;';
+  $('#over').classList.remove('show'); renderTv(); narr('Nueva carrera: los ciclistas se acercan a la meta.', 'tag');
+}
+// Controles
+$('#bPlay').onclick = (e) => { S.paused = !S.paused; e.target.textContent = S.paused ? '▶ Reanudar' : '⏸ Pausar'; e.target.classList.toggle('on', !S.paused); };
+$('#spd').onclick = (e) => { if (!e.target.dataset.s) return; S.speed = +e.target.dataset.s; document.querySelectorAll('#spd button').forEach((b) => b.classList.toggle('on', b === e.target)); };
+$('#bNet').onclick = (e) => {
+  S.online = !S.online; e.target.classList.toggle('on', !S.online); e.target.textContent = S.online ? '📡 Simular caída de internet' : '✅ Restablecer internet';
+  const n = $('#net'); n.textContent = S.online ? 'en línea' : 'SIN INTERNET'; n.classList.toggle('off', !S.online);
+  if (S.online) { narr('Volvió el internet: el puente envía los pasos guardados. No se pierde ninguno.', 'pue'); flushQueue(); } else narr('Se cayó el internet: el chip sigue leyendo y el puente guarda los pasos en cola.', 'pue');
+};
+$('#bReset').onclick = reset;
+let last = performance.now();
+(function loop(now) { const dt = Math.min(60, now - last) * S.speed; last = now; if (!S.paused) step(dt); requestAnimationFrame(loop); })(last);
+new ResizeObserver(drawLinks).observe(stage); drawLinks(); renderTv();
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) $('#bPlay').click();
+</script>
+</body>
+</html>
