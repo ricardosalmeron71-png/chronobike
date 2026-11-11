@@ -1,8 +1,9 @@
 // Panel de STAFF: registro de eventos, corredores, categorías, equipos y cronometraje de vueltas
-import { store } from './store.js';
+import { store, displayUser } from './store.js';
 import { CONFIG } from './config.js';
 import { computeResults, eventSummary, resultsToCSV, fmtDuration, STATUS } from './results.js';
 import { $, $$, esc, toast, modal, confirmDialog, fmtDate, fmtClock, toLocalInput, fromLocalInput, avatar, resizeImage, download, brand } from './ui.js';
+import { showSplash } from './splash.js';
 import { podium, resultsTable, riderDetail, kpis, EVENT_STATUS } from './views.js';
 
 const ACTIVE_KEY = 'chronobike_active_event';
@@ -25,12 +26,15 @@ const teamById = (id) => D().teams.find((t) => t.id === id);
 const can = (pageId) => PAGES.find((p) => p.id === pageId)?.roles.includes(store.user?.role);
 
 // ─────────────── Arranque ───────────────
+const splash = showSplash();
 (async function main() {
-  await store.init();
+  await store.init((p, m) => splash.step(p, m));
   if (store.mode === 'demo') $('#demoBanner').innerHTML = `<div class="demo-banner"><i class="fa-solid fa-flask"></i> MODO DEMOSTRACIÓN · los cambios se guardan solo en este navegador · <a href="./index.html" target="_blank">Abrir vista pública en otra pestaña →</a></div>`;
   if (!ev()) S.eventId = (D().events.find((e) => e.status === 'en_curso') || D().events[0])?.id || null;
-  store.user ? await boot() : renderLogin();
-})().catch((e) => { console.error(e); root.innerHTML = `<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>No se pudo conectar con la base de datos.<br><small>${esc(e.message)}</small></div>`; });
+  splash.step(0.88, store.user ? 'Cargando vueltas y resultados…' : 'Preparando acceso…');
+  store.user ? await boot() : await renderLogin();
+  splash.done();
+})().catch((e) => { console.error(e); splash.fail(); root.innerHTML = `<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>No se pudo conectar con la base de datos.<br><small>${esc(e.message)}</small></div>`; });
 
 async function boot() {
   const fromHash = location.hash.slice(1);
@@ -69,14 +73,14 @@ async function renderLogin() {
       ${setup ? `<div style="text-align:center"><i class="fa-solid fa-rocket" style="font-size:2rem;color:var(--lime)"></i><h2 style="margin-top:.4rem">Configuración inicial</h2>
         <p class="muted small">Aún no hay administradores. Crea <b>tu cuenta de administrador</b>; después podrás dar de alta a tu staff desde <b>Usuarios</b>.</p></div>`
       : `<div style="text-align:center"><i class="fa-solid fa-user-shield" style="font-size:2rem;color:var(--orange)"></i><h2 style="margin-top:.4rem">Acceso de staff</h2><p class="muted small">Solo administradores y registradores</p></div>`}
-      <div class="field"><label>Correo</label><input name="email" type="email" required autocomplete="username" placeholder="tu@correo.com"></div>
+      <div class="field"><label>Usuario</label><input name="email" type="text" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${setup ? 'elige tu usuario, ej. ricardo' : 'tu usuario'}">${setup ? '<span class="hint">Sin espacios: letras, números, punto o guion</span>' : ''}</div>
       <div class="field"><label>Contraseña</label><input name="password" type="password" required minlength="${setup ? 8 : 1}" autocomplete="${setup ? 'new-password' : 'current-password'}" placeholder="••••••••">${setup ? '<span class="hint">Mínimo 8 caracteres</span>' : ''}</div>
       ${setup ? '<div class="field"><label>Repite la contraseña</label><input name="password2" type="password" required autocomplete="new-password" placeholder="••••••••"></div>' : ''}
       <button class="btn ${setup ? 'btn-lime' : 'btn-primary'}" style="height:50px"><i class="fa-solid ${setup ? 'fa-user-plus' : 'fa-right-to-bracket'}"></i> ${setup ? 'Crear administrador y entrar' : 'Entrar'}</button>
       <a class="btn btn-ghost" href="./index.html"><i class="fa-solid fa-arrow-left"></i> Volver a resultados</a>
       ${!setup ? '<p class="muted small" style="text-align:center;margin:0">¿No tienes cuenta? Pídela al administrador del evento.</p>' : ''}
       ${setupError ? `<div class="demo-hint"><b><i class="fa-solid fa-triangle-exclamation"></i> Gestión de usuarios no disponible</b><br>${esc(setupError.message)}</div>` : ''}
-      ${store.mode === 'demo' ? `<div class="demo-hint"><b><i class="fa-solid fa-flask"></i> Modo demo</b><br>Administrador: <code>admin@demo.mx</code><br>Registrador: <code>registro@demo.mx</code><br>Contraseña: <code>demo</code></div>` : ''}
+      ${store.mode === 'demo' ? `<div class="demo-hint"><b><i class="fa-solid fa-flask"></i> Modo demo</b><br>Administrador: usuario <code>admin</code><br>Registrador: usuario <code>registro</code><br>Contraseña: <code>demo</code></div>` : ''}
     </form></div></div>`;
   $('#loginForm').onsubmit = async (e) => {
     e.preventDefault(); const f = new FormData(e.target); const btn = e.target.querySelector('button.btn');
@@ -105,7 +109,7 @@ function renderLayout() {
   </header>
   <div class="admin-layout">
     <nav class="sidenav">${pages.map((p) => `<button data-page="${p.id}"><i class="fa-solid ${p.icon}"></i>${p.label}</button>`).join('')}
-      <div class="who-box"><div class="row"><i class="fa-solid fa-circle-user" style="font-size:1.4rem;color:var(--muted)"></i><div style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis">${esc(store.user.email)}</b><span class="role-badge">${esc(store.user.role)}</span></div></div>
+      <div class="who-box"><div class="row"><i class="fa-solid fa-circle-user" style="font-size:1.4rem;color:var(--muted)"></i><div style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis">${esc(displayUser(store.user.email))}</b><span class="role-badge">${esc(store.user.role)}</span></div></div>
       <button class="btn btn-sm btn-ghost" id="logout" style="width:100%;margin-top:.6rem"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</button></div>
     </nav>
     <main class="admin-main" id="main"></main>
@@ -122,7 +126,7 @@ function renderLayout() {
       ${pages.slice(5).map((p) => `<button class="btn" data-go="${p.id}"><i class="fa-solid ${p.icon}"></i>${p.label}</button>`).join('')}
       <a class="btn" href="./index.html" target="_blank"><i class="fa-solid fa-eye"></i> Vista pública</a>
       <a class="btn" href="./tv.html${S.eventId ? '?e=' + encodeURIComponent(S.eventId) : ''}" target="_blank"><i class="fa-solid fa-tv"></i> Pantalla TV de meta</a>
-      <button class="btn btn-danger" data-logout><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión (${esc(store.user.email)})</button></div>`);
+      <button class="btn btn-danger" data-logout><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión (${esc(displayUser(store.user.email))})</button></div>`);
     fillEventSelect($('#eventSel2', m.el));
     $$('[data-go]', m.el).forEach((b) => b.onclick = () => { m.close(); go(b.dataset.go); });
     $('[data-logout]', m.el).onclick = () => $('#logout').click();
@@ -498,7 +502,7 @@ const ROLE_INFO = {
 };
 const genPassword = () => { const a = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const r = crypto.getRandomValues(new Uint32Array(10)); return Array.from(r, (n) => a[n % a.length]).join(''); };
 function credentialsCard(email, password) {
-  const text = `ChronoBike · acceso de staff\nPágina: ${location.origin}${location.pathname}\nCorreo: ${email}\nContraseña: ${password}`;
+  const text = `ChronoBike · acceso de staff\nPágina: ${location.origin}${location.pathname}\nUsuario: ${displayUser(email)}\nContraseña: ${password}`;
   const m = modal(`<div class="confirm"><div class="confirm-ico" style="background:rgba(34,197,94,.15);color:#5ee08f"><i class="fa-solid fa-circle-check"></i></div>
     <h3>Cuenta lista</h3><p>Comparte estos datos con la persona. <b>La contraseña no se volverá a mostrar.</b></p>
     <pre class="card" style="text-align:left;white-space:pre-wrap;font-size:.9rem;margin:1rem 0">${esc(text)}</pre>
@@ -516,7 +520,7 @@ async function pageUsuarios(main) {
   try { users = await store.listStaff(); } catch (e) { $('#ulist').innerHTML = `<div class="card"><div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>${esc(e.message)}</div></div>`; return; }
   $('#ulist').innerHTML = users.map((u) => { const r = ROLE_INFO[u.role] || ROLE_INFO.registrador; return `<div class="list-item">
     <span class="avatar lg" style="--c:${u.role === 'admin' ? '#ff5a1f' : '#3b82f6'}"><i class="fa-solid ${r.icon}"></i></span>
-    <div class="info"><b>${esc(u.email)} ${u.me ? '<span class="chip" style="margin-left:.3rem">Tú</span>' : ''}</b>
+    <div class="info"><b>${esc(displayUser(u.email))} ${u.me ? '<span class="chip" style="margin-left:.3rem">Tú</span>' : ''}</b>
       <small><span class="role-badge">${r.label}</span> · ${u.last_sign_in_at ? `último acceso ${fmtDate(u.last_sign_in_at)} ${fmtClock(u.last_sign_in_at)}` : 'nunca ha entrado'}</small></div>
     <div class="acts">
       ${u.me ? '' : `<select class="btn btn-sm" data-role="${esc(u.user_id)}" title="Cambiar rol">${Object.entries(ROLE_INFO).map(([k, v]) => `<option value="${k}" ${u.role === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select>`}
@@ -529,7 +533,7 @@ async function pageUsuarios(main) {
   });
   $$('[data-pass]', main).forEach((b) => b.onclick = () => {
     const u = byId(b.dataset.pass); const pw = genPassword();
-    const m = modal(`<h2>Cambiar contraseña</h2><p class="muted">${esc(u.email)}</p><form class="form" id="f">
+    const m = modal(`<h2>Cambiar contraseña</h2><p class="muted">Usuario: <b>${esc(displayUser(u.email))}</b></p><form class="form" id="f">
       <div class="field"><label>Nueva contraseña</label><div class="row"><input name="password" required minlength="8" value="${pw}" class="grow" style="font-family:var(--display);font-size:1.2rem"><button type="button" class="btn" id="gen"><i class="fa-solid fa-dice"></i></button></div><span class="hint">Mínimo 8 caracteres</span></div>
       <div class="row-end"><button type="button" class="btn btn-ghost" data-close>Cancelar</button><button class="btn btn-primary"><i class="fa-solid fa-key"></i> Guardar</button></div></form>`);
     $('#gen', m.el).onclick = () => { $('[name=password]', m.el).value = genPassword(); };
@@ -540,15 +544,15 @@ async function pageUsuarios(main) {
   });
   $$('[data-del]', main).forEach((b) => b.onclick = async () => {
     const u = byId(b.dataset.del);
-    if (!(await confirmDialog('Eliminar cuenta', `${u.email} ya no podrá entrar al panel. Los pasos que registró se conservan.`))) return;
+    if (!(await confirmDialog('Eliminar cuenta', `${displayUser(u.email)} ya no podrá entrar al panel. Los pasos que registró se conservan.`))) return;
     try { await store.deleteStaff(u.user_id); toast('Cuenta eliminada', 'info'); renderPage(); } catch (e) { toast(e.message, 'err'); }
   });
 }
 function userForm() {
   const pw = genPassword();
-  const m = modal(`<h2>Nuevo usuario</h2><p class="muted">La persona entrará con este correo y contraseña en <b>${esc(location.host + location.pathname)}</b></p>
+  const m = modal(`<h2>Nuevo usuario</h2><p class="muted">La persona entrará con este usuario y contraseña en <b>${esc(location.host + location.pathname)}</b></p>
     <form class="form" id="f" style="margin-top:.5rem">
-      <div class="field"><label>Correo *</label><input name="email" type="email" required placeholder="registrador@correo.com" autocomplete="off"></div>
+      <div class="field"><label>Usuario *</label><input name="email" type="text" required placeholder="ej. juan, meta1, registro2" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><span class="hint">Sin espacios: letras, números, punto, guion o guion bajo</span></div>
       <div class="field"><label>Contraseña *</label><div class="row"><input name="password" required minlength="8" value="${pw}" class="grow" autocomplete="new-password" style="font-family:var(--display);font-size:1.2rem"><button type="button" class="btn" id="gen" title="Generar otra"><i class="fa-solid fa-dice"></i></button></div><span class="hint">Generada al azar; puedes cambiarla. Mínimo 8 caracteres.</span></div>
       <div class="field"><label>Rol *</label><div class="seg" id="roleSeg" style="width:100%">${Object.entries(ROLE_INFO).map(([k, v]) => `<button type="button" data-r="${k}" class="${k === 'registrador' ? 'on' : ''}" style="flex:1"><i class="fa-solid ${v.icon}"></i> ${v.label}</button>`).join('')}</div><span class="hint" id="roleDesc">${ROLE_INFO.registrador.desc}</span></div>
       <div class="row-end"><button type="button" class="btn btn-ghost" data-close>Cancelar</button><button class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Crear cuenta</button></div></form>`);

@@ -2,6 +2,7 @@
 import { store } from './store.js';
 import { computeResults, eventSummary } from './results.js';
 import { $, $$, esc, brand, fmtDate, fmtClock, toast } from './ui.js';
+import { showSplash } from './splash.js';
 import { eventCard, kpis, podium, resultsTable, riderDetail, liveFeed, EVENT_STATUS } from './views.js';
 
 const state = { eventId: null, cat: 'ALL', view: 'podios', q: '', laps: [], groups: [] };
@@ -103,13 +104,16 @@ function renderBody() {
   });
 }
 
+const splash = showSplash();
 (async function main() {
   $('#brand').innerHTML = brand('Resultados');
-  await store.init();
+  await store.init((p, m) => splash.step(p, m));
   if (store.mode === 'demo') $('#demoBanner').innerHTML = `<div class="demo-banner"><i class="fa-solid fa-flask"></i> MODO DEMOSTRACIÓN · datos ficticios · la carrera "en vivo" avanza sola. <a href="./admin.html">Probar el panel de staff →</a></div>`;
   readHash();
   if (!currentEvent()) state.eventId = orderedEvents()[0]?.id;
+  splash.step(0.88, 'Calculando resultados…');
   await loadEvent(); writeHash(); renderShell();
+  splash.done();
   let busy = false;
   store.subscribe(async (what) => {
     if (busy) return; busy = true;
@@ -118,4 +122,4 @@ function renderBody() {
       else { const before = state.laps.length; await loadEvent(); if (what !== 'tick' || state.laps.length !== before) renderBody(); }
     } finally { busy = false; }
   });
-})().catch((e) => { console.error(e); app.innerHTML = `<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>No se pudo conectar con la base de datos.<br><small>${esc(e.message)}</small></div>`; });
+})().catch((e) => { console.error(e); splash.fail(); app.innerHTML = `<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>No se pudo conectar con la base de datos.<br><small>${esc(e.message)}</small></div>`; });

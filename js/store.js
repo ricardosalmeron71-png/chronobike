@@ -9,6 +9,21 @@ const DEMO_KEY = 'chronobike_demo_v2';
 const QUEUE_KEY = 'chronobike_queue_v2';
 const SESSION_KEY = 'chronobike_demo_session';
 const USERS_KEY = 'chronobike_demo_users';
+// Las cuentas del staff usan un NOMBRE DE USUARIO (ej. "juan"). Supabase exige un
+// correo, así que por dentro se guarda como "juan@chronobike.local" (nunca se envían correos).
+export const USER_DOMAIN = 'chronobike.local';
+export function toLogin(user) {
+  const s = String(user || '').trim().toLowerCase();
+  if (s.includes('@')) return s; // cuentas antiguas creadas con correo
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '@' + USER_DOMAIN;
+}
+export const displayUser = (email) => String(email || '').replace('@' + USER_DOMAIN, '');
+export function checkUsername(user) {
+  const s = String(user || '').trim();
+  if (s.includes('@')) return;
+  const n = s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (!/^[a-z0-9._-]{3,30}$/.test(n)) throw new Error('El usuario debe tener de 3 a 30 caracteres: letras, números, punto, guion o guion bajo (sin espacios)');
+}
 const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2));
 const byName = (a, b) => (a.sort ?? 999) - (b.sort ?? 999) || String(a.name).localeCompare(String(b.name), 'es');
 
@@ -23,27 +38,28 @@ export const store = {
 
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
-  async init() {
-    if (this.mode === 'cloud') await cloud.init(this); else demo.init(this);
+  async init(onProgress = () => {}) {
+    if (this.mode === 'cloud') await cloud.init(this, onProgress); else { demo.init(this); onProgress(0.6, 'Datos de demostración listos'); }
     sortAll(this.data);
     return this;
   },
   async refresh() { if (this.mode === 'cloud') await cloud.loadAll(this); else demo.load(this); sortAll(this.data); },
 
   // ── Autenticación ──
-  async signIn(email, password) { this.user = await (this.mode === 'cloud' ? cloud.signIn(this, email, password) : demo.signIn(email, password)); return this.user; },
+  async signIn(user, password) { const email = toLogin(user); this.user = await (this.mode === 'cloud' ? cloud.signIn(this, email, password) : demo.signIn(email, password)); return this.user; },
   async signOut() { if (this.mode === 'cloud') await this.sb.auth.signOut(); else localStorage.removeItem(SESSION_KEY); this.user = null; },
   isAdmin() { return this.user?.role === 'admin'; },
 
   // ── Cuentas del staff (se crean desde la app) ──
   /** ¿Ya existe al menos un administrador? Si no, la app ofrece crear el primero. */
   async staffStatus() { return this.mode === 'cloud' ? cloud.staff(this, 'status') : { hasAdmin: true }; },
-  async bootstrapAdmin(email, password) {
-    if (this.mode === 'cloud') await cloud.staff(this, 'bootstrap', { email, password });
-    return this.signIn(email, password);
+  async bootstrapAdmin(user, password) {
+    checkUsername(user);
+    if (this.mode === 'cloud') await cloud.staff(this, 'bootstrap', { email: toLogin(user), password });
+    return this.signIn(user, password);
   },
   async listStaff() { return (this.mode === 'cloud' ? await cloud.staff(this, 'list') : demo.staff('list')).users; },
-  async createStaff(email, password, role) { return this.mode === 'cloud' ? cloud.staff(this, 'create', { email, password, role }) : demo.staff('create', { email, password, role }); },
+  async createStaff(user, password, role) { checkUsername(user); const email = toLogin(user); return this.mode === 'cloud' ? cloud.staff(this, 'create', { email, password, role }) : demo.staff('create', { email, password, role }); },
   async setStaffRole(user_id, role) { return this.mode === 'cloud' ? cloud.staff(this, 'set_role', { user_id, role }) : demo.staff('set_role', { user_id, role }); },
   async resetStaffPassword(user_id, password) { return this.mode === 'cloud' ? cloud.staff(this, 'reset_password', { user_id, password }) : demo.staff('reset_password', { user_id, password }); },
   async deleteStaff(user_id) { return this.mode === 'cloud' ? cloud.staff(this, 'delete', { user_id }) : demo.staff('delete', { user_id }); },
@@ -183,14 +199,14 @@ const demo = {
     const raw = localStorage.getItem(USERS_KEY);
     if (raw) return JSON.parse(raw);
     const seed = [
-      { user_id: 'u-admin', email: 'admin@demo.mx', role: 'admin', password: 'demo', created_at: new Date().toISOString() },
-      { user_id: 'u-registro', email: 'registro@demo.mx', role: 'registrador', password: 'demo', created_at: new Date().toISOString() },
+      { user_id: 'u-admin', email: 'admin@' + USER_DOMAIN, role: 'admin', password: 'demo', created_at: new Date().toISOString() },
+      { user_id: 'u-registro', email: 'registro@' + USER_DOMAIN, role: 'registrador', password: 'demo', created_at: new Date().toISOString() },
     ];
     localStorage.setItem(USERS_KEY, JSON.stringify(seed)); return seed;
   },
   signIn(email, password) {
     const u = this.users().find((x) => x.email === String(email).trim().toLowerCase());
-    if (!u || u.password !== password) throw new Error('Correo o contraseña incorrectos. En el demo: admin@demo.mx / demo');
+    if (!u || u.password !== password) throw new Error('Usuario o contraseña incorrectos. En el demo: admin / demo');
     const user = { id: u.user_id, email: u.email, role: u.role }; localStorage.setItem(SESSION_KEY, JSON.stringify(user)); u.last_sign_in_at = new Date().toISOString();
     localStorage.setItem(USERS_KEY, JSON.stringify(this.users().map((x) => (x.user_id === u.user_id ? u : x)))); return user;
   },
@@ -203,7 +219,7 @@ const demo = {
     if (action === 'create') {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Correo no válido');
       if (String(p.password).length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres');
-      if (list.some((u) => u.email === email)) throw new Error('Ya existe una cuenta con ese correo');
+      if (list.some((u) => u.email === email)) throw new Error('Ya existe ese usuario');
       list.push({ user_id: newId(), email, role: p.role, password: p.password, created_at: new Date().toISOString() });
     }
     if (action === 'set_role') list = list.map((u) => (u.user_id === p.user_id ? { ...u, role: p.role } : u));
@@ -224,12 +240,14 @@ const queue = { // cola offline: las vueltas nunca se pierden aunque falle el in
   drop(id) { this.set(this.all().filter((x) => x.id !== id)); },
 };
 const cloud = {
-  async init(s) {
+  async init(s, onProgress = () => {}) {
+    onProgress(0.12, 'Conectando con la base de datos…');
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
     s.sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     const { data } = await s.sb.auth.getSession();
     if (data.session) { const p = await this.profile(s, data.session.user); if (p.role) s.user = p; else await s.sb.auth.signOut(); }
-    await this.loadAll(s);
+    onProgress(0.25, 'Cargando tablas…');
+    await this.loadAll(s, onProgress);
     s.sb.channel('chronobike-live')
       .on('postgres_changes', { event: '*', schema: 'public' }, async (p) => {
         if (p.table !== 'laps') { await this.loadAll(s); sortAll(s.data); }
@@ -238,8 +256,10 @@ const cloud = {
     const flush = () => this.flush(s);
     window.addEventListener('online', flush); setInterval(flush, 10000); flush();
   },
-  async loadAll(s) {
-    const res = await Promise.all(TABLES.map((t) => s.sb.from(t).select('*')));
+  async loadAll(s, onProgress = () => {}) {
+    const NAMES = { events: 'eventos', categories: 'categorías', teams: 'equipos', riders: 'corredores', event_categories: 'salidas' };
+    let n = 0;
+    const res = await Promise.all(TABLES.map((t) => s.sb.from(t).select('*').then((r) => { n++; onProgress(0.25 + 0.55 * (n / TABLES.length), `Cargando ${NAMES[t]}…`); return r; })));
     res.forEach((r, i) => { if (r.error) throw r.error; s.data[TABLES[i]] = r.data; });
   },
   async profile(s, u) {
@@ -259,7 +279,7 @@ const cloud = {
   },
   async signIn(s, email, password) {
     const { data, error } = await s.sb.auth.signInWithPassword({ email, password });
-    if (error) throw new Error('No se pudo iniciar sesión: ' + error.message);
+    if (error) throw new Error(/invalid/i.test(error.message) ? 'Usuario o contraseña incorrectos' : 'No se pudo iniciar sesión: ' + error.message);
     const p = await this.profile(s, data.user);
     if (!p.role) { await s.sb.auth.signOut(); throw new Error('Tu usuario no está dado de alta como staff. Pide a un administrador que te agregue.'); }
     return p;

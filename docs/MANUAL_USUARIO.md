@@ -35,6 +35,10 @@ Abre en tu celular el enlace que comparte el organizador (ejemplo: `https://tu-s
 
 💡 En el celular: menú del navegador → **"Agregar a pantalla de inicio"**. Así queda como una app.
 
+Al abrir la app aparece por unos segundos la **pantalla de carga**: un ciclista sube pedaleando por un circuito de montaña mientras se cargan los datos. La barra de arriba muestra el avance real, y al llegar a la bandera 🏁 (100 %) se abre la app.
+
+![Pantalla de carga](img/00-pantalla-carga.png)
+
 ![Pantalla de inicio](img/01-publico-inicio.png)
 
 | # | Zona | Para qué sirve |
@@ -104,11 +108,11 @@ Escribe en el buscador: un nombre (`Lucía`), un dorsal (`25`) o un equipo (`Hal
 
 ![Login](img/10-login.png)
 
-1. Escribe tu **correo** y tu **contraseña** (te los da el administrador).
+1. Escribe tu **usuario** y tu **contraseña** (te los da el administrador).
 2. 👆 **Entrar**.
 
 ⚠️ Si aparece *"Tu usuario no está dado de alta como staff"*, pide al administrador que te agregue.
-💡 En el **modo demo**: `registro@demo.mx` o `admin@demo.mx`, contraseña `demo`.
+💡 En el **modo demo**: usuario `registro` o usuario `admin`, contraseña `demo`.
 
 ### B2. La pantalla del cronómetro
 ![Cronómetro](img/11-crono.png)
@@ -290,13 +294,13 @@ Conecta una laptop a una TV o proyector en la meta y abre **Pantalla TV** (arrib
 ### C8. Usuarios del staff 🔐
 Las cuentas se crean **aquí mismo**, en el panel. El público no necesita cuenta.
 
-**La primera vez**, cuando aún no hay administradores, la pantalla de entrada muestra **Configuración inicial**: escribes tu correo y tu contraseña y quedas como administrador.
+**La primera vez**, cuando aún no hay administradores, la pantalla de entrada muestra **Configuración inicial**: eliges tu **usuario** y tu contraseña y quedas como administrador.
 
 👆 **Usuarios** → verás a cada persona, su rol y su último acceso.
 
 ![Usuarios](img/30-usuarios.png)
 
-**Dar de alta a alguien:** 👆 **Nuevo usuario** → correo → la contraseña se genera sola (🎲 para otra) → elige el rol → **Crear cuenta**.
+**Dar de alta a alguien:** 👆 **Nuevo usuario** → **usuario** (ej. `juan`, `meta1`; sin espacios) → la contraseña se genera sola (🎲 para otra) → elige el rol → **Crear cuenta**.
 
 ![Nuevo usuario](img/31-usuario-nuevo.png)
 

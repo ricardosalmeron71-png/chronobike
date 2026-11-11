@@ -19,7 +19,7 @@ const json = (body: unknown, status = 200) =>
 const ROLES = ['admin', 'registrador'];
 const cleanEmail = (e: unknown) => String(e ?? '').trim().toLowerCase();
 function checkInput(email: string, password?: string) {
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Correo no válido');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Usuario no válido');
   if (password !== undefined && String(password).length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres');
 }
 
@@ -116,6 +116,6 @@ Deno.serve(async (req) => {
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return json({ error: /already|registered/i.test(msg) ? 'Ya existe una cuenta con ese correo' : msg }, 400);
+    return json({ error: /already|registered/i.test(msg) ? 'Ya existe ese usuario' : msg }, 400);
   }
 });

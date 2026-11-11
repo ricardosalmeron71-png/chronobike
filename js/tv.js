@@ -7,6 +7,7 @@ import { store } from './store.js';
 import { computeResults, fmtDuration, fmtGap, STATUS } from './results.js';
 import { $, esc, brand, fmtDate, fmtClock } from './ui.js';
 import { STATUS_UI } from './views.js';
+import { showSplash } from './splash.js';
 
 const qs = new URLSearchParams(location.search);
 const S = {
@@ -120,9 +121,11 @@ function toggleFs() {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.();
 }
 
+const splash = showSplash();
 (async function main() {
-  await store.init(); pickEvent(); await load();
-  shell(); board(); lastPass(false); schedule();
+  await store.init((p, m) => splash.step(p, m)); pickEvent();
+  splash.step(0.88, 'Calculando clasificación…'); await load();
+  shell(); board(); lastPass(false); schedule(); splash.done();
   setInterval(() => { const c = $('#clock'); if (c) c.textContent = fmtClock(new Date().toISOString()); }, 1000);
   document.addEventListener('fullscreenchange', () => document.body.classList.toggle('fs', !!document.fullscreenElement));
   document.addEventListener('click', () => { $('#hint')?.classList.add('hide'); toggleFs(); });
@@ -146,4 +149,4 @@ function toggleFs() {
       if (boardGroups().length <= 1 || S.paused) board();
     } finally { busy = false; }
   });
-})().catch((e) => { console.error(e); root.innerHTML = `<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>No se pudo conectar.<br><small>${esc(e.message)}</small></div>`; });
+})().catch((e) => { console.error(e); splash.fail(); root.innerHTML = `<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>No se pudo conectar.<br><small>${esc(e.message)}</small></div>`; });

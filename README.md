@@ -11,7 +11,7 @@ Una app web que se abre en cualquier celular o computadora, con dos caras:
 > **Pruébala ya, sin instalar nada:** abre `index.html` o `admin.html` con cualquier servidor estático.
 > Sin configurar una base de datos, la app arranca en **modo demostración** con datos ficticios
 > (4 eventos, 12 categorías, 84 corredores, ~430 pasos). La carrera "en vivo" avanza sola.
-> Entra al panel con `admin@demo.mx` y la contraseña `demo`.
+> Entra al panel con usuario `admin` y la contraseña `demo`.
 
 ```bash
 npm start          # sirve la app en http://localhost:5173

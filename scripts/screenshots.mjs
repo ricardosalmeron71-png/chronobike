@@ -27,7 +27,8 @@ async function ctx(opts = {}) {
   p.on('pageerror', (e) => console.error('pageerror', e.message));
   return { c, p };
 }
-const shot = async (p, name, opts = {}) => { await p.waitForTimeout(450); await p.screenshot({ path: OUT + name, ...opts }); console.log('✓', name); };
+const noSplash = (p) => p.waitForSelector('#splash', { state: 'detached', timeout: 15000 }).catch(() => {});
+const shot = async (p, name, opts = {}) => { await noSplash(p); await p.waitForTimeout(450); await p.screenshot({ path: OUT + name, ...opts }); console.log('✓', name); };
 const hideToasts = (p) => p.evaluate(() => document.querySelectorAll('.toast').forEach((t) => t.remove()));
 
 // ───────── Vista pública ─────────
@@ -69,7 +70,7 @@ const hideToasts = (p) => p.evaluate(() => document.querySelectorAll('.toast').f
   const { c, p } = await ctx();
   await p.goto(`${BASE}/admin.html`); await p.waitForSelector('#loginForm');
   await shot(p, '10-login.png');
-  await p.fill('[name=email]', 'admin@demo.mx'); await p.fill('[name=password]', 'demo'); await p.click('#loginForm .btn-primary');
+  await p.fill('[name=email]', 'admin'); await p.fill('[name=password]', 'demo'); await p.click('#loginForm .btn-primary');
   await p.waitForSelector('#keypad'); await hideToasts(p);
   await shot(p, '11-crono.png');
   for (const d of String(racing.rider.dorsal)) await p.click(`#keypad [data-k="${d}"]`);
@@ -96,7 +97,7 @@ const hideToasts = (p) => p.evaluate(() => document.querySelectorAll('.toast').f
     if (pg === 'resultados') { await p.click('#rv [data-v=tabla]'); await shot(p, '28-resultados-tabla.png'); }
     if (pg === 'usuarios') {
       await p.waitForSelector('#ulist .list-item'); await shot(p, file);
-      await p.click('#newU'); await p.fill('[name=email]', 'laura.meta@serialmtb.mx'); await shot(p, '31-usuario-nuevo.png');
+      await p.click('#newU'); await p.fill('[name=email]', 'laura.meta'); await shot(p, '31-usuario-nuevo.png');
       await p.click('.modal .btn-primary'); await p.waitForSelector('#cp'); await shot(p, '32-usuario-credenciales.png');
     }
   }
@@ -105,7 +106,7 @@ const hideToasts = (p) => p.evaluate(() => document.querySelectorAll('.toast').f
 {
   const { c, p } = await ctx({ ...devices['iPhone 13'], deviceScaleFactor: undefined });
   await p.goto(`${BASE}/admin.html`); await p.waitForSelector('#loginForm');
-  await p.fill('[name=email]', 'registro@demo.mx'); await p.fill('[name=password]', 'demo'); await p.click('#loginForm .btn-primary');
+  await p.fill('[name=email]', 'registro'); await p.fill('[name=password]', 'demo'); await p.click('#loginForm .btn-primary');
   await p.waitForSelector('#keypad'); await hideToasts(p);
   for (const d of String(racing.rider.dorsal)) await p.click(`#keypad [data-k="${d}"]`);
   await p.evaluate(() => window.scrollTo(0, 0));

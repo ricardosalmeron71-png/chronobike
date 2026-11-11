@@ -55,7 +55,7 @@ flowchart LR
 **Objetivo:** registrar pasos rápido y sin errores, y saber resolver los avisos.
 
 ### 2.A Entrar (5 min)
-Entra con `registro@demo.mx` / `demo`. Revisa el **evento activo** y el **punto de sincronización**.
+Entra con usuario `registro` / `demo`. Revisa el **evento activo** y el **punto de sincronización**.
 
 ![Cronómetro](img/11-crono.png)
 
@@ -99,7 +99,7 @@ Entra con `registro@demo.mx` / `demo`. Revisa el **evento activo** y el **punto 
 
 ## Módulo 3 · Administrador (45 min)
 
-Entra con `admin@demo.mx` / `demo`.
+Entra con usuario `admin` / `demo`.
 
 | # | Ejercicio | Pantalla |
 |---|---|---|

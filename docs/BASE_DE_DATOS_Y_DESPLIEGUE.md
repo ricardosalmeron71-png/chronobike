@@ -117,13 +117,13 @@ Las cuentas se crean **dentro de ChronoBike**, no en Supabase. Para eso se insta
 
 ### 4.2 Crear el primer administrador
 1. Abre `https://tu-sitio.netlify.app/admin.html`.
-2. Como todavía no hay administradores, aparece **Configuración inicial**. Escribe tu correo y una contraseña (mínimo 8 caracteres) → **Crear administrador y entrar**.
+2. Como todavía no hay administradores, aparece **Configuración inicial**. Elige tu **usuario** (ej. `ricardo`) y una contraseña (mínimo 8 caracteres) → **Crear administrador y entrar**.
 3. Esta pantalla **solo aparece una vez**. Cuando ya existe un administrador, nadie más puede usarla.
 
 ⚠️ Hazlo justo después de instalar la función, para que nadie se adelante.
 
 ### 4.3 Dar de alta al staff
-En el panel → **Usuarios** → **Nuevo usuario** → correo, contraseña (se genera una al azar) y rol → **Crear cuenta**.
+En el panel → **Usuarios** → **Nuevo usuario** → **usuario** (ej. `juan`, `meta1`), contraseña (se genera una al azar) y rol → **Crear cuenta**.
 Luego **Copiar** o **WhatsApp** para enviarle sus datos de acceso. Desde ahí también puedes cambiar el rol, cambiar la contraseña o eliminar la cuenta.
 
 ### 4.4 Recomendado
