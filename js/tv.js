@@ -81,7 +81,7 @@ function board() {
       <span class="tv-name"><b>${esc(r.rider.name)}</b><small>${esc(r.team?.name || 'Independiente')}</small></span>
       <span class="tv-laps">${Array.from({ length: Math.min(g.targetLaps, 8) }, (_, i) => `<i class="${i < r.lapsDone ? 'on' : ''}"></i>`).join('')}<span>${r.lapsDone}/${r.targetLaps}</span></span>
       <span class="tv-time ${r.status === STATUS.FINAL ? '' : 'run'}">${r.status === STATUS.FINAL ? fmtDuration(r.total) : fmtDuration(r.splits.at(-1)?.cumulative)}</span>
-      <span class="tv-gap">${r.gap ? fmtGap(r.gap) : r.lapsBehind ? `-${r.lapsBehind} V` : r.status === STATUS.RACING ? `<span class="badge ${STATUS_UI[r.status].cls}">En pista</span>` : r.position === 1 ? '<span style="color:var(--gold)">🏆</span>' : ''}</span>
+      <span class="tv-gap">${r.gap ? fmtGap(r.gap) : r.lapsBehind ? `-${r.lapsBehind} V` : r.status === STATUS.RACING ? `<span class="badge ${STATUS_UI[r.status].cls}">En pista</span>` : r.status === STATUS.DNF ? `<span class="badge ${STATUS_UI[r.status].cls}">DNF</span>` : r.position === 1 ? '<span style="color:var(--gold)">🏆</span>' : ''}</span>
     </div>`).join('') : '<div class="tv-empty"><div><i class="fa-solid fa-hourglass-half"></i>Aún no hay pasos en esta categoría</div></div>'}</div>`;
 }
 

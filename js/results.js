@@ -1,7 +1,7 @@
 // Motor de cálculo de resultados (puro, sin DOM). Se usa en la vista
 // pública, en el panel de staff y en las pruebas automáticas.
 
-export const STATUS = { FINAL: 'FINAL', RACING: 'EN PISTA', DNS: 'SIN PASO', NOSTART: 'SIN SALIDA' };
+export const STATUS = { FINAL: 'FINAL', RACING: 'EN PISTA', DNF: 'DNF', DNS: 'SIN PASO', NOSTART: 'SIN SALIDA' };
 
 /** Formatea milisegundos como HH:MM:SS (o MM:SS.d si showTenths y < 1h). */
 export function fmtDuration(ms, { tenths = false } = {}) {
@@ -76,6 +76,8 @@ export function computeResults({ event, categories, riders, teams, laps, eventCa
         if (start == null && counted.length) status = STATUS.NOSTART;
         else if (counted.length >= targetLaps) status = STATUS.FINAL;
         else if (counted.length > 0) status = STATUS.RACING;
+        // El evento ya terminó y el corredor se quedó a medias: no abandonado en vivo, sino DNF
+        if (status === STATUS.RACING && event.status === 'finalizado') status = STATUS.DNF;
         const total = start != null && lastT != null ? lastT - start : null;
         const valid = splits.filter((s) => s.ms != null);
         const best = valid.length ? Math.min(...valid.map((s) => s.ms)) : null;
@@ -87,7 +89,7 @@ export function computeResults({ event, categories, riders, teams, laps, eventCa
         };
       });
 
-    const rank = { [STATUS.FINAL]: 0, [STATUS.RACING]: 1, [STATUS.NOSTART]: 2, [STATUS.DNS]: 3 };
+    const rank = { [STATUS.FINAL]: 0, [STATUS.RACING]: 1, [STATUS.DNF]: 2, [STATUS.NOSTART]: 3, [STATUS.DNS]: 4 };
     rows.sort((a, b) =>
       rank[a.status] - rank[b.status] ||
       b.lapsDone - a.lapsDone ||
@@ -109,14 +111,15 @@ export function computeResults({ event, categories, riders, teams, laps, eventCa
 
 /** Resumen general de un evento (para tarjetas y KPIs). */
 export function eventSummary(groups) {
-  let riders = 0, finished = 0, racing = 0, passes = 0;
+  let riders = 0, finished = 0, racing = 0, dnf = 0, passes = 0;
   for (const g of groups) for (const r of g.rows) {
     riders++;
-    if (r.status === 'FINAL') finished++;
-    if (r.status === 'EN PISTA') racing++;
+    if (r.status === STATUS.FINAL) finished++;
+    if (r.status === STATUS.RACING) racing++;
+    if (r.status === STATUS.DNF) dnf++;
     passes += r.lapsDone + r.extraPasses;
   }
-  return { riders, finished, racing, passes, categories: groups.length };
+  return { riders, finished, racing, dnf, passes, categories: groups.length };
 }
 
 /** CSV con la clasificación (separador ; para Excel en español). */

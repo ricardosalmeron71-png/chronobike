@@ -5,6 +5,7 @@ import { fmtDuration, fmtGap, STATUS } from './results.js';
 export const STATUS_UI = {
   [STATUS.FINAL]: { cls: 'st-final', icon: 'fa-flag-checkered', label: 'Meta' },
   [STATUS.RACING]: { cls: 'st-racing', icon: 'fa-person-biking', label: 'En pista' },
+  [STATUS.DNF]: { cls: 'st-dnf', icon: 'fa-flag', label: 'DNF' },
   [STATUS.DNS]: { cls: 'st-dns', icon: 'fa-hourglass-start', label: 'Sin paso' },
   [STATUS.NOSTART]: { cls: 'st-dns', icon: 'fa-circle-exclamation', label: 'Sin salida' },
 };
@@ -31,7 +32,8 @@ export function eventCard(ev, { active = false, stats = null } = {}) {
 export function kpis(sum) {
   const k = (icon, val, label, cls = '') => `<div class="kpi ${cls}"><i class="fa-solid ${icon}"></i><b>${val}</b><span>${label}</span></div>`;
   return `<div class="kpis">${k('fa-users', sum.riders, 'Corredores')}${k('fa-flag-checkered', sum.finished, 'En meta', 'k-green')}
-    ${k('fa-person-biking', sum.racing, 'En pista', 'k-lime')}${k('fa-layer-group', sum.categories, 'Categorías')}${k('fa-stopwatch', sum.passes, 'Pasos registrados', 'k-orange')}</div>`;
+    ${k('fa-person-biking', sum.racing, 'En pista', 'k-lime')}${sum.dnf ? k('fa-flag', sum.dnf, 'DNF', 'k-dnf') : ''}
+    ${k('fa-layer-group', sum.categories, 'Categorías')}${k('fa-stopwatch', sum.passes, 'Pasos registrados', 'k-orange')}</div>`;
 }
 
 export function podium(group) {
@@ -41,8 +43,12 @@ export function podium(group) {
     <span class="muted">${group.targetLaps} ${group.targetLaps === 1 ? 'vuelta' : 'vueltas'} · Salida ${fmtClock(group.start)}</span></div>`;
   if (!top.length) {
     const racing = group.rows.filter((r) => r.status === STATUS.RACING).length;
-    return `<section class="podium-card" style="--c:${esc(color)}">${head}<div class="empty small"><i class="fa-solid fa-hourglass-half"></i>
-      ${racing ? `${racing} corredor(es) en pista. El podio aparecerá cuando crucen la meta.` : 'Aún no hay corredores en meta.'}</div></section>`;
+    const dnf = group.rows.filter((r) => r.status === STATUS.DNF).length;
+    const msg = racing ? `${racing} corredor(es) en pista. El podio aparecerá cuando crucen la meta.`
+      : dnf ? `Ningún corredor completó esta categoría (${dnf} DNF). Sin podio.`
+      : 'Aún no hay corredores en meta.';
+    return `<section class="podium-card" style="--c:${esc(color)}">${head}<div class="empty small"><i class="fa-solid ${dnf && !racing ? 'fa-flag' : 'fa-hourglass-half'}"></i>
+      ${msg}</div></section>`;
   }
   const order = [top[1], top[0], top[2]];
   const place = ['p2', 'p1', 'p3'];

@@ -256,6 +256,14 @@ Renombra o elimina equipos. Al eliminar uno, sus corredores quedan como *Indepen
 | **Imprimir / PDF** | Hoja lista para pegar en la meta o publicar |
 | **Cerrar evento** | Lo marca como Finalizado |
 
+⚠️ **Al cerrar el evento, quien se quedó a medias (en pista, sin terminar sus vueltas) pasa automáticamente a 🚩 DNF** (*Did Not Finish*, no terminó). Ya no cuenta como "En pista": es un resultado definitivo, se ordena por vueltas completadas y aparece en la tabla, el Excel y la Pantalla TV con su propia etiqueta roja. Si una categoría se cierra sin que nadie la termine, el podio muestra *"Ningún corredor completó esta categoría. Sin podio"* en vez de quedar vacío.
+
+💡 Por eso conviene cerrar el evento **solo cuando de verdad terminó**: mientras siga abierto, los corredores que faltan por cruzar la meta se muestran como "En pista", no como DNF.
+
+![Clasificación con corredores DNF tras cerrar el evento](img/45-resultados-dnf.png)
+
+![Categoría sin finalistas: se avisa en vez de mostrar un podio vacío](img/47-resultados-podios-dnf.png)
+
 ![Tabla de resultados](img/28-resultados-tabla.png)
 
 ### C6. Importar el Excel actual 📥

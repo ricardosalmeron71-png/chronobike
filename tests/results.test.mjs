@@ -1,7 +1,7 @@
 // Pruebas del motor de resultados:  node --test tests/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeResults, fmtDuration, resultsToCSV, STATUS } from '../js/results.js';
+import { computeResults, fmtDuration, resultsToCSV, STATUS, eventSummary } from '../js/results.js';
 import { buildDemoData } from '../js/demo-data.js';
 
 const T = (hms) => `2026-09-22T${hms}-07:00`;
@@ -80,4 +80,35 @@ test('velocidad promedio = km recorridos / tiempo (requiere km por vuelta en el 
   assert.equal(ana.speed.toFixed(1), '18.7');
   d.event.lap_km = null;
   assert.equal(computeResults(d)[0].rows[0].speed, null);
+});
+
+test('al cerrar el evento, quien se quedó en pista pasa a DNF (no EN PISTA)', () => {
+  const d = base();
+  d.laps = [
+    lap(1, '08:25:00'), lap(1, '08:51:30'), lap(1, '09:17:10'), // Ana: termina sus 3 vueltas
+    lap(2, '08:24:00'), lap(2, '08:49:00'), // Beto: solo 2 de 3, se queda en pista
+  ];
+  // Mientras el evento sigue activo, Beto está EN PISTA
+  let [elite] = computeResults(d);
+  let beto = elite.rows.find((r) => r.rider.name === 'Beto');
+  assert.equal(beto.status, STATUS.RACING);
+
+  // Al finalizar el evento, Beto pasa a DNF y no afecta el podio de quien sí terminó
+  d.event.status = 'finalizado';
+  [elite] = computeResults(d);
+  const ana = elite.rows.find((r) => r.rider.name === 'Ana');
+  beto = elite.rows.find((r) => r.rider.name === 'Beto');
+  assert.equal(ana.status, STATUS.FINAL);
+  assert.equal(beto.status, STATUS.DNF);
+  assert.equal(beto.position, 2); // sigue abajo de quien terminó, por orden de vueltas
+});
+
+test('un evento finalizado sin nadie en meta reporta DNF en el resumen', () => {
+  const d = base(); d.event.status = 'finalizado';
+  d.laps = [lap(2, '08:24:00'), lap(2, '08:49:00')]; // Beto: 2 de 3, nunca terminó
+  const groups = computeResults(d);
+  const sum = eventSummary(groups);
+  assert.equal(sum.dnf, 1);
+  assert.equal(sum.finished, 0);
+  assert.equal(sum.racing, 0);
 });

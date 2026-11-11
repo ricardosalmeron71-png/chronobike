@@ -90,7 +90,7 @@ h1{font-size:2.2rem;font-weight:800} h2{font-size:1.7rem;font-weight:800} h3{fon
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:.9rem 1rem;display:grid;grid-template-columns:auto 1fr;column-gap:.8rem;align-items:center}
 .kpi i{grid-row:span 2;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:var(--surface2);color:var(--muted);font-size:1.1rem}
 .kpi b{font-family:var(--display);font-size:1.9rem;line-height:1} .kpi span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
-.k-green i{color:var(--green);background:rgba(34,197,94,.12)} .k-lime i{color:var(--lime);background:rgba(198,244,50,.1)} .k-orange i{color:var(--orange);background:rgba(255,90,31,.12)}
+.k-green i{color:var(--green);background:rgba(34,197,94,.12)} .k-lime i{color:var(--lime);background:rgba(198,244,50,.1)} .k-orange i{color:var(--orange);background:rgba(255,90,31,.12)} .k-dnf i{color:var(--red);background:rgba(244,63,94,.12)}
 
 /* Filtros y pestañas */
 .toolbar{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
@@ -149,7 +149,7 @@ tr.top1 .pos-n{background:var(--gold);color:#241900} tr.top2 .pos-n{background:v
 .laps-bar{display:flex;gap:3px;margin-bottom:3px} .laps-bar i{width:16px;height:7px;border-radius:3px;background:var(--line2)} .laps-bar i.on{background:var(--c)}
 .warn-t{color:var(--amber);font-weight:800}
 .badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:.28rem .55rem;border-radius:7px}
-.st-final{background:rgba(34,197,94,.14);color:#5ee08f} .st-racing{background:rgba(198,244,50,.12);color:var(--lime)} .st-dns{background:rgba(139,154,184,.12);color:var(--muted)}
+.st-final{background:rgba(34,197,94,.14);color:#5ee08f} .st-racing{background:rgba(198,244,50,.12);color:var(--lime)} .st-dnf{background:rgba(244,63,94,.14);color:var(--red)} .st-dns{background:rgba(139,154,184,.12);color:var(--muted)}
 
 /* Detalle corredor */
 .rider-detail .rd-head{display:flex;gap:1.1rem;align-items:center}
