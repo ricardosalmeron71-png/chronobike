@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChronoBike hoy (sin chip) · esquema y simulación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b16;--bg2:#0c1222;--surface:#111a2e;--surface2:#16213a;--line:#22304d;--line2:#2d3d60;--text:#e8eefc;--muted:#8b9ab8;--dim:#5d6b88;
+  --orange:#ff5a1f;--amber:#ffb21f;--lime:#c6f432;--green:#22c55e;--red:#f43f5e;--display:'Barlow Condensed','Inter',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1100px 500px at 85% -10%,rgba(255,90,31,.13),transparent 60%),var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:1.4rem clamp(1rem,3vw,2rem) 4rem}
+h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:.01em}
+h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;text-transform:uppercase;line-height:.95} h1 span{color:var(--lime)}
+h2{font-size:1.9rem;font-weight:800;margin:2.6rem 0 .3rem} h2 i{font-style:normal;color:var(--orange)}
+.sub{color:var(--muted);max-width:78ch;margin:.4rem 0 1rem}
+.badge{display:inline-flex;gap:.4rem;align-items:center;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .6rem;border-radius:7px;background:rgba(34,197,94,.12);color:#5ee08f;border:1px solid rgba(34,197,94,.35)}
+.card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:1rem}
+.controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:1rem 0}
+button{font:inherit;color:var(--text);background:var(--surface2);border:1px solid var(--line2);border-radius:11px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+button:hover{border-color:var(--muted)} button.on{background:var(--orange);border-color:var(--orange);color:#1a0b02} button.warn.on{background:var(--red);border-color:var(--red);color:#fff}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:11px;overflow:hidden} .seg button{border:0;border-radius:0}
+.steps{display:flex;gap:.4rem;flex-wrap:wrap;margin:.2rem 0 .8rem} .steps span{font-size:.78rem;font-weight:700;padding:.3rem .6rem;border-radius:99px;border:1px solid var(--line2);color:var(--muted);transition:.2s}
+.steps span.on{background:var(--orange);border-color:var(--orange);color:#1a0b02}
+.narr{min-height:3.2rem;padding:.7rem 1rem;border-radius:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--orange);font-weight:600}
+
+.stage{position:relative;display:grid;gap:26px 34px;grid-template-columns:1.5fr 1.05fr .85fr 1.15fr;
+  grid-template-areas:"gate app cloud tv" "gate app cloud phone" "gate app cloud staff";margin-top:.6rem}
+.node{position:relative;z-index:2;background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:.7rem .8rem;transition:box-shadow .25s,border-color .25s;min-width:0}
+.node.hit{border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,90,31,.35)}
+.node h4{font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.4rem} .node h4 b{color:var(--orange)}
+#nGate{grid-area:gate} #nApp{grid-area:app} #nCloud{grid-area:cloud} #nTv{grid-area:tv} #nPhone{grid-area:phone} #nStaff{grid-area:staff}
+#gateSvg{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line)}
+.kv{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted)} .kv b{color:var(--text);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.7rem;font-weight:800;padding:.15rem .5rem;border-radius:99px;background:rgba(34,197,94,.15);color:#5ee08f} .pill.off{background:rgba(244,63,94,.18);color:#ff8fa3}
+.app{margin:.5rem auto;max-width:210px;border:3px solid #05070d;border-radius:18px;background:#0a1020;padding:.5rem;box-shadow:0 0 0 1px var(--line2)}
+.disp{background:#050810;border:2px solid var(--line2);border-radius:10px;text-align:center;font-family:var(--display);font-size:2.2rem;font-weight:800;line-height:1.15;letter-spacing:.05em;min-height:2.5rem;transition:.15s} .disp.ok{border-color:var(--green)}
+.who{font-size:.7rem;color:var(--muted);text-align:center;min-height:1.1em;margin:.25rem 0}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:4px} .pad i{font-style:normal;text-align:center;background:var(--surface2);border:1px solid var(--line2);border-radius:7px;font-family:var(--display);font-size:1.05rem;font-weight:700;padding:.15rem 0;transition:.1s} .pad i.p{background:var(--orange);color:#1a0b02;transform:scale(.92)}
+.reg{margin-top:5px;text-align:center;background:var(--lime);color:#13200a;border-radius:9px;font-family:var(--display);font-weight:800;padding:.3rem 0;font-size:1rem;letter-spacing:.03em;transition:.12s} .reg.p{background:#fff;transform:scale(.97)}
+.log{margin:.4rem 0 0;padding:0;list-style:none;font:500 .72rem/1.45 ui-monospace,Menlo,Consolas,monospace;color:#b9c6e6;min-height:6.2em} .log li{animation:fade .4s} .log li b{color:var(--lime)} .log .dly{color:var(--amber)}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}}
+.cloud{text-align:center} .cloud svg{width:110px;height:auto} .big{font-family:var(--display);font-size:2.2rem;font-weight:800;line-height:1}
+.tv{border:4px solid #05070d;border-radius:10px;background:#0a1020;padding:.4rem .5rem;box-shadow:0 0 0 1px var(--line2)}
+.tv .row{display:grid;grid-template-columns:1.4em 2.6em 1fr auto;gap:.4rem;font-size:.78rem;padding:.12rem 0;border-bottom:1px solid #16213a;transition:background .6s}
+.tv .row.flash{background:rgba(198,244,50,.22)} .tv .pos{font-family:var(--display);font-weight:800;color:var(--amber)} .tv .bib{font-weight:800;background:#fff;color:#0b1020;border-radius:3px;text-align:center;font-size:.7rem;line-height:1.5} .tv .t{color:var(--muted);font-variant-numeric:tabular-nums}
+.phone{max-width:190px;margin:0 auto;border:3px solid #05070d;border-radius:18px;background:#0a1020;padding:.5rem .6rem;box-shadow:0 0 0 1px var(--line2);text-align:center;font-size:.78rem}
+.phone .num{font-family:var(--display);font-size:1.8rem;font-weight:800;background:#fff;color:#0b1020;border-radius:6px;padding:0 .5rem;display:inline-block} .note{color:var(--muted);font-size:.85rem}
+.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+.overlay .link{stroke:#34456b;stroke-width:2;stroke-dasharray:5 6;fill:none;animation:march 1.2s linear infinite} @keyframes march{to{stroke-dashoffset:-22}}
+.overlay circle.pk{stroke:#fff;stroke-width:1.5}
+.over{position:absolute;inset:0;z-index:5;display:none;place-items:center;background:rgba(7,11,22,.7);border-radius:14px;font-family:var(--display);font-size:2.2rem;font-weight:800;text-transform:uppercase;text-align:center;padding:1rem} .over.show{display:grid}
+@media (max-width:980px){.stage{grid-template-columns:1fr 1fr;grid-template-areas:"gate gate" "app cloud" "tv phone" "staff staff"}}
+@media (max-width:560px){.stage{grid-template-columns:1fr;grid-template-areas:"gate" "app" "cloud" "tv" "phone" "staff"}}
+
+.diagram{width:100%;height:auto;display:block;background:var(--bg2);border:1px solid var(--line);border-radius:16px}
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin:.6rem 0;font-size:.85rem;color:var(--muted)} .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:.4rem;vertical-align:-1px}
+.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem} .gallery figure{margin:0} .gallery img{width:100%;border-radius:12px;border:1px solid var(--line2);display:block} .gallery figcaption{font-size:.82rem;color:var(--muted);margin-top:.35rem}
+@media (max-width:720px){.gallery{grid-template-columns:1fr}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1rem} @media (max-width:820px){.two{grid-template-columns:1fr}}
+ul.refs{padding-left:1.1rem} ul.refs li{margin:.35rem 0} a{color:var(--amber)}
+@media (prefers-reduced-motion:reduce){.overlay .link{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">Funciona hoy</span>
+    <h1 style="margin-top:.6rem">ChronoBike <span>hoy · sin chip</span></h1>
+    <p class="sub">Así funciona el sistema actual: una persona en la meta ve el dorsal del ciclista que cruza, lo teclea en el celular y toca <b>REGISTRAR PASO</b>. De ahí el resultado llega solo a la TV, a los celulares del público y al panel del staff.</p>
+  </header>
+
+  <h2><i>1</i> · Simulación del flujo completo</h2>
+  <p class="sub">Fíjate en el <b>retraso de captura</b> (en ámbar): es el tiempo entre que el ciclista cruza y el registrador toca el botón. Con pelotones se acumula. Prueba también <b>cortar el internet</b>.</p>
+  <div class="controls">
+    <button id="bPlay" class="on">⏸ Pausar</button>
+    <span class="seg" id="spd"><button data-s="0.5">0.5×</button><button data-s="1" class="on">1×</button><button data-s="2">2×</button></span>
+    <button id="bNet" class="warn">📡 Simular caída de internet</button>
+    <button id="bReset">↺ Reiniciar</button>
+  </div>
+  <div class="steps" id="steps"><span data-k="cru">① Cruza la meta</span><span data-k="tec">② Teclea el dorsal</span><span data-k="reg">③ Registra el paso</span><span data-k="nub">④ Nube</span><span data-k="pan">⑤ Pantallas</span></div>
+  <div class="narr" id="narr" aria-live="polite">Iniciando…</div>
+
+  <section class="stage" id="stage" aria-label="Simulación del sistema actual">
+    <div class="node" id="nGate"><h4><b>①</b> La meta (vista superior)</h4><svg id="gateSvg" viewBox="0 0 420 300" role="img" aria-label="Meta con un registrador junto a la línea y ciclistas cruzando"></svg>
+      <div class="kv"><span>Número visible en la placa</span><span>1 registrador</span></div></div>
+    <div class="node" id="nApp"><h4><b>②③</b> App del registrador</h4>
+      <div class="app"><div class="disp" id="disp">---</div><div class="who" id="who">&nbsp;</div>
+        <div class="pad" id="pad"></div><div class="reg" id="regBtn">🏁 REGISTRAR PASO</div></div>
+      <div class="kv"><span>Internet</span><span class="pill" id="net">en línea</span></div>
+      <div class="kv"><span>En cola en el celular</span><b id="cQ">0</b></div>
+      <div class="kv"><span>Pasos registrados</span><b id="cReg">0</b></div>
+      <ul class="log" id="log"></ul></div>
+    <div class="node cloud" id="nCloud"><h4><b>④</b> Nube</h4>
+      <svg viewBox="0 0 120 80"><path d="M30 62h62a22 22 0 0 0 2-44 28 28 0 0 0-53-6 24 24 0 0 0-11 50z" fill="#16213a" stroke="#ff5a1f" stroke-width="3"/><text x="60" y="46" text-anchor="middle" font-size="13" font-weight="800" fill="#e8eefc">DB</text></svg>
+      <div class="big" id="cDb">0</div><div class="note">pasos guardados · tiempo real ⚡</div></div>
+    <div class="node" id="nTv"><h4><b>⑤</b> Pantalla TV en la meta</h4><div class="tv" id="tv"></div></div>
+    <div class="node" id="nPhone"><h4><b>⑤</b> Público (celular)</h4>
+      <div class="phone"><div class="note">Último paso</div><div class="num" id="pNum">—</div><div id="pName" style="font-weight:700;margin-top:.2rem">Esperando…</div><div class="note" id="pInfo">&nbsp;</div></div></div>
+    <div class="node" id="nStaff"><h4><b>⑤</b> Panel del staff</h4>
+      <div class="kv"><span>Pasos recibidos</span><b id="sCnt">0</b></div><div class="kv"><span>Último</span><b id="sLast">—</b></div><div class="kv"><span>Corregir / borrar</span><b>sí</b></div></div>
+    <svg class="overlay" id="overlay"><g id="links"></g><g id="pk"></g></svg>
+    <div class="over" id="over"></div>
+  </section>
+
+  <h2><i>2</i> · Esquema de bloques</h2>
+  <p class="sub">Todo el software de este esquema ya existe y funciona. El paso humano (ámbar) es lo que el chip automatizaría.</p>
+  <svg class="diagram" id="dBlocks" viewBox="0 0 1200 440" role="img" aria-label="Diagrama de bloques del sistema actual"></svg>
+  <div class="legend"><span><i style="background:#22c55e"></i>Software que ya funciona</span><span><i style="background:#ffb21f"></i>Persona</span><span><i style="background:#8b9ab8"></i>Equipo</span></div>
+
+  <h2><i>3</i> · Plano de la meta (vista superior)</h2>
+  <svg class="diagram" id="dPlan" viewBox="0 0 1000 560" role="img" aria-label="Plano de la zona de meta con registradores"></svg>
+
+  <h2><i>4</i> · Capturas reales de la app</h2>
+  <p class="sub">Estas son pantallas reales del sistema actual (con datos ficticios).</p>
+  <div class="gallery">
+    <figure><img src="img/12-crono-dorsal.png" alt="Cronómetro con dorsal tecleado" loading="lazy"><figcaption>El registrador teclea el dorsal: la app muestra quién es y qué vuelta lleva (verde = inscrito).</figcaption></figure>
+    <figure><img src="img/13-crono-registrado.png" alt="Paso registrado" loading="lazy"><figcaption>Al tocar REGISTRAR PASO: aviso, tiempo de vuelta y "TERMINÓ" si completó sus vueltas.</figcaption></figure>
+    <figure><img src="img/34-pantalla-tv-paso.png" alt="Pantalla de TV" loading="lazy"><figcaption>Pantalla de TV en la meta: clasificación, último paso en grande y código QR.</figcaption></figure>
+    <figure><img src="img/17-crono-movil.png" alt="Cronómetro en el celular" loading="lazy" style="max-width:260px"><figcaption>La misma app en el celular del registrador.</figcaption></figure>
+  </div>
+
+  <h2><i>5</i> · Qué se necesita en la meta</h2>
+  <div class="two">
+    <div class="card"><h3>Equipo</h3>
+      <ul class="refs"><li><b>Celular del registrador</b> con la app abierta (y batería externa).</li><li><b>Internet</b> por datos móviles o hotspot. Si falla, la app guarda en cola y envía sola.</li><li><b>Laptop</b> del admin para vigilar resultados y corregir.</li><li><b>Pantalla TV o proyector</b> con la Pantalla de meta (opcional pero muy visible).</li><li><b>Segundo celular</b> de respaldo; y un <b>2º registrador</b> si hay más de ≈150 corredores.</li></ul></div>
+    <div class="card"><h3>Buenas prácticas</h3>
+      <ul class="refs"><li><b>Teclea → mira el nombre → registra.</b> La hora se toma al tocar REGISTRAR.</li><li>En un pelotón, registra <b>uno por uno sin pausa</b>, en el orden de llegada.</li><li>Antes de la carrera: da la <b>salida</b> de cada categoría y revisa que cada una tenga su hora.</li><li>Si ves un aviso de duplicado o dorsal no inscrito, resuélvelo en el momento.</li><li>Al terminar: revisa el panel, cierra el evento y exporta.</li></ul></div>
+  </div>
+  <h3 style="margin-top:1.2rem">Límites que conviene conocer</h3>
+  <ul class="refs"><li>La precisión es de <b>≈1 segundo</b> y depende de la persona (tiempo de reacción y de teclear).</li><li>Con muchos ciclistas llegando juntos, <b>los últimos del pelotón se registran con más retraso</b> (se ve en la simulación).</li><li>Una persona atenta es el único punto de lectura: por eso conviene un respaldo.</li></ul>
+  <p class="note">Si necesitas más precisión o eventos muy grandes, la <a href="animacion-chip.html">propuesta con chip</a> automatiza este paso.</p>
+</div>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, attrs = {}, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+const T = (parent, x, y, txt, o = {}) => { const t = el('text', { x, y, 'text-anchor': o.a || 'middle', 'font-size': o.s || 13, 'font-weight': o.w || 600, fill: o.c || '#e8eefc', 'font-family': 'Inter,sans-serif' }, parent); t.textContent = txt; return t; };
+
+/* ═════════════ Esquema de bloques ═════════════ */
+(function blocks() {
+  const svg = $('#dBlocks'); const C = { ok: '#22c55e', hu: '#ffb21f', hw: '#8b9ab8' };
+  el('defs', {}, svg).innerHTML = '<marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8b9ab8"/></marker>';
+  const box = (x, y, w, h, title, sub, k, dash) => {
+    el('rect', { x, y, width: w, height: h, rx: 12, fill: '#111a2e', stroke: C[k], 'stroke-width': 2.5, 'stroke-dasharray': dash ? '6 5' : '0' }, svg);
+    title.split('\n').forEach((l, i, a) => T(svg, x + w / 2, y + h / 2 - (a.length - 1) * 9 + i * 18 - (sub ? 8 : -5), l, { s: 15, w: 800 }));
+    if (sub) T(svg, x + w / 2, y + h - 14, sub, { s: 11, c: '#8b9ab8' });
+  };
+  const arrow = (x1, y1, x2, y2, cap, cx, cy, dash) => { el('path', { d: `M${x1} ${y1} L${x2} ${y2}`, stroke: '#8b9ab8', 'stroke-width': 2.2, fill: 'none', 'marker-end': 'url(#ar)', 'stroke-dasharray': dash ? '6 5' : '0' }, svg); if (cap) T(svg, cx ?? (x1 + x2) / 2, cy ?? y1 + 26, cap, { s: 10.5, c: '#8b9ab8' }); };
+  box(20, 150, 150, 90, 'Ciclista con\nplaca (número)', 'cruza la meta', 'hu');
+  box(215, 150, 150, 90, 'Registrador\nve el dorsal', 'persona en la meta', 'hu');
+  box(410, 150, 165, 90, 'Celular con la app\nteclado + REGISTRAR', 'la hora se toma al tocar', 'ok');
+  box(625, 150, 150, 90, 'Internet\n(datos / hotspot)', '', 'hw');
+  box(820, 150, 175, 90, 'Supabase\nBD + tiempo real', 'ya instalado', 'ok');
+  [[60, 'Panel de staff', 'admin.html'], [175, 'Vista pública', 'index.html'], [290, 'Pantalla de meta', 'tv.html']].forEach(([y, a, b]) => box(1040, y, 150, 70, a, b, 'ok'));
+  arrow(170, 195, 213, 195, 've el número', 192, 262); arrow(365, 195, 408, 195, 'teclea', 387, 262); arrow(575, 195, 623, 195, 'envía', 599, 262); arrow(775, 195, 818, 195, 'guarda', 797, 262);
+  [95, 210, 325].forEach((y) => arrow(995, 195, 1038, y + 35));
+  box(410, 320, 165, 70, 'Cola en el celular', 'si no hay internet', 'ok', true);
+  el('path', { d: 'M492 240 L492 318', stroke: '#8b9ab8', 'stroke-width': 2.2, 'stroke-dasharray': '6 5', 'marker-end': 'url(#ar)' }, svg);
+  box(215, 320, 150, 70, '2º registrador', 'si hay más de ≈150', 'hu', true);
+  el('path', { d: 'M365 355 L408 270', stroke: '#8b9ab8', 'stroke-width': 2, 'stroke-dasharray': '6 5', 'marker-end': 'url(#ar)' }, svg);
+  box(820, 320, 175, 70, 'Importar pasos\n(Excel / CSV)', 'carga en lote', 'ok');
+  el('path', { d: 'M907 320 L907 242', stroke: '#8b9ab8', 'stroke-width': 2.2, 'marker-end': 'url(#ar)' }, svg);
+  T(svg, 20, 420, 'El paso ámbar (persona) es lo que depende de la atención y de la rapidez de quien registra: el chip lo automatizaría.', { a: 'start', s: 12, c: '#8b9ab8' });
+})();
+
+/* ═════════════ Plano de la meta ═════════════ */
+(function plan() {
+  const svg = $('#dPlan'); const M = 44.4;
+  el('defs', {}, svg).innerHTML = '<marker id="dm" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M0 0L8 4L0 8z" fill="#c6f432"/></marker>';
+  el('rect', { width: 1000, height: 560, fill: '#0b1222' }, svg);
+  el('rect', { x: 0, y: 200, width: 1000, height: 160, fill: '#3a2f2a' }, svg);
+  [200, 360].forEach((y) => { el('line', { x1: 0, x2: 1000, y1: y, y2: y, stroke: '#5a4636', 'stroke-width': 5 }, svg); el('line', { x1: 0, x2: 1000, y1: y + (y > 250 ? 10 : -10), y2: y + (y > 250 ? 10 : -10), stroke: '#8b9ab8', 'stroke-width': 2, 'stroke-dasharray': '10 6', opacity: .6 }, svg); });
+  T(svg, 880, 186, 'vallas', { s: 11, c: '#8b9ab8' });
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 2; c++) el('rect', { x: 494 + c * 6, y: 200 + r * 20, width: 6, height: 20, fill: (r + c) % 2 ? '#0b1020' : '#fff' }, svg);
+  T(svg, 500, 192, 'LÍNEA DE META', { s: 12, w: 800, c: '#c6f432' });
+  el('path', { d: 'M60 178 L240 178', stroke: '#8b9ab8', 'stroke-width': 3, 'marker-end': 'url(#dm)' }, svg); T(svg, 150, 166, 'dirección de carrera', { s: 12, c: '#8b9ab8' });
+  const person = (x, y, label, sub, dash) => {
+    el('path', { d: `M${x} ${y} L${dash ? x + 6 : x + 6} ${dash ? 262 : 300}`, stroke: '#ffb21f', 'stroke-width': 1.5, 'stroke-dasharray': '4 4', opacity: .55 }, svg);
+    el('circle', { cx: x, cy: y, r: 10, fill: dash ? 'none' : '#ffb21f', stroke: '#ffb21f', 'stroke-width': 2.5, 'stroke-dasharray': dash ? '4 3' : '0' }, svg);
+    el('rect', { x: x - 9, y: y + 12, width: 18, height: 22, rx: 5, fill: dash ? 'none' : '#ffb21f', stroke: '#ffb21f', 'stroke-width': 2.5, 'stroke-dasharray': dash ? '4 3' : '0' }, svg);
+    el('rect', { x: x + 10, y: y + 8, width: 8, height: 13, rx: 2, fill: '#0b1020', stroke: '#c6f432', 'stroke-width': 1.5 }, svg);
+    T(svg, x + 28, y + 4, label, { a: 'start', s: 12.5, w: 800, c: '#ffb21f' }); T(svg, x + 28, y + 21, sub, { a: 'start', s: 11, c: '#8b9ab8' });
+  };
+  person(470, 400, 'Registrador 1', 've la placa y teclea el dorsal', false);
+  person(530, 130, '2º registrador', '(si hay más de ≈150 corredores)', true);
+  const dim = (x1, y1, x2, y2) => el('path', { d: `M${x1} ${y1} L${x2} ${y2}`, stroke: '#c6f432', 'stroke-width': 2, 'marker-start': 'url(#dm)', 'marker-end': 'url(#dm)' }, svg);
+  dim(400, 200, 400, 360); T(svg, 360, 285, 'ancho', { s: 12, c: '#c6f432', w: 700 }); T(svg, 360, 301, '≈ 3.6 m', { s: 12, c: '#c6f432', w: 700 });
+  el('rect', { x: 640, y: 440, width: 340, height: 90, rx: 10, fill: '#111a2e', stroke: '#8b9ab8', 'stroke-width': 2, 'stroke-dasharray': '6 5' }, svg);
+  T(svg, 810, 466, 'CARPA · admin con laptop', { s: 13, w: 800 }); T(svg, 810, 486, 'hotspot, energía y celular de respaldo', { s: 11.5, c: '#8b9ab8' }); T(svg, 810, 504, 'vigila el panel y corrige si hace falta', { s: 11.5, c: '#8b9ab8' });
+  el('rect', { x: 780, y: 20, width: 200, height: 56, rx: 6, fill: '#05070d', stroke: '#2d3d60', 'stroke-width': 3 }, svg);
+  [0, 1, 2].forEach((i) => el('rect', { x: 792, y: 30 + i * 13, width: 176, height: 8, rx: 2, fill: i ? '#16213a' : '#c6f432', opacity: i ? 1 : .6 }, svg));
+  T(svg, 880, 96, 'TV con resultados + QR', { s: 12, w: 700 });
+  for (let i = 0; i < 7; i++) el('circle', { cx: 800 + i * 26, cy: 110 + (i % 2) * 8, r: 6, fill: '#3b82f6' }, svg);
+  [[110, 235], [160, 270], [135, 310], [215, 245], [260, 300], [300, 258]].forEach(([x, y], i) => {
+    el('line', { x1: x - 16, y1: y, x2: x + 16, y2: y, stroke: '#cfd8e6', 'stroke-width': 3 }, svg);
+    el('ellipse', { cx: x - 2, cy: y, rx: 11, ry: 7, fill: ['#ff5a1f', '#3b82f6', '#22c55e', '#ec4899', '#eab308', '#14b8a6'][i] }, svg);
+    el('rect', { x: x + 13, y: y - 7, width: 12, height: 14, fill: '#fff', stroke: '#0b1020' }, svg); T(svg, x + 19, y + 3.5, [12, 7, 25, 31, 4, 18][i], { s: 8, w: 800, c: '#0b1020' });
+  });
+  T(svg, 200, 395, 'pelotón con número en la placa', { s: 12, c: '#8b9ab8' });
+  el('line', { x1: 40, y1: 520, x2: 40 + M, y2: 520, stroke: '#e8eefc', 'stroke-width': 3 }, svg); T(svg, 40 + M / 2, 540, '1 m', { s: 12, w: 700 });
+})();
+
+/* ═════════════ Simulación ═════════════ */
+const RIDERS = [
+  { d: 12, n: 'Valeria Salazar', c: '#ec4899' }, { d: 7, n: 'Mateo Ibarra', c: '#3b82f6' }, { d: 25, n: 'Marco Barrios', c: '#22c55e' },
+  { d: 31, n: 'Renata Ibarra', c: '#eab308' }, { d: 4, n: 'Diego Quintero', c: '#ff5a1f' }, { d: 18, n: 'Camila Duarte', c: '#14b8a6' },
+];
+const LAPS = 3, FIN_X = 240, LANES = [118, 152, 186], SPEED = 150, T0 = (7 * 3600 + 34 * 60 + 46) * 1000;
+const S = { t: 0, paused: false, speed: 1, online: true, tasks: [], packets: [], pulses: [], actors: [], queue: [], db: [], nextSpawn: 600, cursor: 0, finished: false, overAt: 0, reg: 0, pending: [], busy: false };
+RIDERS.forEach((r) => { r.cross = 0; });
+const fmt = (ms) => { const s = (T0 + ms) / 1000, h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${x.toFixed(2).padStart(5, '0')}`; };
+const gate = $('#gateSvg'), stage = $('#stage'), links = $('#links'), pk = $('#pk');
+const after = (ms, fn) => S.tasks.push({ at: S.t + ms, fn });
+$('#pad').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, '⌫'].map((k) => `<i data-k="${k}">${k}</i>`).join('');
+
+(function buildGate() {
+  el('rect', { width: 420, height: 300, fill: '#0c1222' }, gate);
+  el('rect', { y: 95, width: 420, height: 115, fill: '#3a2f2a' }, gate);
+  [95, 210].forEach((y) => { el('line', { x1: 0, x2: 420, y1: y, y2: y, stroke: '#5a4636', 'stroke-width': 4 }, gate); el('line', { x1: 0, x2: 420, y1: y + (y > 150 ? 9 : -9), y2: y + (y > 150 ? 9 : -9), stroke: '#8b9ab8', 'stroke-width': 1.5, 'stroke-dasharray': '8 5', opacity: .55 }, gate); });
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 2; c++) el('rect', { x: FIN_X - 5 + c * 5, y: 95 + r * 14.4, width: 5, height: 14.4, fill: (r + c) % 2 ? '#0b1020' : '#fff' }, gate);
+  T(gate, FIN_X, 288, 'META', { s: 10, c: '#c6f432', w: 800 });
+  // registrador (vista superior) junto a la línea
+  const rg = el('g', { transform: 'translate(262 246)' }, gate);
+  el('ellipse', { cx: 0, cy: 6, rx: 13, ry: 7, fill: '#ffb21f' }, rg); el('circle', { cx: 0, cy: 0, r: 6, fill: '#e0a06a' }, rg); el('rect', { x: -4, y: -17, width: 9, height: 13, rx: 2, fill: '#0b1020', stroke: '#c6f432', 'stroke-width': 1.5 }, rg);
+  T(gate, 262, 272, 'Registrador', { s: 9, c: '#ffb21f', w: 800 });
+  const bub = el('g', { id: 'bub', opacity: 0 }, gate); el('rect', { x: 282, y: 222, width: 46, height: 20, rx: 8, fill: '#fff' }, bub); const bt = T(bub, 305, 236, '', { s: 11, c: '#0b1020', w: 800 }); bt.id = 'bubT';
+  el('g', { id: 'riders' }, gate);
+})();
+const gRiders = $('#riders');
+function makeActor(r, lane, delay) {
+  const g = el('g', {}, gRiders);
+  el('ellipse', { cx: -15, cy: 0, rx: 8, ry: 3, fill: '#0b1020' }, g); el('ellipse', { cx: 15, cy: 0, rx: 8, ry: 3, fill: '#0b1020' }, g);
+  el('line', { x1: -15, y1: 0, x2: 15, y2: 0, stroke: '#cfd8e6', 'stroke-width': 2.5 }, g);
+  el('ellipse', { cx: -2, cy: 0, rx: 12, ry: 8, fill: r.c }, g); el('circle', { cx: 8, cy: 0, r: 5, fill: '#e0a06a' }, g);
+  el('rect', { x: 15, y: -8, width: 15, height: 16, fill: '#fff', stroke: '#0b1020' }, g); T(g, 22.5, 3.5, r.d, { s: 9, w: 800, c: '#0b1020' });
+  const a = { r, g, x: -40 - delay * SPEED / 1000, y: LANES[lane], crossed: false };
+  g.setAttribute('transform', `translate(${a.x} ${a.y})`); S.actors.push(a); return a;
+}
+const narr = (m, step) => { $('#narr').textContent = m; document.querySelectorAll('#steps span').forEach((s) => s.classList.toggle('on', s.dataset.k === step)); };
+const hit = (id) => { const n = $(id); n.classList.add('hit'); after(500, () => n.classList.remove('hit')); };
+function anchor(a, b) {
+  const R = stage.getBoundingClientRect(), ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+  const e = (r) => [[r.left + r.width / 2, r.top], [r.left + r.width / 2, r.bottom], [r.left, r.top + r.height / 2], [r.right, r.top + r.height / 2]].map(([x, y]) => [x - R.left, y - R.top]);
+  let best = null; for (const p of e(ra)) for (const q of e(rb)) { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (!best || d < best[0]) best = [d, p, q]; } return [best[1], best[2]];
+}
+function drawLinks() { links.innerHTML = ''; [['#nGate', '#nApp'], ['#nApp', '#nCloud'], ['#nCloud', '#nTv'], ['#nCloud', '#nPhone'], ['#nCloud', '#nStaff']].forEach(([a, b]) => { const [p, q] = anchor($(a), $(b)); el('path', { class: 'link', d: `M${p[0]} ${p[1]} L${q[0]} ${q[1]}` }, links); }); }
+function send(from, to, color, ms, done) { const [p, q] = anchor($(from), $(to)); const c = el('circle', { class: 'pk', r: 7, cx: p[0], cy: p[1], fill: color }, pk); S.packets.push({ c, p, q, t: 0, dur: ms, done }); }
+
+// 1) Un ciclista cruza → entra a la lista de espera del registrador
+function onCross(a) {
+  const r = a.r; r.cross++; S.pending.push({ r, lap: r.cross, cross: S.t });
+  $('#bubT').textContent = `¡#${r.d}!`; $('#bub').setAttribute('opacity', 1); after(900, () => $('#bub').setAttribute('opacity', 0));
+  narr(`#${r.d} ${r.n} cruza la meta. El registrador lee el número de su placa.`, 'cru'); hit('#nGate');
+  kick();
+}
+// 2) El registrador atiende uno por uno: reacciona, teclea y toca REGISTRAR
+function kick() {
+  if (S.busy || !S.pending.length) return;
+  S.busy = true; const job = S.pending.shift(); const digits = String(job.r.d).split('');
+  const react = 450 + Math.random() * 350, per = 260;
+  after(react, () => narr(`El registrador teclea el dorsal ${job.r.d}${S.pending.length ? ` (hay ${S.pending.length} más esperando)` : ''}.`, 'tec'));
+  digits.forEach((dg, i) => after(react + i * per, () => press(dg)));
+  const tapAt = react + digits.length * per + 260;
+  after(react + digits.length * per, () => { $('#who').textContent = `${job.r.n} · V${job.lap}`; $('#disp').classList.add('ok'); });
+  after(tapAt, () => tap(job));
+}
+function press(dg) {
+  const d = $('#disp'); d.textContent = d.textContent === '---' ? dg : d.textContent + dg; $('#who').innerHTML = '&nbsp;'; d.classList.remove('ok');
+  const k = document.querySelector(`#pad i[data-k="${dg}"]`); k.classList.add('p'); after(160, () => k.classList.remove('p'));
+}
+// 3) REGISTRAR PASO: la hora se toma en este instante
+function tap(job) {
+  const r = job.r, when = S.t, delay = when - job.cross;
+  $('#regBtn').classList.add('p'); after(180, () => $('#regBtn').classList.remove('p')); $('#disp').textContent = '---'; $('#disp').classList.remove('ok'); $('#who').innerHTML = '&nbsp;';
+  S.reg++; $('#cReg').textContent = S.reg; hit('#nApp');
+  const li = document.createElement('li'); li.innerHTML = `<b>#${r.d}</b> V${job.lap} ${fmt(when).slice(3)} <span class="dly">(+${(delay / 1000).toFixed(1)} s)</span>`; $('#log').prepend(li); while ($('#log').children.length > 4) $('#log').lastChild.remove();
+  narr(`Pasó el dorsal ${r.d}: la hora se toma al tocar REGISTRAR (${(delay / 1000).toFixed(1)} s después de que cruzó${delay > 2500 ? ': el pelotón acumula retraso' : ''}).`, 'reg');
+  const item = { d: r.d, n: r.n, lap: job.lap, when };
+  if (S.online) toCloud(item); else { S.queue.push(item); $('#cQ').textContent = S.queue.length; narr('Sin internet: el celular guarda el paso en cola y lo enviará solo cuando vuelva la conexión.', 'reg'); }
+  S.busy = false; after(150, kick);
+}
+function toCloud(item) {
+  send('#nApp', '#nCloud', '#ff5a1f', 500, () => {
+    S.db.push(item); $('#cDb').textContent = S.db.length; hit('#nCloud'); narr('La base de datos avisa en tiempo real a la TV, los celulares y el panel del staff.', 'nub');
+    after(200, () => ['#nTv', '#nPhone', '#nStaff'].forEach((id, i) => send('#nCloud', id, '#c6f432', 500, () => { hit(id); if (i === 0) renderTv(item.d); if (i === 1) renderPhone(item); if (i === 2) renderStaff(item); narr('Las pantallas se actualizan: el público ve su resultado casi al instante.', 'pan'); })));
+  });
+}
+function standings() { return RIDERS.map((r) => { const ps = S.db.filter((x) => x.d === r.d); return { r, laps: ps.length, last: ps.length ? Math.max(...ps.map((x) => x.when)) : Infinity }; }).filter((x) => x.laps).sort((a, b) => b.laps - a.laps || a.last - b.last).slice(0, 5); }
+function renderTv(flashD) {
+  $('#tv').innerHTML = standings().map((s, i) => `<div class="row${s.r.d === flashD ? ' flash' : ''}"><span class="pos">${i + 1}</span><span class="bib">${s.r.d}</span><span>${s.r.n}</span><span class="t">V${s.laps}/${LAPS} · ${fmt(s.last).slice(3)}</span></div>`).join('') || '<div class="note" style="padding:.4rem">Esperando el primer paso…</div>';
+  setTimeout(() => document.querySelectorAll('#tv .flash').forEach((n) => n.classList.remove('flash')), 700);
+}
+function renderPhone(it) { $('#pNum').textContent = it.d; $('#pName').textContent = it.n; $('#pInfo').textContent = `Vuelta ${it.lap} de ${LAPS} · ${fmt(it.when).slice(3)}`; }
+function renderStaff(it) { $('#sCnt').textContent = S.db.length; $('#sLast').textContent = `#${it.d}`; }
+function flushQueue() { S.queue.splice(0).forEach((it, i) => after(i * 350, () => toCloud(it))); $('#cQ').textContent = 0; }
+
+function spawn() {
+  const due = RIDERS.filter((r) => r.cross + S.actors.filter((a) => a.r === r && !a.crossed).length < LAPS); if (!due.length) return;
+  const pack = Math.random() < 0.35 ? Math.min(due.length, 2 + Math.floor(Math.random() * 2)) : 1;
+  for (let k = 0; k < pack; k++) { const r = due[(S.cursor++) % due.length]; if (S.actors.some((a) => a.r === r && a.x < 440)) continue; makeActor(r, k % 3, k * 150); }
+}
+function step(dt) {
+  S.t += dt;
+  const due = S.tasks.filter((k) => k.at <= S.t); S.tasks = S.tasks.filter((k) => k.at > S.t); due.forEach((k) => k.fn());
+  if (!S.finished && S.t >= S.nextSpawn) { spawn(); S.nextSpawn = S.t + 1700 + Math.random() * 1500; }
+  S.actors = S.actors.filter((a) => { const prev = a.x; a.x += SPEED * dt / 1000; a.g.setAttribute('transform', `translate(${a.x.toFixed(1)} ${a.y})`); if (!a.crossed && prev < FIN_X && a.x >= FIN_X) { a.crossed = true; onCross(a); } if (a.x > 470) { a.g.remove(); return false; } return true; });
+  const arrived = [];
+  S.packets = S.packets.filter((p) => { p.t += dt; const k = Math.min(1, p.t / p.dur); p.c.setAttribute('cx', p.p[0] + (p.q[0] - p.p[0]) * k); p.c.setAttribute('cy', p.p[1] + (p.q[1] - p.p[1]) * k); if (k >= 1) { p.c.remove(); arrived.push(p); return false; } return true; });
+  arrived.forEach((p) => p.done && p.done());
+  if (RIDERS.every((r) => r.cross >= LAPS) && !S.finished && !S.actors.length && !S.packets.length && !S.queue.length && !S.pending.length && !S.busy && !S.tasks.length) {
+    S.finished = true; S.overAt = S.t + 4200; $('#over').textContent = '🏁 Carrera finalizada · todos los pasos quedaron registrados'; $('#over').classList.add('show');
+  }
+  if (S.finished && S.t >= S.overAt) reset();
+}
+function reset() {
+  Object.assign(S, { t: 0, tasks: [], packets: [], actors: [], queue: [], db: [], nextSpawn: 600, cursor: 0, finished: false, reg: 0, pending: [], busy: false });
+  RIDERS.forEach((r) => { r.cross = 0; }); gRiders.innerHTML = ''; pk.innerHTML = ''; $('#log').innerHTML = '';
+  ['#cQ', '#cReg', '#cDb', '#sCnt'].forEach((s) => { $(s).textContent = 0; }); $('#sLast').textContent = '—'; $('#pNum').textContent = '—'; $('#pName').textContent = 'Esperando…'; $('#pInfo').innerHTML = '&nbsp;';
+  $('#disp').textContent = '---'; $('#who').innerHTML = '&nbsp;'; $('#bub').setAttribute('opacity', 0); $('#over').classList.remove('show'); renderTv(); narr('Nueva carrera: los ciclistas se acercan a la meta.', 'cru');
+}
+$('#bPlay').onclick = (e) => { S.paused = !S.paused; e.target.textContent = S.paused ? '▶ Reanudar' : '⏸ Pausar'; e.target.classList.toggle('on', !S.paused); };
+$('#spd').onclick = (e) => { if (!e.target.dataset.s) return; S.speed = +e.target.dataset.s; document.querySelectorAll('#spd button').forEach((b) => b.classList.toggle('on', b === e.target)); };
+$('#bNet').onclick = (e) => {
+  S.online = !S.online; e.target.classList.toggle('on', !S.online); e.target.textContent = S.online ? '📡 Simular caída de internet' : '✅ Restablecer internet';
+  const n = $('#net'); n.textContent = S.online ? 'en línea' : 'SIN INTERNET'; n.classList.toggle('off', !S.online);
+  if (S.online) { narr('Volvió el internet: el celular envía los pasos guardados. No se pierde ninguno.', 'reg'); flushQueue(); } else narr('Se cayó el internet: el registrador sigue tecleando y la app guarda los pasos en cola.', 'reg');
+};
+$('#bReset').onclick = reset;
+let last = performance.now();
+(function loop(now) { const dt = Math.min(60, now - last) * S.speed; last = now; if (!S.paused) step(dt); requestAnimationFrame(loop); })(last);
+new ResizeObserver(drawLinks).observe(stage); drawLinks(); renderTv();
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) $('#bPlay').click();
+</script>
+</body>
+</html>
