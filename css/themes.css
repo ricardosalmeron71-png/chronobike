@@ -1,0 +1,226 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ChronoBike · Diseños alternativos
+   Se activan con <html data-theme="pista|editorial|sendero|minimal|retro">.
+   Base común: superficies planas, sin degradados ni resplandores,
+   jerarquía por tipografía, espacio y líneas — no por efectos.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Base común a todos los diseños nuevos ── */
+html[data-theme]{--on-accent:#fff;--on-live:#0b0b0b;--live:var(--lime);--row-line:var(--line);--num:var(--display)}
+html[data-theme] body{background:var(--bg)}
+html[data-theme] .card,html[data-theme] .table-card,html[data-theme] .podium-card,html[data-theme] .event-card,
+html[data-theme] .kpi,html[data-theme] .list-item,html[data-theme] .start-item,html[data-theme] .feed li{background:var(--surface);box-shadow:var(--shadow)}
+html[data-theme] .event-card::after,html[data-theme] .track{display:none}
+html[data-theme] .topbar{background:var(--bar,var(--bg));backdrop-filter:none}
+html[data-theme] .sidenav{background:var(--bg2)}
+html[data-theme] .btn{background:var(--surface);border-color:var(--line2);color:var(--text)}
+html[data-theme] .btn:hover{transform:none;border-color:var(--text)}
+html[data-theme] .btn-primary{background:var(--orange);border-color:var(--orange);color:var(--on-accent);box-shadow:none}
+html[data-theme] .btn-primary:hover{filter:brightness(.92)}
+html[data-theme] .btn-lime{background:var(--live);border-color:var(--live);color:var(--on-live)}
+html[data-theme] .btn-ghost{background:transparent}
+html[data-theme] .btn-danger{background:transparent;color:var(--red);border-color:var(--red)}
+html[data-theme] .register-btn{background:var(--live);color:var(--on-live);box-shadow:none}
+html[data-theme] .hero h1 span{background:none;-webkit-text-fill-color:currentColor;color:var(--orange)}
+html[data-theme] .logo-svg{filter:none}
+html[data-theme] .live-dot{background:var(--live);animation:none;box-shadow:none}
+html[data-theme] .cat-dot{box-shadow:none}
+html[data-theme] .results td{border-bottom-color:var(--row-line)}
+html[data-theme] .results tbody tr:hover{background:var(--hover,rgba(127,127,127,.06))}
+html[data-theme] .key{background:var(--surface2);border-color:var(--line2);color:var(--text)}
+html[data-theme] .dorsal-display{background:var(--bg2)}
+html[data-theme] .rider-preview{background:var(--surface2)}
+html[data-theme] .avatar{background:color-mix(in srgb,var(--c,#888) 22%,var(--surface));color:var(--text);border-color:color-mix(in srgb,var(--c,#888) 60%,transparent)}
+html[data-theme] .cat-chip{background:var(--surface);color:var(--muted)}
+html[data-theme] .cat-chip.on{color:var(--text);background:color-mix(in srgb,var(--c,var(--orange)) 16%,var(--surface))}
+html[data-theme] .sidenav button.on{color:var(--text);background:var(--surface2);box-shadow:inset 3px 0 0 var(--orange)}
+html[data-theme] .seg{background:var(--surface)} html[data-theme] .seg button.on{background:var(--bg2)}
+html[data-theme] .modal{background:var(--bg2);box-shadow:0 20px 60px -20px rgba(0,0,0,.35)}
+html[data-theme] .modal-wrap{background:rgba(0,0,0,.45);backdrop-filter:none}
+html[data-theme] .toast{background:var(--surface);color:var(--text)}
+html[data-theme] .field input,html[data-theme] .field select,html[data-theme] .field textarea,html[data-theme] .search input{background:var(--surface);color:var(--text)}
+html[data-theme] .event-pill{background:var(--surface)}
+html[data-theme] .event-pill select option{background:var(--bg2);color:var(--text)}
+html[data-theme] .st-racing{background:color-mix(in srgb,var(--live) 18%,transparent);color:var(--live-text,var(--live))}
+html[data-theme] .st-final{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+html[data-theme] .ev-live .ev-badge,html[data-theme] .tv-live{color:var(--live-text,var(--live));background:color-mix(in srgb,var(--live) 14%,transparent);border-color:color-mix(in srgb,var(--live) 40%,transparent)}
+html[data-theme] .results td.best,html[data-theme] .lap-bar.best b{color:var(--live-text,var(--live))}
+html[data-theme] .lap-bar i{background:var(--c)}
+html[data-theme] .pod-step{background:var(--surface2)!important}
+html[data-theme] .p1 .pod-step{border-color:var(--gold)} html[data-theme] .p2 .pod-step{border-color:var(--silver)} html[data-theme] .p3 .pod-step{border-color:var(--bronze)}
+html[data-theme] .mono,html[data-theme] .pod-time,html[data-theme] .kpi b,html[data-theme] .clock,html[data-theme] .dorsal-num,
+html[data-theme] .tv-time,html[data-theme] .tv-clock,html[data-theme] .pos-n,html[data-theme] .tv-pos{font-family:var(--num)}
+html[data-theme] .doc-body p,html[data-theme] .doc-body li{color:var(--text)} html[data-theme] .doc-body strong{color:var(--text)}
+html[data-theme] .doc-body pre,html[data-theme] .doc-body .mermaid{background:var(--bg2)}
+html[data-theme] .doc-toc a:hover{color:var(--text)}
+html[data-theme] .demo-banner{background:var(--amber);color:#1a1200} html[data-theme] .demo-banner a{color:#1a1200}
+html[data-theme] .tv-board,html[data-theme] .tv-side>div{background:var(--surface)}
+html[data-theme] .tv-row{background:var(--bg2);border-color:var(--line)}
+html[data-theme] .tv-row.p1{background:color-mix(in srgb,var(--gold) 14%,var(--bg2))}
+html[data-theme] .tv-recent li{background:var(--bg2)}
+html[data-theme] .tv-last.flash{animation:none;outline:3px solid var(--live)}
+html[data-theme] .register-btn.flash{animation:none;filter:brightness(1.15)}
+
+/* Temas claros: textos que estaban fijos en blanco */
+html[data-theme=editorial],html[data-theme=sendero],html[data-theme=minimal],html[data-theme=retro]{color-scheme:light}
+html[data-theme=editorial] .brand b,html[data-theme=sendero] .brand b,html[data-theme=minimal] .brand b,html[data-theme=retro] .brand b{color:var(--text)}
+
+/* ═══ 1 · CRONOMETRÍA (broadcast de automovilismo) ═══ */
+html[data-theme=pista]{
+  --bg:#0b0b0c;--bg2:#111113;--surface:#17171a;--surface2:#1f1f23;--line:#2a2a30;--line2:#3a3a42;
+  --text:#f4f4f5;--muted:#a1a1aa;--dim:#6b6b74;--orange:#e10600;--amber:#ffc400;--lime:#00d26a;--live:#00d26a;--green:#00d26a;--red:#ff3b30;--blue:#2f80ed;
+  --gold:#ffd400;--silver:#c9ccd1;--bronze:#d08a52;--shadow:none;--r:2px;
+  --font:'Titillium Web',system-ui,sans-serif;--display:'Titillium Web',sans-serif;--num:'Titillium Web',sans-serif;--bar:#000;
+}
+html[data-theme=pista] *{border-radius:2px!important}
+html[data-theme=pista] .avatar,html[data-theme=pista] .live-dot,html[data-theme=pista] .cat-dot,html[data-theme=pista] .medal,
+html[data-theme=pista] .tv-pager i,html[data-theme=pista] .sp-wheel{border-radius:50%!important}
+html[data-theme=pista] h1,html[data-theme=pista] h2,html[data-theme=pista] h3{text-transform:uppercase;font-weight:900;letter-spacing:.02em}
+html[data-theme=pista] .topbar{border-bottom:3px solid var(--orange)}
+html[data-theme=pista] .table-card::before,html[data-theme=pista] .podium-card::before{height:4px}
+html[data-theme=pista] .results th{background:#000;color:#fff;letter-spacing:.12em}
+html[data-theme=pista] .results tbody tr:nth-child(odd){background:#141417}
+html[data-theme=pista] .pos-n{background:#fff;color:#000;font-weight:900}
+html[data-theme=pista] tr.top1 .pos-n{background:var(--orange);color:#fff}
+html[data-theme=pista] .bib{border-left-width:6px;font-weight:900}
+html[data-theme=pista] .kpi{border-left:4px solid var(--orange)} html[data-theme=pista] .kpi i{background:transparent}
+html[data-theme=pista] .register-btn{text-transform:uppercase;letter-spacing:.12em}
+html[data-theme=pista] .event-card.active{box-shadow:inset 0 -4px 0 var(--orange);border-color:var(--line2)}
+html[data-theme=pista] .tv-row{border-left:6px solid var(--c)}
+
+/* ═══ 2 · EDITORIAL (sección deportiva impresa) ═══ */
+html[data-theme=editorial]{
+  --bg:#f3efe6;--bg2:#ebe5d8;--surface:#fffdf8;--surface2:#f6f1e7;--line:#d9d1bf;--line2:#bfb5a0;
+  --text:#141414;--muted:#5c574d;--dim:#8a8476;--orange:#c8102e;--amber:#b7791f;--lime:#1f7a4d;--live:#c8102e;--live-text:#c8102e;--on-live:#fff;--green:#1f7a4d;--red:#c8102e;--blue:#1f4bd8;
+  --gold:#b8860b;--silver:#7d8590;--bronze:#a0522d;--shadow:none;--r:0px;--hover:#efe8da;
+  --font:'IBM Plex Sans',system-ui,sans-serif;--display:'Fraunces',Georgia,serif;--num:'IBM Plex Mono',ui-monospace,monospace;
+}
+html[data-theme=editorial] .card,html[data-theme=editorial] .table-card,html[data-theme=editorial] .podium-card,html[data-theme=editorial] .event-card,
+html[data-theme=editorial] .kpi,html[data-theme=editorial] .list-item,html[data-theme=editorial] .modal,html[data-theme=editorial] .btn,html[data-theme=editorial] .key,
+html[data-theme=editorial] .seg,html[data-theme=editorial] .field input,html[data-theme=editorial] .field select,html[data-theme=editorial] .search input{border-radius:0!important}
+html[data-theme=editorial] h1{font-weight:800;letter-spacing:-.01em} html[data-theme=editorial] h2,html[data-theme=editorial] h3{font-weight:700}
+html[data-theme=editorial] .hero h1{text-transform:none;font-size:clamp(2.4rem,6vw,4.4rem);letter-spacing:-.02em}
+html[data-theme=editorial] .hero h1 span{font-style:italic}
+html[data-theme=editorial] .topbar{border-bottom:3px double var(--text)}
+html[data-theme=editorial] .table-card::before,html[data-theme=editorial] .podium-card::before{height:0}
+html[data-theme=editorial] .table-card,html[data-theme=editorial] .podium-card{border-top:3px solid var(--text)}
+html[data-theme=editorial] .results th{color:var(--text);border-bottom:2px solid var(--text);font-family:var(--font)}
+html[data-theme=editorial] .pos-n{background:transparent;font-size:1.3rem}
+html[data-theme=editorial] tr.top1 .pos-n,html[data-theme=editorial] tr.top2 .pos-n,html[data-theme=editorial] tr.top3 .pos-n{background:var(--text);color:var(--surface)}
+html[data-theme=editorial] .bib{background:var(--text);color:var(--surface);border-left:0;border-radius:0}
+html[data-theme=editorial] .avatar{border-radius:50%;background:var(--bg2);border-color:var(--line2)}
+html[data-theme=editorial] .kpi i{display:none} html[data-theme=editorial] .kpi{grid-template-columns:1fr;border-left:3px solid var(--text)}
+html[data-theme=editorial] .kpi b{font-family:var(--display);font-size:2.4rem}
+html[data-theme=editorial] .event-card.active{border-color:var(--text);box-shadow:inset 0 0 0 1px var(--text)}
+html[data-theme=editorial] .cat-dot{border-radius:0}
+html[data-theme=editorial] .register-btn{border-radius:0;font-family:var(--font);letter-spacing:.2em;font-size:1.4rem}
+html[data-theme=editorial] .badge{border-radius:0;border:1px solid currentColor;background:transparent}
+
+/* ═══ 3 · SENDERO (marca outdoor / mapa topográfico) ═══ */
+html[data-theme=sendero]{
+  --bg:#ece5d6;--bg2:#e3dac7;--surface:#f7f2e7;--surface2:#efe7d6;--line:#d3c8b1;--line2:#b9ab8f;
+  --text:#1f2a22;--muted:#5e6a5f;--dim:#8a917f;--orange:#c4572a;--amber:#c98b1d;--lime:#3f6b45;--live:#3f6b45;--live-text:#2f5536;--on-live:#fff;--green:#3f6b45;--red:#b23a2b;--blue:#36607a;
+  --gold:#c99a2e;--silver:#8a9399;--bronze:#a86a3f;--shadow:0 1px 0 rgba(31,42,34,.08);--hover:#efe6d3;
+  --font:'Archivo',system-ui,sans-serif;--display:'Archivo Narrow','Archivo',sans-serif;--num:'Archivo Narrow',sans-serif;--bar:#22362b;
+}
+html[data-theme=sendero] body{background-color:var(--bg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%23b9ab8f' stroke-opacity='.35' stroke-width='1'%3E%3Cpath d='M-50 120c80-60 160 40 260-10s180-80 260-20 160 30 200-10'/%3E%3Cpath d='M-50 160c90-55 170 45 270-5s170-70 250-15 150 35 200-5'/%3E%3Cpath d='M-50 200c100-50 180 50 280 0s160-60 240-10 140 40 200 0'/%3E%3Cpath d='M-50 330c70-40 150 30 240-15s200-70 280-25 120 25 180-10'/%3E%3Cpath d='M-50 370c80-35 160 35 250-10s190-60 270-20 120 30 180-5'/%3E%3Cpath d='M-50 480c90-50 190 40 290-10s170-50 250-10 110 20 160-5'/%3E%3Cpath d='M-50 520c100-45 200 45 300-5s160-45 240-5 100 25 160 0'/%3E%3C/g%3E%3C/svg%3E");background-attachment:fixed}
+html[data-theme=sendero] .topbar{color:#f3ecdc;border-bottom:0}
+html[data-theme=sendero] .topbar .brand b,html[data-theme=sendero] .topbar .clock,html[data-theme=sendero] .topbar .sync{color:#f3ecdc}
+html[data-theme=sendero] .topbar .brand small{color:#b9c4b4}
+html[data-theme=sendero] .topbar .btn,html[data-theme=sendero] .topbar .event-pill,html[data-theme=sendero] .topbar .chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#f3ecdc}
+html[data-theme=sendero] .topbar .event-pill select{color:#f3ecdc}
+html[data-theme=sendero] .card,html[data-theme=sendero] .table-card,html[data-theme=sendero] .podium-card,html[data-theme=sendero] .event-card,html[data-theme=sendero] .kpi{border-radius:10px}
+html[data-theme=sendero] h1,html[data-theme=sendero] h2{font-weight:700;letter-spacing:-.005em}
+html[data-theme=sendero] .hero h1{text-transform:none}
+html[data-theme=sendero] .results th{color:var(--muted)}
+html[data-theme=sendero] .pos-n{background:var(--bg2)}
+html[data-theme=sendero] tr.top1 .pos-n{background:#22362b;color:#f3ecdc}
+html[data-theme=sendero] .bib{background:#f7f2e7;color:#1f2a22;border:1px solid #1f2a22;border-left:5px solid var(--c)}
+html[data-theme=sendero] .kpi i{background:var(--bg2);color:#22362b}
+html[data-theme=sendero] .sidenav{background:var(--surface2)}
+html[data-theme=sendero] .register-btn{border-radius:12px}
+html[data-theme=sendero] .event-card.active{border-color:var(--orange);box-shadow:inset 0 0 0 1px var(--orange)}
+html[data-theme=sendero] .tv-head{color:var(--text)}
+
+/* ═══ 4 · MINIMAL (producto de software) ═══ */
+html[data-theme=minimal]{
+  --bg:#fafaf9;--bg2:#f5f5f4;--surface:#ffffff;--surface2:#f5f5f4;--line:#e7e5e4;--line2:#d6d3d1;
+  --text:#0a0a0a;--muted:#57534e;--dim:#a8a29e;--orange:#ff4f00;--amber:#d97706;--lime:#0a0a0a;--live:#16a34a;--live-text:#15803d;--on-live:#fff;--green:#16a34a;--red:#dc2626;--blue:#2563eb;
+  --gold:#ca8a04;--silver:#a8a29e;--bronze:#b45309;--shadow:0 1px 2px rgba(0,0,0,.04);--hover:#fafaf9;
+  --font:'Inter Tight','Inter',system-ui,sans-serif;--display:'Inter Tight','Inter',sans-serif;--num:'Inter Tight',sans-serif;--bar:rgba(255,255,255,.9);
+}
+html[data-theme=minimal] .card,html[data-theme=minimal] .table-card,html[data-theme=minimal] .podium-card,html[data-theme=minimal] .event-card,html[data-theme=minimal] .kpi,html[data-theme=minimal] .list-item{border-radius:12px}
+html[data-theme=minimal] h1,html[data-theme=minimal] h2,html[data-theme=minimal] h3{font-weight:700;letter-spacing:-.025em}
+html[data-theme=minimal] .hero h1{text-transform:none;font-weight:800;letter-spacing:-.04em}
+html[data-theme=minimal] .hero h1 span{color:var(--muted)}
+html[data-theme=minimal] .table-card::before,html[data-theme=minimal] .podium-card::before{height:0}
+html[data-theme=minimal] .btn-primary{background:var(--text);border-color:var(--text);color:#fff}
+html[data-theme=minimal] .register-btn{background:var(--text);color:#fff;border-radius:14px;font-family:var(--font);font-weight:700;letter-spacing:0}
+html[data-theme=minimal] .register-btn i{color:var(--orange)}
+html[data-theme=minimal] .results th{text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:500}
+html[data-theme=minimal] .pos-n{background:transparent;color:var(--muted);font-weight:600}
+html[data-theme=minimal] tr.top1 .pos-n{background:var(--orange);color:#fff}
+html[data-theme=minimal] .bib{background:var(--surface2);color:var(--text);border:0;border-left:3px solid var(--c);font-family:var(--num)}
+html[data-theme=minimal] .kpi i{background:var(--surface2);color:var(--text)}
+html[data-theme=minimal] .kpi span{text-transform:none;letter-spacing:0;font-weight:500}
+html[data-theme=minimal] .sidenav button.on{box-shadow:none;background:var(--surface2)}
+html[data-theme=minimal] .sidenav button.on i{color:var(--orange)}
+html[data-theme=minimal] .event-card.active{border-color:var(--text);box-shadow:0 0 0 1px var(--text)}
+html[data-theme=minimal] .badge{text-transform:none;letter-spacing:0;font-weight:600}
+html[data-theme=minimal] .key{background:#fff;font-family:var(--font);font-weight:600}
+
+/* ═══ 5 · CLUB RETRO (jersey de los 70) ═══ */
+html[data-theme=retro]{
+  --bg:#f2e8d5;--bg2:#eadcc2;--surface:#fbf4e6;--surface2:#f1e5cd;--line:#d8c6a3;--line2:#bba67d;
+  --text:#1b2a4a;--muted:#5a6580;--dim:#8d8f99;--orange:#e8662b;--amber:#e3a72f;--lime:#1b2a4a;--live:#e8662b;--live-text:#c24e18;--on-live:#fff;--green:#2f7d5b;--red:#c2361b;--blue:#1b2a4a;
+  --gold:#e3a72f;--silver:#9aa3b2;--bronze:#b8693a;--shadow:4px 4px 0 rgba(27,42,74,.12);--hover:#f6ecd8;
+  --font:'Work Sans',system-ui,sans-serif;--display:'Big Shoulders Display','Work Sans',sans-serif;--num:'Big Shoulders Display',sans-serif;--bar:#1b2a4a;
+}
+html[data-theme=retro] .topbar{color:#f2e8d5;border-bottom:0;box-shadow:inset 0 -6px 0 var(--orange),inset 0 -12px 0 var(--amber)}
+html[data-theme=retro] .topbar .brand b,html[data-theme=retro] .topbar .clock,html[data-theme=retro] .topbar .sync{color:#f2e8d5}
+html[data-theme=retro] .topbar .btn,html[data-theme=retro] .topbar .event-pill,html[data-theme=retro] .topbar .chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#f2e8d5}
+html[data-theme=retro] .topbar .event-pill select{color:#f2e8d5}
+html[data-theme=retro] .card,html[data-theme=retro] .table-card,html[data-theme=retro] .podium-card,html[data-theme=retro] .event-card,html[data-theme=retro] .kpi,html[data-theme=retro] .list-item{border-radius:6px;border:2px solid var(--text)}
+html[data-theme=retro] .table-card::before,html[data-theme=retro] .podium-card::before{height:8px;background:linear-gradient(var(--c) 0 50%,var(--amber) 50% 100%)}
+html[data-theme=retro] h1,html[data-theme=retro] h2,html[data-theme=retro] h3{text-transform:uppercase;font-weight:900;letter-spacing:.01em}
+html[data-theme=retro] .hero h1 span{color:var(--orange)}
+html[data-theme=retro] .btn{border:2px solid var(--text);border-radius:6px;font-weight:700}
+html[data-theme=retro] .btn-primary{background:var(--orange);color:#fff;border-color:var(--text);box-shadow:3px 3px 0 var(--text)}
+html[data-theme=retro] .register-btn{background:var(--orange);color:#fff;border:2px solid var(--text);box-shadow:5px 5px 0 var(--text);border-radius:8px}
+html[data-theme=retro] .results th{background:var(--text);color:#f2e8d5}
+html[data-theme=retro] .pos-n{background:var(--surface2);border:2px solid var(--text)}
+html[data-theme=retro] tr.top1 .pos-n{background:var(--amber)}
+html[data-theme=retro] .bib{background:#fff;color:var(--text);border:2px solid var(--text);border-left:6px solid var(--c)}
+html[data-theme=retro] .kpi i{background:var(--text);color:var(--amber)}
+html[data-theme=retro] .event-card.active{box-shadow:4px 4px 0 var(--orange)}
+html[data-theme=retro] .key{border:2px solid var(--text);box-shadow:2px 2px 0 var(--text)}
+html[data-theme=retro] .badge{border:1.5px solid currentColor}
+
+/* ── Selector de diseño ── */
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.7rem;margin-top:1rem}
+.theme-opt{display:grid;grid-template-columns:auto 1fr auto;gap:.8rem;align-items:start;text-align:left;padding:.9rem;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--text);cursor:pointer}
+.theme-opt:hover{border-color:var(--text)} .theme-opt.on{border-color:var(--orange);box-shadow:inset 0 0 0 1px var(--orange)}
+.theme-sw{display:grid;grid-template-columns:1fr 1fr;width:44px;height:44px;border-radius:8px;overflow:hidden;border:1px solid var(--line2)} .theme-sw i{display:block}
+.theme-txt b{display:block;font-size:1rem} .theme-txt b small{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-left:.3rem}
+.theme-txt span{display:block;font-size:.8rem;color:var(--muted);margin-top:.2rem;line-height:1.35} .theme-txt em{display:block;font-style:normal;font-size:.72rem;color:var(--dim);margin-top:.35rem}
+.theme-check{color:var(--orange);opacity:0;font-size:1.2rem} .theme-opt.on .theme-check{opacity:1}
+
+/* Podio en diseños claros: número en tinta, color del metal como borde superior */
+html[data-theme=editorial] .pod-step,html[data-theme=sendero] .pod-step,html[data-theme=minimal] .pod-step,html[data-theme=retro] .pod-step{color:var(--text)!important;border-top-width:4px!important}
+html[data-theme=editorial] .p1 .pod-step,html[data-theme=sendero] .p1 .pod-step,html[data-theme=minimal] .p1 .pod-step,html[data-theme=retro] .p1 .pod-step{background:color-mix(in srgb,var(--gold) 22%,var(--surface))!important}
+html[data-theme=editorial] .pod-gap.lead,html[data-theme=sendero] .pod-gap.lead,html[data-theme=minimal] .pod-gap.lead,html[data-theme=retro] .pod-gap.lead{color:var(--text)}
+
+/* Pantalla de acceso */
+html[data-theme] .login-art{background:var(--bg2)}
+html[data-theme] .login-art h1{color:var(--text)} html[data-theme] .login-art h1 span{color:var(--orange)}
+html[data-theme] .login-art .feat div{color:var(--muted)} html[data-theme] .login-art .feat i{background:var(--surface);color:var(--orange)}
+html[data-theme=pista] .login-art{background:#000;border-right:3px solid var(--orange)}
+html[data-theme=sendero] .login-art,html[data-theme=retro] .login-art{background:var(--bar)}
+html[data-theme=sendero] .login-art h1,html[data-theme=retro] .login-art h1,html[data-theme=sendero] .login-art .brand b,html[data-theme=retro] .login-art .brand b{color:#f3ecdc}
+html[data-theme=sendero] .login-art .feat div,html[data-theme=retro] .login-art .feat div{color:#c9cfc4}
+html[data-theme=sendero] .login-art .feat i,html[data-theme=retro] .login-art .feat i{background:rgba(255,255,255,.1)}
+html[data-theme=retro] .login-art{box-shadow:inset -8px 0 0 var(--orange),inset -16px 0 0 var(--amber)}
+html[data-theme] .demo-hint{background:color-mix(in srgb,var(--amber) 12%,var(--surface));border-color:color-mix(in srgb,var(--amber) 45%,transparent);color:var(--text)}
+html[data-theme] .demo-hint code{background:var(--surface2);color:var(--text)}
+html[data-theme] .tv-hint{background:var(--surface);color:var(--text)}
+html[data-theme=sendero] .login-art p,html[data-theme=retro] .login-art p{color:#c3cad6}

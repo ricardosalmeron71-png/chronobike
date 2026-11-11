@@ -330,6 +330,20 @@ Para capacitar al staff **sin tocar los datos reales**:
 💡 El demo se queda activo en ese navegador hasta que salgas. Lo que hagas en el demo se guarda solo en ese navegador y **nunca** llega a la base de datos real. Para reiniciarlo: **Importar y ajustes → Restablecer datos de demostración**.
 ⚠️ El día de la carrera, revisa que **ningún** celular ni la TV tengan la franja o la etiqueta DEMO.
 
+### C6f. Diseño de la app 🎨
+👆 **Diseño**, arriba en el panel (solo administradores; en el celular está en **Más**). Toca una opción para verla **en vivo**, y luego **Usar este diseño**. Se aplica en ese dispositivo a la vista pública, el panel y la Pantalla TV.
+
+![Selector de diseño](img/39-selector-diseno.png)
+
+| Diseño | Idea | Vista |
+|---|---|---|
+| **Original** | Oscuro azul noche con naranja | — |
+| **Cronometría** | Torre de tiempos de automovilismo: negro, rojo señal, esquinas rectas | ![](img/40-diseno-cronometria.png) |
+| **Editorial** | Periódico deportivo: papel, tinta, titulares serif | ![](img/41-diseno-editorial.png) |
+| **Sendero** | Marca outdoor: bosque, arena, curvas de nivel | ![](img/42-diseno-sendero.png) |
+| **Minimal** | Software moderno: blanco, líneas finas, un acento | ![](img/43-diseno-minimal.png) |
+| **Club Retro** | Jersey de los 70: crema, azul marino, franjas | ![](img/44-diseno-retro.png) |
+
 ### C7. Respaldo 💾
 👆 **Descargar respaldo completo (JSON)** después de cada evento. Guarda todo: eventos, corredores, categorías, equipos y todos los pasos.
 

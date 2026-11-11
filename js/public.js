@@ -3,6 +3,8 @@ import { store, FORCED_DEMO } from './store.js';
 import { computeResults, eventSummary } from './results.js';
 import { $, $$, esc, brand, fmtDate, fmtClock, toast } from './ui.js';
 import { showSplash } from './splash.js';
+import { initTheme } from './theme.js';
+initTheme();
 import { eventCard, kpis, podium, resultsTable, riderDetail, liveFeed, EVENT_STATUS } from './views.js';
 
 const state = { eventId: null, cat: 'ALL', view: 'podios', q: '', laps: [], groups: [] };

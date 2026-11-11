@@ -8,6 +8,8 @@ import { computeResults, fmtDuration, fmtGap, STATUS } from './results.js';
 import { $, esc, brand, fmtDate, fmtClock } from './ui.js';
 import { STATUS_UI } from './views.js';
 import { showSplash } from './splash.js';
+import { initTheme } from './theme.js';
+initTheme();
 
 const qs = new URLSearchParams(location.search);
 const S = {

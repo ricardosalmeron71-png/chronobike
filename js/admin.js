@@ -4,6 +4,8 @@ import { CONFIG } from './config.js';
 import { computeResults, eventSummary, resultsToCSV, fmtDuration, STATUS } from './results.js';
 import { $, $$, esc, toast, modal, confirmDialog, fmtDate, fmtClock, toLocalInput, fromLocalInput, avatar, resizeImage, download, brand } from './ui.js';
 import { showSplash } from './splash.js';
+import { initTheme, openThemePicker } from './theme.js';
+initTheme();
 import { pageDocs } from './docs.js';
 import { parseLaps } from './lapimport.js';
 import { podium, resultsTable, riderDetail, kpis, EVENT_STATUS } from './views.js';
@@ -108,6 +110,7 @@ function renderLayout() {
     <span class="spacer"></span>
     <span class="sync" id="sync"><span class="dot"></span><span></span></span>
     <span class="clock hide-m" id="clock">${fmtClock(new Date().toISOString())}</span>
+    ${store.isAdmin() ? '<button class="btn btn-sm btn-ghost hide-m" id="themeBtn" title="Cambiar diseño de la app"><i class="fa-solid fa-palette"></i> Diseño</button>' : ''}
     <a class="btn btn-sm btn-ghost hide-m" href="./tv.html" target="_blank" id="tvLink"><i class="fa-solid fa-tv"></i> Pantalla TV</a>
     <a class="btn btn-sm btn-ghost hide-m" href="./index.html" target="_blank"><i class="fa-solid fa-eye"></i> Vista pública</a>
   </header>
@@ -123,17 +126,20 @@ function renderLayout() {
   fillEventSelect();
   if (S.eventId) $('#tvLink').href = `./tv.html?e=${encodeURIComponent(S.eventId)}`;
   $$('[data-page]').forEach((b) => b.onclick = () => go(b.dataset.page));
+  $('#themeBtn') && ($('#themeBtn').onclick = openThemePicker);
   $('#logout').onclick = async () => { await store.signOut(); location.hash = ''; location.reload(); };
   $('#moreBtn').onclick = () => {
     const m = modal(`<h3>Menú</h3><div class="list" style="margin-top:1rem">
       <div class="event-pill"><i class="fa-solid fa-flag-checkered" style="color:var(--orange)"></i><select id="eventSel2"></select></div>
       ${pages.slice(5).map((p) => `<button class="btn" data-go="${p.id}"><i class="fa-solid ${p.icon}"></i>${p.label}</button>`).join('')}
       <a class="btn" href="./index.html" target="_blank"><i class="fa-solid fa-eye"></i> Vista pública</a>
+      ${store.isAdmin() ? '<button class="btn" data-theme-pick><i class="fa-solid fa-palette"></i> Diseño de la app</button>' : ''}
       <a class="btn" href="./tv.html${S.eventId ? '?e=' + encodeURIComponent(S.eventId) : ''}" target="_blank"><i class="fa-solid fa-tv"></i> Pantalla TV de meta</a>
       <button class="btn btn-danger" data-logout><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión (${esc(displayUser(store.user.email))})</button></div>`);
     fillEventSelect($('#eventSel2', m.el));
     $$('[data-go]', m.el).forEach((b) => b.onclick = () => { m.close(); go(b.dataset.go); });
     $('[data-logout]', m.el).onclick = () => $('#logout').click();
+    $('[data-theme-pick]', m.el) && ($('[data-theme-pick]', m.el).onclick = () => { m.close(); setTimeout(openThemePicker, 220); });
   };
   updateNav();
 }
