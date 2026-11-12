@@ -108,6 +108,7 @@ function renderLayout() {
   <header class="topbar">${brand('Staff')}
     <div class="event-pill hide-m"><i class="fa-solid fa-flag-checkered" style="color:var(--orange)"></i><select id="eventSel" aria-label="Evento activo"></select></div>
     <span class="spacer"></span>
+    <button class="btn btn-sm btn-ghost" id="bTest" title="Probar sonido y vibración" aria-label="Probar sonido y vibración"><i class="fa-solid fa-bell"></i></button>
     <span class="sync" id="sync"><span class="dot"></span><span></span></span>
     <span class="clock hide-m" id="clock">${fmtClock(new Date().toISOString())}</span>
     ${store.isAdmin() ? '<button class="btn btn-sm btn-ghost hide-m" id="themeBtn" title="Cambiar diseño de la app"><i class="fa-solid fa-palette"></i> Diseño</button>' : ''}
@@ -127,6 +128,7 @@ function renderLayout() {
   if (S.eventId) $('#tvLink').href = `./tv.html?e=${encodeURIComponent(S.eventId)}`;
   $$('[data-page]').forEach((b) => b.onclick = () => go(b.dataset.page));
   $('#themeBtn') && ($('#themeBtn').onclick = openThemePicker);
+  $('#bTest').onclick = () => { feedback('ok'); toast('🔔 Sonido y vibración probados. Si no se oye, sube el volumen multimedia (en iPhone, apaga el modo silencio; el iPhone no vibra desde el navegador).', 'info', 6500); };
   $('#logout').onclick = async () => { await store.signOut(); location.hash = ''; location.reload(); };
   $('#moreBtn').onclick = () => {
     const m = modal(`<h3>Menú</h3><div class="list" style="margin-top:1rem">
@@ -209,7 +211,7 @@ function pageCrono(main) {
 
 function keyPress(k) {
   if (k === 'C') S.dorsal = ''; else if (k === 'B') S.dorsal = S.dorsal.slice(0, -1); else if (S.dorsal.length < 4) S.dorsal += k;
-  navigator.vibrate?.(15); renderPreview();
+  navigator.vibrate?.(25); try { audio(); } catch { /* sin audio */ } renderPreview();
 }
 function onKey(e) {
   if (S.page !== 'crono' || !$('#keypad') || $('.modal-wrap')) return;
@@ -240,20 +242,41 @@ function renderPreview() {
     <div class="rp-laps" style="color:${done >= target ? 'var(--green)' : 'var(--lime)'}">${done >= target ? '<i class="fa-solid fa-flag-checkered"></i>' : `V${done + 1}`}<small class="muted">${done >= target ? 'ya terminó' : `de ${target}`}</small></div>`;
 }
 
-let audioCtx;
-function beep(ok = true) {
+// ── Sonido y vibración FUERTES: pensados para la meta (ruido, sol, celular en el bolsillo) ──
+// Tonos de onda cuadrada entre 2 y 3.5 kHz (donde el oído es más sensible y las bocinas de celular rinden más),
+// a volumen máximo con un compresor para que no distorsione. Cada tipo de aviso suena y vibra distinto.
+let audioCtx, master;
+function audio() {
+  audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!master) {
+    const comp = audioCtx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 8;
+    master = audioCtx.createGain(); master.gain.value = 1; master.connect(comp); comp.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+function tone(freq, at, dur, type = 'square') {
+  const ctx = audio(); const t = ctx.currentTime + at; const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(1, t + 0.01); g.gain.setValueAtTime(1, t + dur - 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
+}
+const VIBRATION = { ok: [220, 90, 220], finish: [300, 100, 300, 100, 700], bad: [700], start: [450] };
+/** kind: 'ok' paso registrado · 'finish' terminó todas sus vueltas · 'bad' error o dorsal no inscrito · 'start' salida */
+function feedback(kind = 'ok') {
   try {
-    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-    o.frequency.value = ok ? 1320 : 440; g.gain.value = 0.08; o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + (ok ? 0.12 : 0.3));
+    if (kind === 'ok') { tone(2000, 0, 0.13); tone(2600, 0.17, 0.2); }
+    else if (kind === 'finish') { tone(1800, 0, 0.12); tone(2300, 0.15, 0.12); tone(2900, 0.3, 0.12); tone(3500, 0.45, 0.4); }
+    else if (kind === 'bad') tone(330, 0, 0.6, 'sawtooth');
+    else if (kind === 'start') { tone(1500, 0, 0.15); tone(2200, 0.2, 0.45); }
   } catch { /* sin audio */ }
+  navigator.vibrate?.(VIBRATION[kind] || VIBRATION.ok); // en Android; iPhone no permite vibrar desde el navegador
 }
 
 async function registerLap() {
   const e = ev(); const dorsal = parseInt(S.dorsal, 10);
   if (!e) return toast('Selecciona un evento', 'err');
-  if (!dorsal) { beep(false); return toast('Ingresa un dorsal', 'warn'); }
+  if (!dorsal) { feedback('bad'); return toast('Ingresa un dorsal', 'warn'); }
   const ts = new Date().toISOString(); // la hora se toma al tocar, antes de cualquier confirmación
   const rider = D().riders.find((r) => Number(r.dorsal) === dorsal);
   const last = S.laps.filter((l) => Number(l.dorsal) === dorsal).sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
@@ -265,11 +288,11 @@ async function registerLap() {
   S.lastId = lap.id; S.dorsal = '';
   await reloadLaps();
   const now = rowFor(dorsal);
-  beep(true); navigator.vibrate?.([40, 40, 40]);
+  const justFinished = !!(now && now.r.status === STATUS.FINAL && now.r.lapsDone === now.r.targetLaps && found?.r.status !== STATUS.FINAL);
+  feedback(!rider ? 'bad' : justFinished ? 'finish' : 'ok');
   const b = $('#regBtn'); b?.classList.remove('flash'); void b?.offsetWidth; b?.classList.add('flash');
   toast(rider ? `#${dorsal} ${rider.name.split(' ')[0]} · V${now?.r.lapsDone ?? '?'}/${now?.r.targetLaps ?? '?'} · ${fmtDuration(now?.r.splits.at(-1)?.ms)}` : `Paso de #${dorsal} registrado (dorsal no dado de alta)`, rider ? 'ok' : 'warn');
-  if (!rider) beep(false);
-  if (now && now.r.status === STATUS.FINAL && now.r.lapsDone === now.r.targetLaps && found?.r.status !== STATUS.FINAL) toast(`🏁 #${dorsal} TERMINÓ · ${fmtDuration(now.r.total)}`, 'ok', 3500);
+  if (justFinished) toast(`🏁 #${dorsal} TERMINÓ · ${fmtDuration(now.r.total)}`, 'ok', 3500);
   renderPreview(); renderCronoSide();
 }
 
@@ -300,13 +323,13 @@ function renderCronoSide() {
         <button class="btn btn-sm btn-icon btn-ghost" data-del-lap="${esc(l.id)}" title="Eliminar paso"><i class="fa-solid fa-trash-can"></i></button></li>`;
     }).join('')}</ul>` : '<div class="empty small"><i class="fa-solid fa-flag"></i>Aún no hay pasos registrados</div>'}</div>`;
 
-  $$('[data-start]', side).forEach((b) => b.onclick = async () => { await store.saveEventCategory(e.id, b.dataset.start, { start_at: new Date().toISOString() }); await reloadLaps(); renderCronoSide(); toast(`¡Salida! ${catById(b.dataset.start).name}`); beep(); });
+  $$('[data-start]', side).forEach((b) => b.onclick = async () => { await store.saveEventCategory(e.id, b.dataset.start, { start_at: new Date().toISOString() }); await reloadLaps(); renderCronoSide(); toast(`¡Salida! ${catById(b.dataset.start).name}`); feedback('start'); });
   $('#startAll').onclick = async () => {
     const now = new Date().toISOString(); const pend = cats.filter((c) => !ecs.find((y) => y.category_id === c.id)?.start_at);
     if (!pend.length) return toast('Todas las categorías ya tienen salida', 'info');
     if (!(await confirmDialog('Dar salida', `Se registrará la salida AHORA (${fmtClock(now)}) para ${pend.length} categoría(s).`, { ok: '¡Salida!', danger: false }))) return;
     for (const c of pend) await store.saveEventCategory(e.id, c.id, { start_at: now });
-    await reloadLaps(); renderCronoSide(); beep(); toast('¡Salida registrada!');
+    await reloadLaps(); renderCronoSide(); feedback('start'); toast('¡Salida registrada!');
   };
   $$('[data-edit-start]', side).forEach((b) => b.onclick = () => editStart(b.dataset.editStart));
   $$('[data-del-lap]', side).forEach((b) => b.onclick = async () => {

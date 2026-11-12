@@ -1,8 +1,8 @@
-# 🧭 ChronoBike hoy (sin chip) · esquema y simulación
+# 🧭 Sistema actual · esquema y simulación
 
 > **Estado: funciona hoy.** Una persona en la meta registra cada paso por dorsal desde el celular, y los resultados llegan solos a la TV, al público y al panel del staff.
 
-![Ilustración del sistema actual sin chip](img/sistema-actual-ilustracion.png)
+![Ilustración del sistema actual](img/sistema-actual-ilustracion.png)
 
 ▶ **[Abrir la simulación interactiva](../docs/animacion-actual.html)**: el registrador teclea, la app registra, el dato viaja a la nube y a las pantallas. Incluye el **retraso de captura** real, la **caída de internet** (cola en el celular), el esquema de bloques, el plano de la meta y capturas reales.
 
@@ -21,7 +21,7 @@ flowchart LR
   DB --> TV["Pantalla TV"]
 ```
 
-Todo el software de este esquema **ya existe**. El único paso humano es el del registrador, que es lo que el chip automatizaría.
+Todo el software de este esquema **ya existe y funciona**. El paso humano es el del registrador: de su atención y rapidez depende la precisión del tiempo.
 
 ## 2. Qué pasa con cada paso por meta
 
@@ -50,7 +50,7 @@ La **hora del paso es la del momento en que se toca REGISTRAR**, no la del cruce
 
 1. **Mira** el número de la placa del ciclista que cruza.
 2. **Teclea** el dorsal. La app muestra quién es, su categoría y qué vuelta le toca (verde = inscrito, amarillo = no inscrito).
-3. **Toca REGISTRAR PASO** (o `Enter` en computadora). Suena un bip y aparece el aviso.
+3. **Toca REGISTRAR PASO** (o `Enter` en computadora). Suena un bip fuerte, el celular vibra y aparece el aviso.
 4. Si completó todas sus vueltas, aparece **🏁 TERMINÓ** con su tiempo oficial.
 
 ![Dorsal tecleado](img/12-crono-dorsal.png)
@@ -81,16 +81,3 @@ La **hora del paso es la del momento en que se toca REGISTRAR**, no la del cruce
 - La precisión es de **≈1 segundo** y depende de la persona.
 - Con muchos ciclistas llegando juntos, **los últimos del pelotón se registran con más retraso**.
 - Es un solo punto de lectura humano: conviene un respaldo.
-
-## 7. Sin chip y con chip, lado a lado
-
-| | **Hoy (manual)** | **Con chip (propuesta)** |
-|---|---|---|
-| Quién lee el paso | Una persona, por dorsal | Antenas leen el tag de la placa |
-| Precisión | ≈ 1 segundo | Décimas de segundo |
-| Pelotones grandes | Se acumula retraso; hace falta más gente | Lee varios tags a la vez |
-| Hardware extra | Solo celular, laptop y TV | Lector, antenas, tags, energía |
-| Estado | ✅ Funciona hoy | 🟠 Por construir |
-| Respaldo | Segundo registrador | Registro manual |
-
-Ver la propuesta: [Sistema con chip](SISTEMA_CHIP.md).

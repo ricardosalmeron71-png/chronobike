@@ -165,7 +165,7 @@ Reproduce un día real. Roles:
 - [ ] Batería al 100 % y una batería externa.
 - [ ] Hora automática activada.
 - [ ] Sesión iniciada, **evento correcto** seleccionado y punto 🟢.
-- [ ] Brillo al máximo y sonido activado.
+- [ ] Brillo al máximo, volumen multimedia al máximo y **prueba con el botón 🔔** (sonido y vibración).
 - [ ] **Sin franja amarilla de DEMO** (si aparece: *Salir del demo*).
 - [ ] Prueba: registra el dorsal de prueba y **bórralo**.
 - [ ] TV o proyector en la meta con `tv.html` en pantalla completa (tecla **F**).

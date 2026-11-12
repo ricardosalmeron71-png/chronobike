@@ -7,7 +7,7 @@
 
 ## 1. El problema
 
-En las carreras locales de MTB, el cronometraje suele hacerse con libreta y cronómetro, con hojas de Excel, o con sistemas de chip que cuestan miles de pesos por evento. Eso trae problemas:
+En las carreras locales de MTB, el cronometraje suele hacerse con libreta y cronómetro, con hojas de Excel, o con sistemas profesionales de equipo especializado que cuestan miles de pesos por evento. Eso trae problemas:
 
 - Los resultados tardan horas en publicarse, a veces días, y los corredores preguntan sin parar "¿en qué lugar quedé?".
 - Al copiar datos a mano se cuelan errores: dorsales repetidos, equipos escritos de 5 formas, tiempos mal restados.
@@ -56,20 +56,20 @@ Analizamos la app actual y el archivo `chronobike.xlsx`. Funciona como una sola 
 
 ## 4. Ventajas frente a otras opciones
 
-| Criterio | Libreta + Excel | App anterior | Sistemas de chip RFID | Apps genéricas de cronómetro | **ChronoBike 2.0** |
+| Criterio | Libreta + Excel | App anterior | Sistemas profesionales con equipo especializado | Apps genéricas de cronómetro | **ChronoBike 2.0** |
 |---|:-:|:-:|:-:|:-:|:-:|
-| Costo por evento | Bajo | Gratis | 💲💲💲 (renta de tapetes y chips) | Suscripción | **Gratis** (plan gratuito de Supabase y Netlify) |
+| Costo por evento | Bajo | Gratis | 💲💲💲 (renta de equipo especializado) | Suscripción | **Gratis** (plan gratuito de Supabase y Netlify) |
 | Resultados en vivo para el público | ❌ | Parcial | ✅ | Rara vez | ✅ |
 | Salidas escalonadas por categoría | Manual | ❌ (con error) | ✅ | ❌ | ✅ |
 | Podio por categoría | Manual | ❌ | ✅ | ❌ | ✅ |
 | Historial de eventos | Archivos sueltos | Parcial | Según proveedor | ❌ | ✅ |
 | Seguridad y usuarios | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Funciona sin internet | ✅ | Parcial | ✅ | Parcial | ✅ (cola offline) |
-| Hardware especial | No | No | Sí: tapetes, antenas, chips | No | **No, solo un celular** |
+| Hardware especial | No | No | Sí: tapetes, antenas y decodificadores | No | **No, solo un celular** |
 | Personalizable a tu serial | Sí | Difícil | No | No | ✅ (código propio) |
 | Curva de aprendizaje | Baja | Media | Alta (técnico) | Media | **Muy baja** |
 
-> **Dónde no compite:** en eventos de más de 500 corredores con llegadas masivas, un sistema de chip sigue siendo superior. ChronoBike está pensado para seriales locales y regionales (de 50 a 400 corredores), donde 1 o 2 registradores con celular bastan. En el futuro se puede conectar un lector de chip (ver Hoja de ruta).
+> **Dónde no compite:** en eventos de más de 500 corredores con llegadas masivas, un sistema profesional con equipo especializado sigue siendo superior. ChronoBike está pensado para seriales locales y regionales (de 50 a 400 corredores), donde 1 o 2 registradores con celular bastan.
 
 ## 5. Cómo funciona (arquitectura)
 
@@ -116,7 +116,7 @@ flowchart LR
 1. **Fase 1 (lista):** app pública + staff, importación de Excel, demo, documentación.
 2. **Fase 2:** inscripción en línea de corredores. Fotos en Supabase Storage.
 3. **Fase 3:** campeonato del serial (puntos acumulados por etapa), estados DNF/DSQ, penalizaciones.
-4. **Fase 4:** integración con lector RFID o código QR en el número. Notificaciones por WhatsApp.
+4. **Fase 4:** código QR en el número y notificaciones por WhatsApp.
 
 ## 8. Demo con datos ficticios
 

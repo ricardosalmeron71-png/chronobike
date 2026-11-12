@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ChronoBike hoy (sin chip) · esquema y simulación</title>
+<title>ChronoBike · sistema actual · esquema y simulación</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -68,7 +68,7 @@ ul.refs{padding-left:1.1rem} ul.refs li{margin:.35rem 0} a{color:var(--amber)}
 <div class="wrap">
   <header>
     <span class="badge">Funciona hoy</span>
-    <h1 style="margin-top:.6rem">ChronoBike <span>hoy · sin chip</span></h1>
+    <h1 style="margin-top:.6rem">ChronoBike <span>sistema actual</span></h1>
     <p class="sub">Así funciona el sistema actual: una persona en la meta ve el dorsal del ciclista que cruza, lo teclea en el celular y toca <b>REGISTRAR PASO</b>. De ahí el resultado llega solo a la TV, a los celulares del público y al panel del staff.</p>
   </header>
 
@@ -106,7 +106,7 @@ ul.refs{padding-left:1.1rem} ul.refs li{margin:.35rem 0} a{color:var(--amber)}
   </section>
 
   <h2><i>2</i> · Esquema de bloques</h2>
-  <p class="sub">Todo el software de este esquema ya existe y funciona. El paso humano (ámbar) es lo que el chip automatizaría.</p>
+  <p class="sub">Todo el software de este esquema ya existe y funciona. El paso humano (ámbar) depende de la atención y la rapidez de quien registra.</p>
   <svg class="diagram" id="dBlocks" viewBox="0 0 1200 440" role="img" aria-label="Diagrama de bloques del sistema actual"></svg>
   <div class="legend"><span><i style="background:#22c55e"></i>Software que ya funciona</span><span><i style="background:#ffb21f"></i>Persona</span><span><i style="background:#8b9ab8"></i>Equipo</span></div>
 
@@ -131,7 +131,6 @@ ul.refs{padding-left:1.1rem} ul.refs li{margin:.35rem 0} a{color:var(--amber)}
   </div>
   <h3 style="margin-top:1.2rem">Límites que conviene conocer</h3>
   <ul class="refs"><li>La precisión es de <b>≈1 segundo</b> y depende de la persona (tiempo de reacción y de teclear).</li><li>Con muchos ciclistas llegando juntos, <b>los últimos del pelotón se registran con más retraso</b> (se ve en la simulación).</li><li>Una persona atenta es el único punto de lectura: por eso conviene un respaldo.</li></ul>
-  <p class="note">Si necesitas más precisión o eventos muy grandes, la <a href="animacion-chip.html">propuesta con chip</a> automatiza este paso.</p>
 </div>
 
 <script>
@@ -164,7 +163,7 @@ const T = (parent, x, y, txt, o = {}) => { const t = el('text', { x, y, 'text-an
   el('path', { d: 'M365 355 L408 270', stroke: '#8b9ab8', 'stroke-width': 2, 'stroke-dasharray': '6 5', 'marker-end': 'url(#ar)' }, svg);
   box(820, 320, 175, 70, 'Importar pasos\n(Excel / CSV)', 'carga en lote', 'ok');
   el('path', { d: 'M907 320 L907 242', stroke: '#8b9ab8', 'stroke-width': 2.2, 'marker-end': 'url(#ar)' }, svg);
-  T(svg, 20, 420, 'El paso ámbar (persona) es lo que depende de la atención y de la rapidez de quien registra: el chip lo automatizaría.', { a: 'start', s: 12, c: '#8b9ab8' });
+  T(svg, 20, 420, 'El paso ámbar (persona) depende de la atención y de la rapidez de quien registra.', { a: 'start', s: 12, c: '#8b9ab8' });
 })();
 
 /* ═════════════ Plano de la meta ═════════════ */

@@ -47,7 +47,7 @@ Al abrir la app aparece por unos segundos la **pantalla de carga**: un ciclista 
 | 2 | **Eventos** (tarjetas) | El que dice **EN VIVO** está ocurriendo ahora. Desliza para ver los anteriores y los próximos. |
 | 3 | **Resumen** | Corredores inscritos, en meta, en pista, categorías y pasos registrados |
 | 4 | **Podios / Clasificación / Últimos pasos** | Tres formas de ver el evento |
-| 5 | **Categorías** (chips de colores) | Filtra una sola categoría |
+| 5 | **Categorías** (botones de colores) | Filtra una sola categoría |
 
 ### A2. Ver los podios 🏆
 👆 Toca **Podios**. Cada categoría muestra a sus 3 primeros con medalla 🥇🥈🥉, tiempo oficial y diferencia con el ganador.
@@ -153,7 +153,17 @@ Cada categoría necesita su **hora de salida**. Hay 3 formas:
 
 ![Paso registrado](img/13-crono-registrado.png)
 
-✅ Suena un *bip*, el celular vibra y aparece arriba: `#20 Valeria · V2/2 · 00:24:43`.
+✅ Suena un **bip fuerte (doble)**, el celular **vibra con fuerza** y aparece arriba: `#20 Valeria · V2/2 · 00:24:43`.
+
+| Aviso | Sonido | Vibración |
+|---|---|---|
+| Paso registrado | 2 bips agudos | 2 pulsos fuertes |
+| **TERMINÓ** (completó sus vueltas) | 4 bips ascendentes | Patrón largo |
+| Dorsal no inscrito / sin dorsal | Zumbido grave y largo | 1 pulso largo |
+| Salida dada | 2 tonos | 1 pulso |
+
+🔔 **Probar:** el botón de campana (arriba a la derecha) hace sonar y vibrar el celular. Pruébalo antes de empezar.
+⚠️ Si no se oye, **sube el volumen multimedia** del celular. En **iPhone** apaga el modo silencio; además, el iPhone **no vibra** desde el navegador (en Android sí).
 ✅ Si completó su última vuelta aparece **🏁 TERMINÓ** con su tiempo oficial.
 ✅ El paso aparece primero en **Últimos pasos** y, en 1 o 2 segundos, en los celulares del público.
 
