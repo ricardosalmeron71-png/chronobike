@@ -7,6 +7,7 @@ export const DOCS = [
   { file: 'MANUAL_USUARIO.md', title: 'Manual de usuario', icon: 'fa-book-open', desc: 'Paso a paso con capturas: público, registrador y administrador', roles: ['admin', 'registrador'] },
   { file: 'GUIA_ENTRENAMIENTO.md', title: 'Guías de entrenamiento', icon: 'fa-graduation-cap', desc: 'Módulos, ejercicios, simulacro, checklists y evaluación', roles: ['admin', 'registrador'] },
   { file: 'PRESENTACION.md', title: 'Presentación y ventajas', icon: 'fa-person-chalkboard', desc: 'El proyecto, diagnóstico del sistema anterior, comparativa y costos', roles: ['admin'] },
+  { file: 'PRESENTACION_ANIMADA.md', title: 'Presentación animada', icon: 'fa-film', desc: 'Animación con voz y subtítulos para clientes: versión de 2 min y de 30 s', roles: ['admin'] },
   { file: 'BASE_DE_DATOS_Y_DESPLIEGUE.md', title: 'Base de datos y despliegue', icon: 'fa-database', desc: 'Supabase, Netlify, función de usuarios y mantenimiento', roles: ['admin'] },
   { file: 'SISTEMA_ACTUAL.md', title: 'Sistema actual', icon: 'fa-compass', desc: 'Cómo funciona hoy: esquema, simulación interactiva y plano de la meta', roles: ['admin', 'registrador'] },
 ];

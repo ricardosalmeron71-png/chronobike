@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChronoBike · presentación animada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Caveat:wght@600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b16;--bg2:#0c1222;--surface:#111a2e;--surface2:#16213a;--line:#22304d;--line2:#2d3d60;--text:#e8eefc;--muted:#8b9ab8;--dim:#5d6b88;
+  --orange:#ff5a1f;--amber:#ffb21f;--lime:#c6f432;--green:#22c55e;--red:#f43f5e;--cyan:#22d3ee;--pink:#f472b6;--violet:#a78bfa;
+  --display:'Barlow Condensed','Inter',sans-serif;--bar:58px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#03050b;color:var(--text);font-family:'Inter',system-ui,sans-serif;overflow:hidden}
+#view{position:fixed;inset:0 0 var(--bar) 0;display:grid;place-items:center;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:0 0;overflow:hidden;border-radius:6px;
+  background:radial-gradient(900px 500px at 85% -10%,rgba(255,90,31,.16),transparent 60%),radial-gradient(700px 500px at 0% 110%,rgba(198,244,50,.08),transparent 60%),var(--bg)}
+#scene{position:absolute;inset:0}
+.ab{position:absolute}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:.01em}
+.title{position:absolute;left:80px;top:54px;font-family:var(--display);font-weight:800;font-size:58px;text-transform:uppercase;line-height:1}
+.title b{color:var(--orange)} .title i{font-style:normal;color:var(--lime)}
+.kicker{position:absolute;left:82px;top:30px;font-weight:800;font-size:16px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.phone{position:absolute;background:#04060c;border-radius:42px;padding:13px;box-shadow:0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.55)}
+.phone::before{content:"";position:absolute;top:20px;left:50%;width:84px;height:20px;margin-left:-42px;background:#04060c;border-radius:0 0 14px 14px;z-index:3}
+.scr{position:relative;width:100%;height:100%;border-radius:30px;background:#0a1020;overflow:hidden}
+.tv{position:absolute;background:#04060c;border-radius:14px;padding:12px;box-shadow:0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.5)}
+.tv::after{content:"";position:absolute;left:42%;right:42%;bottom:-26px;height:26px;background:linear-gradient(#1d2740,#0d1322);border-radius:0 0 6px 6px}
+.lap{position:absolute;background:#04060c;border-radius:14px 14px 4px 4px;padding:10px;box-shadow:0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.5)}
+.lap::after{content:"";position:absolute;left:-30px;right:-30px;bottom:-16px;height:16px;background:linear-gradient(#26314e,#141b2e);border-radius:0 0 14px 14px}
+.chip{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:99px;font-weight:800;font-size:22px;background:var(--surface2);border:1px solid var(--line2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;letter-spacing:.03em;border-radius:14px;text-transform:uppercase}
+.bib{display:inline-block;min-width:54px;text-align:center;background:#fff;color:#0b1020;border-radius:6px;font-weight:800;font-family:var(--display);padding:0 6px}
+.row{display:grid;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);font-size:18px}
+.mono{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.pk{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--lime);box-shadow:0 0 22px 6px rgba(198,244,50,.6);z-index:20}
+.pk.q{background:var(--amber);box-shadow:0 0 22px 6px rgba(255,178,31,.6)}
+svg.ov{position:absolute;inset:0;width:1600px;height:900px;pointer-events:none}
+/* subtítulos */
+#subs{visibility:hidden;position:absolute;left:50%;bottom:34px;transform:translateX(-50%);max-width:1300px;text-align:center;z-index:50;pointer-events:none}
+#subs span{display:inline;background:rgba(3,5,11,.82);box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:6px 16px;border-radius:10px;font-size:34px;font-weight:700;line-height:1.55;color:#fff;text-shadow:0 2px 6px #000}
+#subs.off{display:none}
+#prog{position:absolute;left:0;top:0;height:5px;background:linear-gradient(90deg,var(--orange),var(--amber));z-index:60;width:0}
+/* barra de control */
+#bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);display:flex;align-items:center;gap:8px;padding:0 12px;background:#0a0f1c;border-top:1px solid var(--line);z-index:100}
+#bar button{font:inherit;font-weight:700;font-size:15px;color:var(--text);background:var(--surface2);border:1px solid var(--line2);border-radius:10px;height:38px;min-width:40px;padding:0 10px;cursor:pointer}
+#bar button:hover{border-color:var(--muted)} #bar button.on{background:var(--orange);border-color:var(--orange);color:#1a0b02}
+#dots{display:flex;gap:5px;flex:1;min-width:0;overflow:hidden;align-items:center}
+#dots i{flex:1;height:8px;border-radius:99px;background:var(--line2);cursor:pointer;position:relative;overflow:hidden;min-width:10px}
+#dots i b{position:absolute;inset:0;width:0;background:var(--orange)}
+#dots i.done b{width:100%}
+#time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;min-width:92px;text-align:center}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden} .seg button{border:0!important;border-radius:0!important}
+#voz{font-size:12px;color:var(--dim);max-width:140px;line-height:1.1}
+.seg{flex-shrink:0}
+@media (max-width:720px){#voz,#time,#dots{display:none}#bar{gap:5px;padding:0 6px;justify-content:space-between}#bar button{min-width:34px;padding:0 8px;font-size:14px}}
+/* portada */
+#cover{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:rgba(3,5,11,.78);backdrop-filter:blur(4px)}
+#cover .box{text-align:center;padding:30px}
+#cover h1{font-size:clamp(40px,7vw,86px);font-weight:800;text-transform:uppercase;line-height:.9} #cover h1 span{color:var(--lime)}
+#cover p{color:var(--muted);font-size:18px;margin:14px 0 26px}
+#cover button{font:inherit;font-family:var(--display);font-size:28px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:16px 32px;border-radius:16px;border:0;background:var(--orange);color:#1a0b02;cursor:pointer;box-shadow:0 0 0 6px rgba(255,90,31,.25)}
+#cover .alt{display:block;margin:16px auto 0;background:none;box-shadow:none;color:var(--muted);font-size:18px;text-decoration:underline;padding:4px}
+#cover.hide{display:none}
+</style>
+</head>
+<body>
+<div id="view"><div id="stage"><div id="prog"></div><div id="scene"></div><div id="subs"><span></span></div></div></div>
+<div id="bar">
+  <button id="bPlay" title="Reproducir / pausa (espacio)">▶</button>
+  <button id="bPrev" title="Escena anterior (←)">⏮</button>
+  <button id="bNext" title="Escena siguiente (→)">⏭</button>
+  <div id="dots"></div>
+  <span id="time">0:00 / 0:00</span>
+  <span class="seg"><button id="vLarga">Larga</button><button id="vCorta">Corta</button></span>
+  <button id="bSubs" class="on" title="Subtítulos (S)">CC</button>
+  <button id="bMute" title="Silenciar (M)">🔊</button>
+  <button id="bLoop" title="Repetir al terminar">🔁</button>
+  <button id="bFull" title="Pantalla completa (F)">⛶</button>
+  <span id="voz"></span>
+</div>
+<div id="cover"><div class="box">
+  <h1>Chrono<span>Bike</span></h1>
+  <p id="coverSub">Presentación · versión larga · 2 min · con voz y subtítulos</p>
+  <button id="bStart">▶ Ver presentación</button>
+  <button class="alt" id="bOther">Ver la versión corta</button>
+</div></div>
+
+<script type="module">
+const $ = (s, r = document) => r.querySelector(s);
+const qs = new URLSearchParams(location.search);
+let VERSION = qs.get('v') === 'corta' ? 'corta' : 'larga';
+
+/* ───────── Guion ───────── */
+const NARR = {
+  larga: [
+    'Esto es ChronoBike: cronometraje de circuitos y resultados en vivo, desde un celular.',
+    'En muchas carreras todavía se cronometra con libreta y Excel. Los resultados tardan horas, se cuelan errores al pasar los datos, y los corredores no dejan de preguntar en qué lugar quedaron.',
+    'Con ChronoBike, preparas el evento en minutos. Creas la carrera, importas a tus corredores desde Excel, y el sistema arma las categorías con sus vueltas y colores.',
+    'El día de la carrera, das la salida de cada categoría con un toque. En la meta, el registrador teclea el dorsal, ve al instante quién es y qué vuelta lleva, y registra el paso. Un sonido fuerte y la vibración lo confirman, y la app avisa si un paso parece duplicado.',
+    'Cada paso llega en segundos a la nube y se reparte en tiempo real: a la pantalla de la meta, al celular del público y al panel del staff. Sin recargar, sin esperar.',
+    '¿Y si se cae el internet? La app sigue registrando, guarda los pasos en el celular y los envía solos cuando vuelve la señal. Ningún paso se pierde.',
+    'Los resultados se calculan solos: podio por categoría, tiempo de cada vuelta, la mejor vuelta, la velocidad promedio, y quien no terminó queda como DNF al cerrar el evento. Todo se exporta a Excel o PDF con un clic.',
+    'El público escanea el código QR de la pantalla y consulta los resultados en su celular, sin descargar nada.',
+    'Y cada evento queda guardado: tu serial completo, con podios y tiempos de todas las etapas, para consultarlo cuando quieras.',
+    'ChronoBike: solo necesitas un celular, resultados en tiempo real, y funciona aunque falle el internet. Agenda una demostración con nuestro equipo.',
+  ],
+  corta: [
+    'ChronoBike: cronometraje y resultados en vivo, desde un celular.',
+    'En la meta, tecleas el dorsal y registras el paso con un toque.',
+    'Los resultados llegan en segundos a la pantalla y al celular del público.',
+    'Podios, tiempos por vuelta y métricas, calculados solos.',
+    'Funciona aunque falle el internet. Agenda tu demostración.',
+  ],
+};
+/* escena: [constructor, duración planeada (s), duración nominal del constructor (s), modo compacto] */
+const PLAN = {
+  larga: [['apertura', 7, 7], ['problema', 13, 13], ['preparar', 13, 13], ['cronometrar', 19, 19], ['vivo', 12, 12],
+    ['offline', 10, 10], ['resultados', 17, 17], ['qr', 8, 8], ['historial', 10, 10], ['cierre', 11, 11]],
+  corta: [['apertura', 6, 7], ['cronometrar', 6, 6, true], ['vivo', 6, 6, true], ['resultados', 6, 6, true], ['cierre', 6, 11]],
+};
+const CPS = 14.5; // caracteres por segundo de la voz (medido en las tomas)
+
+/* ───────── Motor ───────── */
+const root = $('#scene'), stage = $('#stage');
+const EASE = 'cubic-bezier(.2,.8,.2,1)';
+let anims = [], tasks = [], ticks = [], K = 1, playing = false, st = 0, last = 0, idx = 0, ended = false;
+let muted = false, loop = false, subsOn = true;
+let narr = null, voiceMode = 'none', ttsVoice = null;
+const audios = {};
+
+function A(el, kf, at = 0, d = 0.5, o = {}) {
+  if (typeof el === 'string') el = $(el, root);
+  if (!el) return null;
+  const a = el.animate(kf, { duration: d * 1000 * K, delay: at * 1000 * K, easing: o.e || EASE, fill: o.fill || (kf === OUT ? 'forwards' : 'both'), iterations: o.it ?? 1, direction: o.dir || 'normal' });
+  anims.push(a); if (!playing) a.pause(); return a;
+}
+const at = (t, fn) => tasks.push({ t, fn });
+const tick = (fn) => ticks.push(fn);
+const nowS = () => st / 1000 / K;
+const IN = [{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }];
+const POP = [{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1.06)', offset: .7 }, { opacity: 1, transform: 'scale(1)' }];
+const FADE = [{ opacity: 0 }, { opacity: 1 }];
+const OUT = [{ opacity: 1 }, { opacity: 0 }];
+function el(html, parent = root) { const t = document.createElement('template'); t.innerHTML = html.trim(); const n = t.content.firstElementChild; parent.appendChild(n); return n; }
+function type(node, text, t0, cps = 12, caret = true) {
+  tick((t) => { const n = Math.max(0, Math.min(text.length, Math.floor((t - t0) * cps))); const s = text.slice(0, n); const c = caret && t >= t0 && n < text.length ? '▍' : ''; if (node.__s !== s + c) { node.textContent = s + c; node.__s = s + c; } });
+}
+function count(node, a, b, t0, d, fmt = (v) => v) {
+  tick((t) => { const p = Math.max(0, Math.min(1, (t - t0) / d)); const e = 1 - Math.pow(1 - p, 3); node.textContent = fmt(Math.round(a + (b - a) * e)); });
+}
+function fly(from, to, t0, d = 0.8, cls = '') {
+  const p = el(`<div class="pk ${cls}" style="left:${from[0]}px;top:${from[1]}px;opacity:0"></div>`);
+  A(p, [{ left: from[0] + 'px', top: from[1] + 'px', opacity: 1, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)', offset: .2 }, { left: to[0] + 'px', top: to[1] + 'px', opacity: 1, transform: 'scale(1)', offset: .95 }, { left: to[0] + 'px', top: to[1] + 'px', opacity: 0, transform: 'scale(1.8)' }], t0, d, { e: 'cubic-bezier(.5,0,.3,1)' });
+  return p;
+}
+function press(node, t0) { A(node, [{ transform: 'scale(1)', filter: 'brightness(1)' }, { transform: 'scale(.9)', filter: 'brightness(1.6)' }, { transform: 'scale(1)', filter: 'brightness(1)' }], t0, 0.28, { fill: 'none' }); }
+function ripple(cx, cy, t0, color = 'var(--lime)', n = 3, size = 320) {
+  for (let i = 0; i < n; i++) {
+    const r = el(`<div class="ab" style="left:${cx - size / 2}px;top:${cy - size / 2}px;width:${size}px;height:${size}px;border-radius:50%;border:6px solid ${color};opacity:0;z-index:15"></div>`);
+    A(r, [{ opacity: .9, transform: 'scale(.25)' }, { opacity: 0, transform: 'scale(1.25)' }], t0 + i * 0.22, 0.9, { e: 'ease-out', fill: 'forwards' });
+  }
+}
+function title(kicker, html, t0 = 0) {
+  if (kicker) A(el(`<div class="kicker">${kicker}</div>`), FADE, t0, 0.5);
+  A(el(`<div class="title">${html}</div>`), IN, t0 + 0.1, 0.6);
+}
+function link(pts, color = 'var(--line2)', dash = '10 10', w = 4) {
+  const svg = root.querySelector('svg.ov') || el('<svg class="ov" viewBox="0 0 1600 900"></svg>');
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  p.setAttribute('points', pts.map((x) => x.join(',')).join(' ')); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', w); p.setAttribute('stroke-dasharray', dash); p.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(p); return p;
+}
+
+/* ───────── Piezas reutilizables ───────── */
+const CATS = [['Élite varonil', 5, 'var(--orange)'], ['Master 30', 4, 'var(--amber)'], ['Master 40', 4, 'var(--lime)'], ['Femenil', 3, 'var(--pink)'], ['Juvenil', 3, 'var(--cyan)'], ['Infantil', 1, 'var(--violet)']];
+function keypadPhone(x, y, w = 330, h = 640) {
+  const ph = el(`<div class="phone" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><div class="scr" style="padding:46px 18px 18px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:700"><span>Serial Sierra Alta · E3</span><span class="wifi" style="color:var(--green)">● en línea</span></div>
+    <div class="disp mono" style="margin-top:12px;height:86px;border-radius:14px;background:#050810;border:3px solid var(--line2);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:64px;letter-spacing:.06em;color:#fff"></div>
+    <div class="who" style="height:58px;margin:10px 0;border-radius:12px;padding:8px 12px;font-size:15px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--line)">Teclea un dorsal</div>
+    <div class="pad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, 'OK'].map((k) => `<i data-k="${k}" style="font-style:normal;text-align:center;background:var(--surface2);border:1px solid var(--line2);border-radius:12px;font-family:var(--display);font-size:30px;font-weight:700;padding:${h > 600 ? 8 : 4}px 0">${k}</i>`).join('')}</div>
+    <div class="reg btn" style="margin-top:12px;height:${h > 600 ? 64 : 50}px;background:var(--lime);color:#13200a;font-size:28px;width:100%">Registrar paso</div>
+  </div></div>`);
+  return { ph, disp: $('.disp', ph), who: $('.who', ph), reg: $('.reg', ph), key: (k) => $(`[data-k="${k}"]`, ph), wifi: $('.wifi', ph) };
+}
+function typeBib(P, digits, t0, gap = 0.4) {
+  [...digits].forEach((d, i) => { const t = t0 + i * gap; press(P.key(d), t); at(t, () => { P.disp.textContent = digits.slice(0, i + 1); }); });
+}
+function qrSvg(size, seed = 7) {
+  let s = seed; const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+  const n = 25, c = size / n; let r = '';
+  const finder = (x, y) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { if (finder(x, y)) continue; if (rnd() > .52) r += `<rect x="${x * c}" y="${y * c}" width="${c}" height="${c}"/>`; }
+  const f = (x, y) => `<rect x="${x * c}" y="${y * c}" width="${7 * c}" height="${7 * c}" fill="none" stroke="#000" stroke-width="${c}" transform="translate(${c / 2},${c / 2})" style="transform-box:fill-box"/><rect x="${(x + 2) * c}" y="${(y + 2) * c}" width="${3 * c}" height="${3 * c}"/>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="background:#fff;padding:${c}px;box-sizing:content-box;border-radius:8px"><g fill="#000">${r}${f(0, 0)}${f(n - 7, 0)}${f(0, n - 7)}</g></svg>`;
+}
+
+/* ───────── Escenas ───────── */
+const SCENES = {
+  apertura() {
+    el(`<svg class="ov" viewBox="0 0 1600 900">
+      <path d="M0 720 L220 520 L360 610 L560 380 L760 560 L940 330 L1130 540 L1300 430 L1600 650 L1600 900 L0 900Z" fill="#0d1527"/>
+      <path d="M0 790 L260 640 L470 730 L700 560 L930 700 L1160 590 L1400 690 L1600 610 L1600 900 L0 900Z" fill="#111c33"/>
+      <path id="trail" d="M-40 810 C 180 700, 300 760, 470 700 S 760 600, 930 660 S 1250 560, 1640 600" fill="none" stroke="var(--orange)" stroke-width="5" stroke-dasharray="14 12" opacity=".7"/>
+    </svg>`);
+    const bike = el(`<div class="ab" style="left:0;top:0;width:46px;height:46px;margin:-30px 0 0 -23px;offset-path:path('M-40 810 C 180 700, 300 760, 470 700 S 760 600, 930 660 S 1250 560, 1640 600');offset-rotate:auto;font-size:44px;line-height:46px;text-align:center;filter:drop-shadow(0 0 14px rgba(255,90,31,.9))">🚴</div>`);
+    A(bike, [{ offsetDistance: '0%' }, { offsetDistance: '100%' }], 0, 7, { e: 'linear' });
+    const ring = el(`<svg class="ab" style="left:560px;top:150px" width="480" height="480" viewBox="0 0 480 480"><circle cx="240" cy="240" r="220" fill="none" stroke="var(--line)" stroke-width="10"/><circle id="arc" cx="240" cy="240" r="220" fill="none" stroke="var(--lime)" stroke-width="10" stroke-linecap="round" stroke-dasharray="1383" transform="rotate(-90 240 240)"/></svg>`);
+    A($('#arc', ring), [{ strokeDashoffset: 1383 }, { strokeDashoffset: 0 }], 0.2, 2.2, { e: 'ease-in-out' });
+    A(ring, FADE, 0, 0.6);
+    const logo = el(`<div class="ab" style="left:0;right:0;top:300px;text-align:center"><h1 style="font-size:150px;font-weight:800;text-transform:uppercase;line-height:.9">Chrono<span style="color:var(--lime)">Bike</span></h1></div>`);
+    A(logo, POP, 0.6, 0.8);
+    A(el(`<div class="ab" style="left:0;right:0;top:450px;text-align:center;font-size:32px;font-weight:600;color:var(--muted)">Cronometraje de circuitos · resultados en vivo</div>`), IN, 1.4, 0.7);
+    const chips = el(`<div class="ab" style="left:0;right:0;top:560px;display:flex;gap:18px;justify-content:center"></div>`);
+    ['📱 Desde un celular', '⚡ En tiempo real', '📶 Aunque falle el internet'].forEach((t, i) => A(el(`<span class="chip">${t}</span>`, chips), POP, 2.8 + i * 0.4, 0.5));
+  },
+
+  problema() {
+    title('Hoy', 'Así se cronometra en <b>muchas carreras</b>');
+    const note = el(`<div class="ab" style="left:80px;top:180px;width:430px;height:470px;background:#f5efe0;border-radius:10px;transform:rotate(-3deg);box-shadow:0 20px 50px rgba(0,0,0,.5);padding:34px 30px;background-image:repeating-linear-gradient(transparent 0 46px,#b9c6e0 46px 48px);font-family:Caveat,cursive;color:#1f2a44;font-size:38px;line-height:48px"></div>`);
+    A(note, IN, 0.2, 0.6);
+    const lines = ['#127 — 10:42:13', '#88 — 10:42:15', '#301 — 10:42:1?', '#56 — 10:4?:20', '#127 — 10:48:02'];
+    lines.forEach((l, i) => { const d = el(`<div></div>`, note); type(d, l, 0.8 + i * 0.75, 16, false); });
+    const strike = el(`<div class="ab" style="left:110px;top:322px;width:300px;height:5px;background:var(--red);transform:rotate(-6deg);transform-origin:left"></div>`);
+    A(strike, [{ transform: 'rotate(-6deg) scaleX(0)' }, { transform: 'rotate(-6deg) scaleX(1)' }], 3.4, 0.4);
+    // flecha y excel
+    A(el(`<div class="ab" style="left:540px;top:380px;font-size:70px;color:var(--muted)">➜</div>`), FADE, 4.2, 0.4);
+    const xl = el(`<div class="ab card" style="left:640px;top:200px;width:460px;height:430px;padding:0;overflow:hidden;border-radius:12px">
+      <div style="background:#1d6f42;color:#fff;font-weight:800;padding:10px 16px;font-size:18px">resultados_final_v3 (2).xlsx</div>
+      <div class="grid" style="display:grid;grid-template-columns:60px repeat(3,1fr);font-size:17px"></div></div>`);
+    A(xl, IN, 4.4, 0.6);
+    const g = $('.grid', xl); const vals = [['', 'Dorsal', 'Vuelta', 'Tiempo'], ['1', '127', '2', '0:41:52'], ['2', '88', '2', '0:41:54'], ['3', '301', '2', '#¡VALOR!'], ['4', '56', '1', '0:4?:20'], ['5', '127', '2', '0:47:41'], ['6', '212', '?', '…']];
+    vals.forEach((r, i) => r.forEach((c, j) => { const bad = c.includes('#') || c.includes('?'); const cell = el(`<div style="padding:9px 10px;border:1px solid #2b3a58;${i === 0 || j === 0 ? 'background:#16213a;color:var(--muted);font-weight:700' : ''}${bad && i ? ';color:var(--red);font-weight:800;background:rgba(244,63,94,.12)' : ''}">${c}</div>`, g); if (i && j) A(cell, FADE, 4.9 + i * 0.25, 0.2); }));
+    A(el(`<div class="ab" style="left:1010px;top:470px;font-size:60px">⚠️</div>`), POP, 6.6, 0.5);
+    // reloj
+    const clock = el(`<div class="ab" style="left:1170px;top:200px;width:330px;text-align:center"><svg width="250" height="250" viewBox="0 0 250 250"><circle cx="125" cy="125" r="112" fill="var(--surface)" stroke="var(--line2)" stroke-width="10"/><line class="hand" x1="125" y1="125" x2="125" y2="38" stroke="var(--orange)" stroke-width="10" stroke-linecap="round" style="transform-origin:125px 125px"/><circle cx="125" cy="125" r="10" fill="var(--orange)"/></svg><div class="hrs" style="font-family:var(--display);font-weight:800;font-size:68px;color:var(--amber)">+0 h</div><div class="muted" style="font-size:22px;font-weight:600">para tener resultados</div></div>`);
+    A(clock, IN, 5.2, 0.6);
+    A($('.hand', clock), [{ transform: 'rotate(0)' }, { transform: 'rotate(1080deg)' }], 5.6, 3, { e: 'ease-in-out' });
+    count($('.hrs', clock), 0, 3, 5.6, 3, (v) => `+${v} h`);
+    // preguntas
+    [['¿En qué lugar quedé?', 120, 690], ['¿Ya están los resultados?', 560, 720], ['¿Y mi tiempo?', 1010, 690], ['¿Quién ganó Master 40?', 1240, 760]].forEach(([t, x, y], i) =>
+      A(el(`<div class="ab" style="left:${x}px;top:${y}px;background:#fff;color:#111;font-weight:800;font-size:26px;padding:12px 22px;border-radius:22px 22px 22px 4px;box-shadow:0 10px 30px rgba(0,0,0,.4)">${t}</div>`), POP, 8.4 + i * 0.55, 0.5));
+  },
+
+  preparar() {
+    title('Paso 1', 'Prepara tu evento <i>en minutos</i>');
+    const f = el(`<div class="ab card" style="left:80px;top:190px;width:470px;height:470px;padding:28px">
+      <div style="font-family:var(--display);font-weight:800;font-size:32px;text-transform:uppercase;margin-bottom:18px">➕ Nuevo evento</div>
+      ${['Nombre', 'Fecha', 'Distancia por vuelta', 'Lugar'].map((l) => `<div style="font-size:15px;font-weight:700;color:var(--muted);margin-top:14px">${l}</div><div class="fld" style="margin-top:6px;height:52px;border-radius:12px;background:#0a1020;border:2px solid var(--line2);padding:12px 14px;font-size:21px;font-weight:600"></div>`).join('')}
+    </div>`);
+    A(f, IN, 0.2, 0.6);
+    const flds = f.querySelectorAll('.fld');
+    ['Serial Sierra Alta · Etapa 3', '23 nov 2026', '6.2 km', 'Parque El Mirador'].forEach((t, i) => { type(flds[i], t, 0.8 + i * 0.85, 22); at(0.8 + i * 0.85, () => { flds.forEach((x) => (x.style.borderColor = 'var(--line2)')); flds[i].style.borderColor = 'var(--orange)'; }); });
+    at(4.4, () => flds[3].style.borderColor = 'var(--line2)');
+    // importación
+    const imp = el(`<div class="ab card" style="left:610px;top:190px;width:420px;height:470px;padding:28px;text-align:center">
+      <div style="font-family:var(--display);font-weight:800;font-size:32px;text-transform:uppercase">📥 Importar corredores</div>
+      <div class="drop" style="margin:22px auto 0;height:150px;border:3px dashed var(--line2);border-radius:18px;display:grid;place-items:center;color:var(--muted);font-weight:700;font-size:19px">Arrastra tu Excel aquí</div>
+      <div class="num mono" style="font-family:var(--display);font-weight:800;font-size:110px;line-height:1;margin-top:26px;color:var(--lime)">0</div>
+      <div class="muted" style="font-size:22px;font-weight:700">corredores importados</div>
+      <div style="height:12px;border-radius:99px;background:var(--line);margin-top:18px;overflow:hidden"><div class="bar" style="height:100%;width:0;background:var(--lime)"></div></div>
+    </div>`);
+    A(imp, IN, 3.6, 0.6);
+    const file = el(`<div class="ab" style="left:1300px;top:120px;width:120px;text-align:center;z-index:20"><div style="width:96px;height:118px;margin:auto;border-radius:10px;background:#1d6f42;display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:800;font-size:44px;box-shadow:0 14px 34px rgba(0,0,0,.5)">X</div><div style="font-weight:700;font-size:16px;margin-top:6px">corredores.xlsx</div></div>`);
+    A(file, [{ left: '1300px', top: '120px', opacity: 0, transform: 'rotate(12deg)' }, { opacity: 1, offset: .15 }, { left: '760px', top: '255px', opacity: 1, transform: 'rotate(0)', offset: .85 }, { left: '760px', top: '255px', opacity: 0, transform: 'scale(.5)' }], 4.3, 1.3, { e: 'cubic-bezier(.5,0,.3,1)' });
+    at(5.4, () => { const d = $('.drop', imp); d.style.borderColor = 'var(--lime)'; d.style.color = 'var(--lime)'; d.textContent = '✓ corredores.xlsx'; });
+    count($('.num', imp), 0, 256, 5.6, 2.4);
+    A($('.bar', imp), [{ width: '0%' }, { width: '100%' }], 5.6, 2.4, { e: 'cubic-bezier(.3,.6,.3,1)' });
+    // categorías
+    const cats = el(`<div class="ab" style="left:1090px;top:190px;width:430px"><div style="font-family:var(--display);font-weight:800;font-size:32px;text-transform:uppercase;margin-bottom:14px">🏷️ Categorías</div></div>`);
+    A(cats.firstChild, FADE, 7.6, 0.4);
+    CATS.forEach(([n, v, c], i) => A(el(`<div style="display:flex;align-items:center;gap:14px;margin:10px 0;padding:14px 18px;border-radius:16px;background:var(--surface);border:1px solid var(--line);border-left:10px solid ${c};font-size:23px;font-weight:700"><span style="flex:1">${n}</span><span class="muted" style="font-size:19px">${v} vuelta${v > 1 ? 's' : ''}</span></div>`, cats), IN, 8 + i * 0.4, 0.45));
+  },
+
+  cronometrar(c) {
+    if (!c) title('Paso 2', 'Cronometra <b>desde la meta</b>');
+    const P = keypadPhone(c ? 640 : 635, c ? 120 : 150, 330, c ? 620 : 640);
+    A(P.ph, IN, 0.1, 0.6);
+    const t0 = c ? 0.5 : 4.6, g = c ? 0.3 : 0.45;
+    if (!c) {
+      const sal = el(`<div class="ab card" style="left:80px;top:190px;width:470px;padding:22px"><div style="font-family:var(--display);font-weight:800;font-size:30px;text-transform:uppercase;margin-bottom:10px">🚦 Salidas</div></div>`);
+      A(sal, IN, 0.2, 0.6);
+      CATS.slice(0, 5).forEach(([n, , col], i) => {
+        const r = el(`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:21px;font-weight:700"><span style="width:12px;height:30px;border-radius:4px;background:${col}"></span><span style="flex:1">${n}</span><span class="b btn" style="height:44px;padding:0 16px;background:var(--orange);color:#1a0b02;font-size:20px">▶ Salida</span></div>`, sal);
+        const b = $('.b', r); press(b, 0.9 + i * 0.5);
+        at(1.05 + i * 0.5, () => { b.style.background = 'rgba(34,197,94,.15)'; b.style.color = '#5ee08f'; b.textContent = `● 10:0${i}:00`; });
+      });
+    }
+    typeBib(P, '127', t0, g);
+    at(t0 + 2 * g + 0.25, () => { P.disp.style.borderColor = 'var(--green)'; P.who.innerHTML = '<span style="color:#fff;font-size:18px">Ana López</span><br><span style="color:var(--pink)">Femenil</span> · vuelta <b style="color:var(--lime)">2 de 3</b>'; P.who.style.borderColor = 'var(--green)'; });
+    if (!c) A(el(`<div class="ab" style="left:1000px;top:330px;font-size:22px;font-weight:700;color:var(--muted);width:240px">👀 Ve quién es<br>y qué vuelta lleva</div>`), IN, t0 + 1.4, 0.5);
+    const tr = c ? 2.4 : 8.6;
+    press(P.reg, tr);
+    ripple(800, 500, tr + 0.05, 'var(--lime)', 3, 520);
+    A(P.ph, [{ transform: 'translateX(0)' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(9px)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(0)' }], tr + 0.05, 0.5, { fill: 'none', e: 'linear' });
+    const toast = el(`<div class="ab" style="left:${c ? 1020 : 1010}px;top:${c ? 300 : 440}px;width:440px;padding:20px 24px;border-radius:18px;background:rgba(34,197,94,.16);border:2px solid var(--green);font-size:26px;font-weight:800;color:#7af0a6">✓ Paso registrado<div style="font-size:20px;color:#fff;margin-top:6px" class="mono">#127 · vuelta 2 · 1:08:20</div></div>`);
+    A(toast, POP, tr + 0.2, 0.5);
+    at(tr + 0.2, () => { P.disp.textContent = ''; P.disp.style.borderColor = 'var(--line2)'; P.who.style.borderColor = 'var(--line)'; P.who.textContent = 'Teclea un dorsal'; });
+    const icons = el(`<div class="ab" style="left:${c ? 1020 : 1010}px;top:${c ? 440 : 580}px;display:flex;gap:14px"><span class="chip">🔊 Sonido fuerte</span><span class="chip">📳 Vibración</span></div>`);
+    A(icons, IN, tr + 0.5, 0.5);
+    if (c) return;
+    // duplicado
+    A(toast, OUT, 12, 0.3); A(icons, OUT, 12, 0.3);
+    typeBib(P, '127', 12.3, 0.35);
+    at(13.25, () => { P.disp.style.borderColor = 'var(--amber)'; P.who.innerHTML = '<span style="color:#fff;font-size:18px">Ana López</span><br><span style="color:var(--amber)">pasó hace 6 s</span>'; });
+    press(P.reg, 14);
+    const warn = el(`<div class="ab" style="left:1010px;top:430px;width:470px;padding:20px 24px;border-radius:18px;background:rgba(255,178,31,.14);border:2px solid var(--amber);font-size:25px;font-weight:800;color:var(--amber)">⚠ ¿Paso duplicado?<div style="font-size:19px;color:#fff;margin:6px 0 14px;font-weight:600">#127 pasó hace 6 segundos</div><span class="btn d" style="height:46px;padding:0 18px;background:var(--surface2);border:1px solid var(--line2);color:#fff;font-size:20px;margin-right:10px">Descartar</span><span class="btn" style="height:46px;padding:0 18px;background:var(--amber);color:#1a1100;font-size:20px">Registrar igual</span></div>`);
+    A(warn, POP, 14.2, 0.5);
+    ripple(800, 500, 14.05, 'var(--amber)', 2, 460);
+    press($('.d', warn), 16.4);
+    A(warn, OUT, 16.8, 0.4);
+    at(16.7, () => { P.disp.textContent = ''; P.disp.style.borderColor = 'var(--line2)'; P.who.textContent = 'Teclea un dorsal'; });
+    A(el(`<div class="ab" style="left:1010px;top:470px;font-size:30px;font-weight:800;color:#7af0a6">✓ Sin pasos dobles</div>`), IN, 17.2, 0.4);
+  },
+
+  vivo(c) {
+    title(c ? '' : 'Paso 3', 'Todo en <i>tiempo real</i>');
+    const phone = el(`<div class="phone" style="left:110px;top:250px;width:210px;height:410px"><div class="scr" style="display:grid;place-items:center;text-align:center;padding:20px"><div><div style="font-family:var(--display);font-weight:800;font-size:58px" class="d">—</div><div class="btn" style="margin-top:16px;height:50px;width:150px;background:var(--lime);color:#13200a;font-size:20px">Registrar</div><div class="muted" style="font-size:14px;margin-top:12px;font-weight:700">Registrador</div></div></div></div>`);
+    A(phone, IN, 0.1, 0.5);
+    const cloud = el(`<div class="ab" style="left:690px;top:360px;width:220px;text-align:center"><svg width="200" height="130" viewBox="0 0 200 130"><path d="M50 118 h108 a38 38 0 0 0 0-76 a52 52 0 0 0-98-8 a42 42 0 0 0-10 84z" fill="var(--surface2)" stroke="var(--orange)" stroke-width="5"/></svg><div style="font-family:var(--display);font-weight:800;font-size:28px;text-transform:uppercase">Nube</div></div>`);
+    A(cloud, POP, 0.3, 0.6);
+    const mkList = (n) => Array.from({ length: n }, () => '').join('');
+    const tv = el(`<div class="tv" style="left:1110px;top:150px;width:400px;height:220px"><div class="scr" style="border-radius:6px;padding:10px 12px"><div style="font-family:var(--display);font-weight:800;font-size:20px;color:var(--amber);text-transform:uppercase">📺 Pantalla de meta</div><div class="L"></div></div></div>`);
+    const pub = el(`<div class="phone" style="left:1190px;top:405px;width:150px;height:250px;padding:9px;border-radius:30px"><div class="scr" style="border-radius:22px;padding:30px 8px 8px"><div style="font-weight:800;font-size:13px;color:var(--cyan)">📱 Público</div><div class="L"></div></div></div>`);
+    const lap = el(`<div class="lap" style="left:1110px;top:690px;width:400px;height:150px"><div class="scr" style="border-radius:6px;padding:8px 12px"><div style="font-weight:800;font-size:15px;color:var(--lime)">💻 Panel de staff</div><div class="L"></div></div></div>`);
+    [tv, pub, lap].forEach((d, i) => A(d, IN, 0.5 + i * 0.25, 0.5));
+    link([[330, 455], [690, 440]]); link([[910, 440], [1100, 260]]); link([[910, 440], [1180, 530]]); link([[910, 440], [1100, 765]]);
+    const people = [['127', 'Ana López', '1:08:20'], ['88', 'Luis Ortega', '1:08:31'], ['301', 'Diego Ramos', '1:09:02']];
+    const send = (t, [b, n, tm]) => {
+      at(t, () => { $('.d', phone).textContent = '#' + b; });
+      fly([330, 455], [690, 440], t + 0.1, 0.7);
+      [[1100, 260, tv, 22], [1180, 530, pub, 13], [1100, 765, lap, 15]].forEach(([x, y, dev, fs]) => {
+        fly([910, 440], [x, y], t + 0.85, 0.6);
+        at(t + 1.45, () => {
+          const L = $('.L', dev); const r = document.createElement('div');
+          r.style.cssText = `display:flex;gap:8px;align-items:center;font-size:${fs}px;font-weight:700;padding:${fs / 5}px 0;border-bottom:1px solid var(--line)`;
+          r.innerHTML = `<span class="bib" style="min-width:${fs * 2.2}px;font-size:${fs * .9}px">${b}</span><span style="flex:1;white-space:nowrap;overflow:hidden">${n}</span>${dev === pub ? '' : `<span class="mono muted">${tm}</span>`}`;
+          L.prepend(r); while (L.children.length > 4) L.lastChild.remove();
+          r.animate([{ background: 'rgba(198,244,50,.35)' }, { background: 'transparent' }], 1200);
+          dev.animate([{ boxShadow: '0 0 0 4px var(--lime),0 30px 80px rgba(0,0,0,.5)' }, { boxShadow: '0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.5)' }], 900);
+        });
+      });
+    };
+    (c ? [0.7, 3.2] : [1.4, 4.6, 7.8]).forEach((t, i) => send(t, people[i]));
+    if (!c) A(el(`<div class="ab" style="left:440px;top:560px;font-size:26px;font-weight:800;color:var(--lime)">⚡ en segundos · sin recargar</div>`), IN, 3, 0.5);
+  },
+
+  offline() {
+    title('Paso 4', '¿Se cayó el internet? <b>No pasa nada</b>');
+    const P = el(`<div class="phone" style="left:200px;top:200px;width:300px;height:560px"><div class="scr" style="padding:50px 20px 20px;text-align:center">
+      <div class="net" style="font-weight:800;font-size:20px;color:var(--green)">📶 En línea</div>
+      <div style="font-family:var(--display);font-weight:800;font-size:26px;text-transform:uppercase;margin-top:26px">Pasos en cola</div>
+      <div class="qn mono" style="font-family:var(--display);font-weight:800;font-size:120px;line-height:1.05;color:var(--amber)">0</div>
+      <div class="Q" style="display:flex;flex-direction:column-reverse;gap:8px;margin-top:6px"></div>
+    </div></div>`);
+    A(P, IN, 0.1, 0.5);
+    const cloud = el(`<div class="ab" style="left:1100px;top:330px;width:260px;text-align:center"><svg width="230" height="150" viewBox="0 0 200 130"><path d="M50 118 h108 a38 38 0 0 0 0-76 a52 52 0 0 0-98-8 a42 42 0 0 0-10 84z" fill="var(--surface2)" stroke="var(--orange)" stroke-width="5"/></svg><div style="font-family:var(--display);font-weight:800;font-size:30px;text-transform:uppercase">Nube</div></div>`);
+    A(cloud, POP, 0.3, 0.5);
+    const ln = link([[510, 440], [1090, 420]], 'var(--green)', '14 12', 6);
+    const x = el(`<div class="ab" style="left:740px;top:370px;font-size:90px;opacity:0">📵</div>`);
+    at(0.9, () => { $('.net', P).textContent = '📵 Sin conexión'; $('.net', P).style.color = 'var(--red)'; ln.setAttribute('stroke', 'var(--red)'); ln.setAttribute('stroke-dasharray', '4 22'); });
+    A(x, POP, 0.9, 0.5);
+    const Q = $('.Q', P), qn = $('.qn', P);
+    ['#127', '#88', '#301', '#56'].forEach((b, i) => {
+      const t = 1.8 + i * 1.05;
+      at(t, () => { const it = document.createElement('div'); it.style.cssText = 'padding:8px;border-radius:10px;background:rgba(255,178,31,.14);border:1px solid var(--amber);font-weight:800;font-size:19px'; it.textContent = `⏳ ${b} guardado`; Q.appendChild(it); it.animate(IN, { duration: 350, easing: EASE }); qn.textContent = i + 1; });
+    });
+    at(6.3, () => { $('.net', P).textContent = '📶 Señal de vuelta'; $('.net', P).style.color = 'var(--green)'; ln.setAttribute('stroke', 'var(--green)'); ln.setAttribute('stroke-dasharray', '14 12'); });
+    A(x, OUT, 6.2, 0.3);
+    [0, 1, 2, 3].forEach((i) => { const t = 6.6 + i * 0.35; fly([510, 440], [1170, 410], t, 0.8, 'q'); at(t + 0.1, () => { Q.lastChild?.remove(); qn.textContent = 3 - i; }); });
+    at(8.2, () => { qn.style.color = 'var(--green)'; });
+    A(el(`<div class="ab" style="left:900px;top:600px;width:620px;padding:20px 26px;border-radius:18px;background:rgba(34,197,94,.14);border:2px solid var(--green);font-size:30px;font-weight:800;color:#7af0a6;text-align:center">✓ Sincronizado · 0 pasos perdidos</div>`), POP, 8.4, 0.5);
+  },
+
+  resultados(c) {
+    title(c ? '' : 'Paso 5', 'Resultados <i>automáticos</i>');
+    const S = c ? 0.45 : 1; // compresión de tiempos en la versión corta
+    const pod = el(`<div class="ab" style="left:80px;top:${c ? 210 : 200}px;width:520px;height:520px"></div>`);
+    [[2, 'Luis Ortega', '1:41:07', 'var(--muted)', 220, 10], [1, 'Ana López', '1:40:12', 'var(--amber)', 300, 180], [3, 'Diego Ramos', '1:42:55', '#cd7f32', 170, 350]].forEach(([p, n, t, col, h, x], i) => {
+      const b = el(`<div class="ab" style="left:${x}px;bottom:0;width:160px;height:${h}px;border-radius:14px 14px 0 0;background:linear-gradient(180deg,${col},rgba(255,255,255,.05));display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:14px;transform-origin:bottom"><div style="font-family:var(--display);font-weight:800;font-size:70px;color:#0b1020;line-height:1">${p}</div></div>`, pod);
+      A(b, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], (0.4 + i * 0.35) * S, 0.7 * S);
+      const lbl = el(`<div class="ab" style="left:${x - 20}px;bottom:${h + 14}px;width:200px;text-align:center"><div style="font-size:${p === 1 ? 44 : 34}px">${['🥇', '🥈', '🥉'][p - 1]}</div><div style="font-weight:800;font-size:21px">${n}</div><div class="mono muted" style="font-size:18px;font-weight:700">${t}</div></div>`, pod);
+      A(lbl, IN, (0.9 + i * 0.35) * S, 0.5 * S);
+    });
+    const tb = el(`<div class="ab card" style="left:650px;top:${c ? 190 : 180}px;width:880px;padding:10px 0;overflow:hidden"></div>`);
+    A(tb, IN, 2.6 * S, 0.5 * S);
+    const cols = '50px 70px 1fr 100px 100px 100px 120px 100px';
+    el(`<div class="row" style="grid-template-columns:${cols};color:var(--muted);font-weight:800;font-size:15px;text-transform:uppercase"><span>Pos</span><span>Dorsal</span><span>Nombre</span><span>V1</span><span>V2</span><span>V3</span><span>Total</span><span>km/h</span></div>`, tb);
+    const data = [['1', '127', 'Ana López', '33:30', '32:58', '33:44', '1:40:12', '22.3'], ['2', '88', 'Luis Ortega', '33:41', '33:36', '33:50', '1:41:07', '22.1'], ['3', '301', 'Diego Ramos', '34:02', '34:30', '34:23', '1:42:55', '21.7'], ['4', '56', 'Sofía Méndez', '34:40', '34:51', '35:02', '1:44:33', '21.3'], ['—', '212', 'Iván Castro', '35:10', '36:02', '—', '—', '—']];
+    const rows = data.map((r, i) => { const row = el(`<div class="row mono" style="grid-template-columns:${cols};font-weight:600">${r.map((v, j) => `<span data-c="${j}" style="${j === 1 ? '' : ''}">${j === 1 ? `<span class="bib">${v}</span>` : v}</span>`).join('')}</div>`, tb); A(row, FADE, (3 + i * 0.25) * S, 0.3 * S); return row; });
+    const best = $('[data-c="4"]', rows[0]);
+    at(5.6 * S, () => { best.style.cssText = 'color:var(--lime);font-weight:800;background:rgba(198,244,50,.14);border-radius:8px;padding:2px 6px;margin:-2px -6px'; });
+    A(el(`<div class="ab chip" style="left:900px;top:${c ? 520 : 510}px;color:var(--lime);border-color:var(--lime)">⚡ Mejor vuelta 32:58</div>`), POP, 5.8 * S, 0.45);
+    at(7.6 * S, () => rows.slice(0, 4).forEach((r) => { const s = $('[data-c="7"]', r); s.style.color = 'var(--cyan)'; s.style.fontWeight = 800; }));
+    A(el(`<div class="ab chip" style="left:1230px;top:${c ? 520 : 510}px;color:var(--cyan);border-color:var(--cyan)">🚴 Velocidad promedio</div>`), POP, 7.8 * S, 0.45);
+    at(9.6 * S, () => { const s = $('[data-c="0"]', rows[4]); s.innerHTML = '<span style="background:rgba(244,63,94,.18);color:#ff8fa3;font-weight:800;border-radius:6px;padding:1px 6px;font-size:14px">DNF</span>'; rows[4].style.color = 'var(--muted)'; });
+    A(el(`<div class="ab chip" style="left:650px;top:${c ? 600 : 590}px;color:#ff8fa3;border-color:var(--red)">🏁 DNF al cerrar el evento</div>`), POP, 9.8 * S, 0.45);
+    if (c) return;
+    const ex = el(`<div class="ab" style="left:1060px;top:660px;display:flex;gap:16px"><span class="btn x" style="height:62px;padding:0 26px;background:#1d6f42;color:#fff;font-size:26px">⬇ Excel</span><span class="btn p" style="height:62px;padding:0 26px;background:var(--red);color:#fff;font-size:26px">⬇ PDF</span></div>`);
+    A(ex, IN, 12, 0.5);
+    press($('.x', ex), 13); press($('.p', ex), 13.6);
+    [[1120, 13.1, '#1d6f42', 'XLS'], [1290, 13.7, 'var(--red)', 'PDF']].forEach(([x, t, col, l]) => {
+      const f = el(`<div class="ab" style="left:${x}px;top:650px;width:80px;height:98px;border-radius:10px;background:${col};color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.5)">${l}</div>`);
+      A(f, [{ transform: 'translateY(0) scale(.6)', opacity: 0 }, { opacity: 1, offset: .2 }, { transform: 'translateY(-250px) scale(1)', opacity: 1, offset: .8 }, { transform: 'translateY(-280px) scale(1)', opacity: 0 }], t, 1.6);
+    });
+    A(el(`<div class="ab" style="left:1060px;top:750px;font-size:24px;font-weight:800;color:#7af0a6">✓ con un clic</div>`), FADE, 14.6, 0.4);
+  },
+
+  qr() {
+    title('Para el público', 'Escanea y <i>listo</i>');
+    const tv = el(`<div class="tv" style="left:90px;top:200px;width:760px;height:430px"><div class="scr" style="border-radius:6px;display:grid;grid-template-columns:1fr 280px;gap:20px;padding:24px">
+      <div><div style="font-family:var(--display);font-weight:800;font-size:30px;color:var(--amber);text-transform:uppercase">Resultados en vivo</div>${['Ana López', 'Luis Ortega', 'Diego Ramos', 'Sofía Méndez', 'Iván Castro'].map((n, i) => `<div style="display:flex;gap:10px;font-size:22px;font-weight:700;padding:8px 0;border-bottom:1px solid var(--line)"><span style="color:var(--amber);font-family:var(--display);width:24px">${i + 1}</span><span>${n}</span></div>`).join('')}</div>
+      <div style="text-align:center"><div class="q">${qrSvg(220)}</div><div style="font-weight:800;font-size:20px;margin-top:12px">📱 Escanea para ver<br>los resultados</div></div>
+    </div></div>`);
+    A(tv, IN, 0.1, 0.6);
+    const ph = el(`<div class="phone" style="left:1120px;top:170px;width:290px;height:560px"><div class="scr"><div class="cam" style="position:absolute;inset:0;background:#000;display:grid;place-items:center"><div style="width:200px;height:200px;border:4px solid rgba(255,255,255,.8);border-radius:20px;position:relative;overflow:hidden"><div class="ln" style="position:absolute;left:0;right:0;height:4px;background:var(--lime);box-shadow:0 0 14px var(--lime)"></div><div style="transform:scale(.8);transform-origin:0 0;opacity:.85">${qrSvg(230)}</div></div></div>
+      <div class="res" style="position:absolute;inset:0;padding:50px 14px 14px;opacity:0"><div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--cyan);text-transform:uppercase">Serial Sierra Alta · E3</div><div class="muted" style="font-size:13px;font-weight:700;margin-bottom:6px">Femenil · en vivo</div>${['Ana López', 'Karla Ruiz', 'Paola Díaz', 'Mónica Vela', 'Elena Soto', 'Rosa Gil'].map((n, i) => `<div class="r" style="display:flex;gap:8px;font-size:16px;font-weight:700;padding:8px 0;border-bottom:1px solid var(--line)"><span style="color:var(--amber);width:16px">${i + 1}</span><span style="flex:1">${n}</span><span class="mono muted">1:4${i}:${10 + i * 7}</span></div>`).join('')}</div>
+    </div></div>`);
+    A(ph, [{ transform: 'translateX(400px) rotate(8deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], 0.8, 0.8);
+    A($('.ln', ph), [{ top: '0%' }, { top: '96%' }], 1.8, 0.6, { it: 3, dir: 'alternate', e: 'ease-in-out' });
+    A($('.cam', ph), OUT, 3.6, 0.3);
+    A($('.res', ph), FADE, 3.7, 0.4);
+    ph.querySelectorAll('.r').forEach((r, i) => A(r, IN, 3.9 + i * 0.12, 0.3));
+    A(el(`<div class="ab" style="left:880px;top:420px;font-size:70px;color:var(--lime)">➜</div>`), POP, 1.6, 0.4);
+    A(el(`<div class="ab" style="left:90px;top:690px;display:flex;gap:16px"><span class="chip">🚫 Sin descargar nada</span><span class="chip">🌐 Desde el navegador</span><span class="chip">🔄 Se actualiza solo</span></div>`), IN, 4.8, 0.5);
+  },
+
+  historial() {
+    title('Tu serial', 'Historial de <i>todas las etapas</i>');
+    const E = [['Etapa 1', 'Cerro Azul', 'Ana López', 'Karla Ruiz', 'Paola Díaz', 2], ['Etapa 2', 'Los Pinos', 'Karla Ruiz', 'Ana López', 'Elena Soto', 1], ['Etapa 3', 'El Mirador', 'Ana López', 'Paola Díaz', 'Karla Ruiz', 0], ['Etapa 4', 'Gran final', 'Paola Díaz', 'Ana López', 'Mónica Vela', 1]];
+    const cards = E.map(([e, l, a, b, c2], i) => {
+      const cd = el(`<div class="ab card" style="left:${80 + i * 365}px;top:180px;width:345px;padding:20px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--display);font-weight:800;font-size:30px;text-transform:uppercase">${e}</span><span class="muted" style="font-weight:700;font-size:16px">✓ finalizado</span></div><div class="muted" style="font-weight:700;font-size:18px;margin-bottom:10px">${l} · Femenil</div>${[a, b, c2].map((n, k) => `<div class="p" data-n="${n}" style="display:flex;gap:10px;align-items:center;font-size:20px;font-weight:700;padding:7px 8px;border-radius:10px"><span>${['🥇', '🥈', '🥉'][k]}</span><span>${n}</span></div>`).join('')}</div>`);
+      A(cd, IN, 0.4 + i * 0.35, 0.5); return cd;
+    });
+    const sb = el(`<div class="ab card" style="left:80px;top:500px;width:620px;height:76px;border-radius:40px;padding:0 28px;display:flex;align-items:center;gap:14px;font-size:28px;font-weight:700"><span>🔎</span><span class="q"></span></div>`);
+    A(sb, IN, 3.4, 0.5);
+    type($('.q', sb), 'Ana López', 4, 9);
+    const res = el(`<div class="ab card" style="left:760px;top:470px;width:760px;padding:18px 22px"><div style="font-family:var(--display);font-weight:800;font-size:28px;text-transform:uppercase;margin-bottom:6px">Ana López · #127 · Femenil</div></div>`);
+    A(res, POP, 5.4, 0.5);
+    [['Etapa 1', '🥇 1º', '1:42:18', '21.8'], ['Etapa 2', '🥈 2º', '1:43:02', '21.6'], ['Etapa 3', '🥇 1º', '1:40:12', '22.3'], ['Etapa 4', '🥈 2º', '1:41:40', '22.0']].forEach((r, i) =>
+      A(el(`<div class="row mono" style="grid-template-columns:1fr 110px 140px 120px;font-weight:700;font-size:21px"><span>${r[0]}</span><span>${r[1]}</span><span>${r[2]}</span><span class="muted">${r[3]} km/h</span></div>`, res), IN, 5.8 + i * 0.25, 0.35));
+    at(5.6, () => cards.forEach((cd) => { const p = cd.querySelector('[data-n="Ana López"]'); if (p) { p.style.background = 'rgba(198,244,50,.16)'; p.style.boxShadow = 'inset 0 0 0 2px var(--lime)'; } }));
+  },
+
+  cierre() {
+    const logo = el(`<div class="ab" style="left:0;right:0;top:80px;text-align:center"><h1 style="font-size:120px;font-weight:800;text-transform:uppercase;line-height:.9">Chrono<span style="color:var(--lime)">Bike</span></h1><div class="muted" style="font-size:26px;font-weight:600;margin-top:8px">Cronometraje de circuitos · resultados en vivo</div></div>`);
+    A(logo, POP, 0.2, 0.8);
+    const b = el(`<div class="ab" style="left:0;right:0;top:330px;display:flex;gap:22px;justify-content:center"></div>`);
+    ['📱 Solo necesitas un celular', '⚡ Resultados en tiempo real', '📶 Funciona aunque falle el internet'].forEach((t, i) => A(el(`<span class="chip" style="font-size:26px;padding:16px 26px">${t}</span>`, b), POP, 1.2 + i * 0.8, 0.5));
+    const cta = el(`<div class="ab" style="left:0;right:0;top:470px;text-align:center"><span class="btn" style="height:92px;padding:0 50px;background:var(--orange);color:#1a0b02;font-size:44px;box-shadow:0 0 0 8px rgba(255,90,31,.22)">Agenda una demostración</span></div>`);
+    A(cta, POP, 5, 0.6);
+    A(cta.firstChild, [{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], 6, 1.2, { it: 4, fill: 'none', e: 'ease-in-out' });
+    const names = el(`<div class="ab" style="left:0;right:0;top:620px;display:flex;gap:70px;justify-content:center"></div>`);
+    ['Ricardo Salmeron', 'Jose Almada'].forEach((n, i) => A(el(`<div style="font-family:var(--display);font-weight:800;font-size:56px;letter-spacing:.02em"><span style="color:var(--lime);margin-right:4px">+</span>${n}</div>`, names), IN, 6.6 + i * 0.6, 0.6));
+  },
+};
+
+/* ───────── Narración ───────── */
+const clipUrl = (v, i) => `media/narracion/${v}-${String(i + 1).padStart(2, '0')}.mp3`;
+function chunks(text) {
+  const parts = text.split(/(?<=[.,:;?!])\s+/); const out = []; let cur = '';
+  for (const p of parts) { if (cur && (cur + ' ' + p).length > 68) { out.push(cur); cur = p; } else cur = cur ? cur + ' ' + p : p; }
+  if (cur) out.push(cur);
+  let acc = 0; const tot = out.reduce((s, x) => s + x.length, 0);
+  return out.map((t) => { const c = { t, at: acc / tot }; acc += t.length; return c; });
+}
+async function detectVoice() {
+  if (qs.get('voz') === 'tts') return pickTTS();
+  if (qs.get('voz') === 'no') return 'none';
+  const ok = await Promise.all(Object.keys(NARR).flatMap((v) => NARR[v].map((_, i) => new Promise((res) => {
+    const a = new Audio(); a.preload = 'auto';
+    const done = (r) => { a.onloadedmetadata = a.onerror = null; res(r); };
+    a.onloadedmetadata = () => { audios[`${v}-${i}`] = a; done(true); }; a.onerror = () => done(false);
+    setTimeout(() => done(false), 6000); a.src = clipUrl(v, i);
+  }))));
+  // Solo se usa la voz grabada si están todas las tomas de la versión actual (una sola voz de principio a fin)
+  const all = NARR[VERSION].every((_, i) => audios[`${VERSION}-${i}`]);
+  return all ? 'mp3' : pickTTS();
+}
+async function pickTTS() {
+  if (!('speechSynthesis' in window)) return 'none';
+  let vs = speechSynthesis.getVoices();
+  if (!vs.length) await new Promise((r) => { speechSynthesis.onvoiceschanged = r; setTimeout(r, 1200); });
+  vs = speechSynthesis.getVoices().filter((v) => v.lang?.toLowerCase().startsWith('es'));
+  if (!vs.length) return 'none';
+  ttsVoice = vs.find((v) => /es-MX/i.test(v.lang) && /natural|online|google/i.test(v.name)) || vs.find((v) => /es-MX|es-US|es-419/i.test(v.lang)) || vs.find((v) => /google|natural/i.test(v.name)) || vs[0];
+  return 'tts';
+}
+function voiceLabel() {
+  const m = { mp3: '🎙️ Voz grabada', tts: `🗣️ Voz del navegador${ttsVoice ? ' · ' + ttsVoice.name.split(/[-(]/)[0].trim() : ''}`, none: '💬 Solo subtítulos (este navegador no tiene voz en español)' };
+  $('#voz').textContent = m[voiceMode] || '';
+}
+function startNarr() {
+  const text = NARR[VERSION][idx]; narr.started = true; narr.t0 = st;
+  if (voiceMode === 'mp3') {
+    const a = audios[`${VERSION}-${idx}`]; narr.a = a; a.currentTime = 0; a.muted = muted; a.onended = () => endNarr();
+    a.play().catch(() => { narr.a = null; });
+  } else if (voiceMode === 'tts') {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = ttsVoice?.lang || 'es-MX'; if (ttsVoice) u.voice = ttsVoice; u.rate = 1.04; u.volume = muted ? 0 : 1;
+    u.onboundary = (e) => { if (narr && narr.u === u) narr.ci = e.charIndex; };
+    u.onend = () => { if (narr && narr.u === u) endNarr(); };
+    narr.u = u; speechSynthesis.speak(u);
+  }
+}
+function endNarr() { if (narr && !narr.done) { narr.done = true; narr.endAt = st; } }
+function narrProgress() {
+  if (!narr?.started) return -1;
+  const el = (st - narr.t0) / 1000;
+  if (narr.a && narr.a.duration) return narr.a.currentTime / narr.a.duration;
+  if (narr.u && narr.ci) return Math.max(narr.ci / narr.len, Math.min(.98, el / narr.est * .8));
+  return el / narr.est;
+}
+function stopNarr() {
+  if (narr?.a) { narr.a.onended = null; narr.a.pause(); }
+  if (narr?.u) { narr.u.onend = narr.u.onboundary = null; }
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+/* ───────── Reproducción ───────── */
+const plan = () => PLAN[VERSION];
+function buildScene(i) {
+  stopNarr(); anims.forEach((a) => a.cancel()); anims = []; tasks = []; ticks = []; root.innerHTML = '';
+  idx = i; st = 0; ended = false;
+  const [name, dur, nominal, compact] = plan()[i]; K = dur / nominal;
+  const text = NARR[VERSION][i];
+  narr = { started: false, done: false, endAt: 0, len: text.length, est: text.length / CPS, ci: 0, chunks: chunks(text), a: null, u: null };
+  SCENES[name](!!compact);
+  root.animate(FADE, { duration: 350, fill: 'both' });
+  renderDots(); $('#subs span').textContent = ''; $('#subs').style.visibility = 'hidden'; updateTime();
+}
+function setPlaying(p) {
+  playing = p; $('#bPlay').textContent = p ? '❚❚' : '▶';
+  anims.forEach((a) => (p ? a.play() : a.pause()));
+  if (narr?.a) p ? narr.a.play().catch(() => {}) : narr.a.pause();
+  if (narr?.u && 'speechSynthesis' in window) p ? speechSynthesis.resume() : speechSynthesis.pause();
+}
+function go(i) { const n = plan().length; if (i < 0) i = 0; if (i >= n) { if (loop) i = 0; else return finish(); } buildScene(i); if (playing) setPlaying(true); }
+function finish() { setPlaying(false); ended = true; $('#cover').classList.remove('hide'); $('#bStart').textContent = '↺ Ver de nuevo'; renderDots(true); }
+function frame(ts) {
+  requestAnimationFrame(frame);
+  const dt = last ? Math.min(100, ts - last) : 0; last = ts;
+  if (!playing || ended) return;
+  st += dt;
+  const t = nowS();
+  if (!narr.started && st >= 350) startNarr();
+  const due = tasks.filter((x) => x.t <= t); if (due.length) { tasks = tasks.filter((x) => x.t > t); due.forEach((x) => x.fn()); }
+  ticks.forEach((f) => f(t));
+  // narración sin audio o con voz del navegador que no avisa al terminar
+  if (narr.started && !narr.done) {
+    const el = (st - narr.t0) / 1000;
+    if (voiceMode === 'none' || (!narr.a && !narr.u)) { if (el >= narr.est) endNarr(); }
+    else if (narr.u && el > narr.est * 1.8 + 1.5) endNarr();
+  }
+  // subtítulos
+  const p = narr.done ? (st - narr.endAt < 700 ? 1 : 2) : narrProgress();
+  let txt = '';
+  if (p >= 0 && p <= 1) { const cs = narr.chunks; for (const c of cs) if (p >= c.at) txt = c.t; }
+  const span = $('#subs span'); if (span.textContent !== txt) span.textContent = txt;
+  $('#subs').style.visibility = txt ? 'visible' : 'hidden';
+  // fin de escena
+  const dur = plan()[idx][1] * 1000;
+  if (st >= dur && narr.done && st - narr.endAt >= 600) go(idx + 1);
+  updateTime();
+}
+function renderDots(all) {
+  const D = $('#dots'); if (D.children.length !== plan().length) { D.innerHTML = plan().map((_, i) => `<i title="Escena ${i + 1}"><b></b></i>`).join(''); [...D.children].forEach((d, i) => (d.onclick = () => { go(i); })); }
+  [...D.children].forEach((d, i) => { d.classList.toggle('done', all || i < idx); if (i >= idx || all) d.firstChild.style.width = all ? '100%' : '0'; });
+}
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function updateTime() {
+  const P = plan(); const total = P.reduce((s, x) => s + x[1], 0); const dur = P[idx][1];
+  const el = P.slice(0, idx).reduce((s, x) => s + x[1], 0) + Math.min(st / 1000, dur);
+  $('#time').textContent = `${fmt(el)} / ${fmt(total)}`;
+  $('#prog').style.width = (el / total * 100) + '%';
+  const d = $('#dots').children[idx]; if (d) d.firstChild.style.width = Math.min(100, st / 10 / dur) + '%';
+}
+async function setVersion(v, autoplay) {
+  VERSION = v; const u = new URL(location); u.searchParams.set('v', v); history.replaceState(null, '', u);
+  $('#vLarga').classList.toggle('on', v === 'larga'); $('#vCorta').classList.toggle('on', v === 'corta');
+  $('#coverSub').textContent = v === 'larga' ? 'Presentación · versión larga · 2 min · con voz y subtítulos' : 'Presentación · versión corta · 30 s · con voz y subtítulos';
+  $('#bOther').textContent = v === 'larga' ? 'Ver la versión corta' : 'Ver la versión larga';
+  $('#dots').innerHTML = '';
+  if (voiceMode !== 'none' || autoplay !== undefined) { voiceMode = NARR[v].every((_, i) => audios[`${v}-${i}`]) ? 'mp3' : (voiceMode === 'mp3' ? await pickTTS() : voiceMode); voiceLabel(); }
+  buildScene(0); setPlaying(!!autoplay);
+}
+
+/* ───────── Controles ───────── */
+function fit() { const W = innerWidth, H = innerHeight - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar')); const s = Math.min(W / 1600, H / 900); stage.style.transform = `scale(${s}) translate(-50%,-50%)`; stage.style.transformOrigin = '0 0'; stage.style.left = W / 2 - 800 * s + 'px'; stage.style.top = H / 2 - 450 * s + 'px'; stage.style.transform = `scale(${s})`; }
+addEventListener('resize', fit); fit();
+let voiceReady = null;
+async function start() {
+  $('#cover').classList.add('hide');
+  if (!voiceReady) { $('#voz').textContent = 'Preparando voz…'; voiceReady = detectVoice().then((m) => { voiceMode = m; voiceLabel(); }); }
+  await voiceReady;
+  if (ended || idx !== 0 || st > 0) buildScene(0);
+  setPlaying(true);
+}
+$('#bStart').onclick = start;
+$('#bOther').onclick = async () => { await setVersion(VERSION === 'larga' ? 'corta' : 'larga'); start(); };
+$('#bPlay').onclick = () => { if (!voiceReady || ended) return start(); setPlaying(!playing); };
+$('#bPrev').onclick = () => go(idx - 1);
+$('#bNext').onclick = () => go(idx + 1);
+$('#vLarga').onclick = () => setVersion('larga', playing);
+$('#vCorta').onclick = () => setVersion('corta', playing);
+$('#bMute').onclick = () => { muted = !muted; $('#bMute').textContent = muted ? '🔇' : '🔊'; if (narr?.a) narr.a.muted = muted; if (muted && narr?.u) speechSynthesis.cancel(); };
+$('#bSubs').onclick = () => { subsOn = !subsOn; $('#bSubs').classList.toggle('on', subsOn); $('#subs').classList.toggle('off', !subsOn); };
+$('#bLoop').onclick = () => { loop = !loop; $('#bLoop').classList.toggle('on', loop); };
+$('#bFull').onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.());
+addEventListener('keydown', (e) => {
+  if (e.key === ' ') { e.preventDefault(); $('#bPlay').click(); }
+  else if (e.key === 'ArrowRight') go(idx + 1); else if (e.key === 'ArrowLeft') go(idx - 1);
+  else if (e.key === 'f' || e.key === 'F') $('#bFull').click(); else if (e.key === 'm' || e.key === 'M') $('#bMute').click();
+  else if (e.key === 's' || e.key === 'S') $('#bSubs').click();
+});
+// Para capturas: ?escena=N muestra esa escena congelada en el segundo ?t=
+window.__pres = { go: (i) => buildScene(i), seek(t) { const target = t * 1000; setPlaying(true); while (st < target) { st += 50; const s = nowS(); const due = tasks.filter((x) => x.t <= s); tasks = tasks.filter((x) => x.t > s); due.forEach((x) => x.fn()); ticks.forEach((f) => f(s)); } anims.forEach((a) => { a.currentTime = Math.min(a.currentTime ?? 0, 1e9); }); setPlaying(false); anims.forEach((a) => { const tm = a.effect.getTiming(); a.currentTime = Math.min(target, tm.delay + tm.duration * (tm.iterations === Infinity ? 1 : tm.iterations)); }); }, plan, get state() { return { idx, st, voiceMode, version: VERSION, sub: $('#subs span').textContent }; } };
+$('#vLarga').classList.toggle('on', VERSION === 'larga'); $('#vCorta').classList.toggle('on', VERSION === 'corta');
+await setVersion(VERSION);
+if (qs.has('escena')) { $('#cover').classList.add('hide'); window.__pres.go(+qs.get('escena') - 1); window.__pres.seek(+(qs.get('t') || 5)); }
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
