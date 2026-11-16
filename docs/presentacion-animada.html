@@ -18,14 +18,19 @@ html,body{margin:0;height:100%;background:#03050b;color:var(--text);font-family:
 #scene{position:absolute;inset:0}
 .ab{position:absolute}
 h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:.01em}
-.title{position:absolute;left:80px;top:54px;font-family:var(--display);font-weight:800;font-size:58px;text-transform:uppercase;line-height:1}
+.title{position:absolute;left:80px;top:50px;font-family:var(--display);font-weight:800;font-size:70px;text-transform:uppercase;line-height:1;text-shadow:0 4px 24px rgba(0,0,0,.6)}
 .title b{color:var(--orange)} .title i{font-style:normal;color:var(--lime)}
-.kicker{position:absolute;left:82px;top:30px;font-weight:800;font-size:16px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.kicker{position:absolute;left:82px;top:24px;font-weight:800;font-size:19px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 .card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-.phone{position:absolute;background:#04060c;border-radius:42px;padding:13px;box-shadow:0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.55)}
+.phone{position:absolute;background:linear-gradient(145deg,#2a3142,#05070d 40%,#0b0f1a);border-radius:42px;padding:13px;box-shadow:0 0 0 2px #3a4560,inset 0 0 0 1px rgba(255,255,255,.08),0 40px 90px rgba(0,0,0,.7)}
 .phone::before{content:"";position:absolute;top:20px;left:50%;width:84px;height:20px;margin-left:-42px;background:#04060c;border-radius:0 0 14px 14px;z-index:3}
 .scr{position:relative;width:100%;height:100%;border-radius:30px;background:#0a1020;overflow:hidden}
-.tv{position:absolute;background:#04060c;border-radius:14px;padding:12px;box-shadow:0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.5)}
+.scr::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:30;background:linear-gradient(115deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.03) 28%,transparent 42%)}
+.shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.bgimg{position:absolute;inset:-4%;background:url(img/sistema-actual-ilustracion.png) center/cover no-repeat}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(3,5,11,.85) 100%)}
+.ntf{position:absolute;left:6%;right:6%;top:8%;z-index:25;border-radius:12px;background:rgba(10,16,32,.94);border:2px solid var(--lime);box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 24px rgba(198,244,50,.35);display:flex;gap:8px;align-items:center;font-weight:800;color:#fff}
+.tv{position:absolute;background:linear-gradient(160deg,#1f2636,#04060c 30%);border-radius:14px;padding:12px;box-shadow:0 0 0 2px #2d3a58,0 40px 90px rgba(0,0,0,.7)}
 .tv::after{content:"";position:absolute;left:42%;right:42%;bottom:-26px;height:26px;background:linear-gradient(#1d2740,#0d1322);border-radius:0 0 6px 6px}
 .lap{position:absolute;background:#04060c;border-radius:14px 14px 4px 4px;padding:10px;box-shadow:0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.5)}
 .lap::after{content:"";position:absolute;left:-30px;right:-30px;bottom:-16px;height:16px;background:linear-gradient(#26314e,#141b2e);border-radius:0 0 14px 14px}
@@ -57,7 +62,7 @@ svg.ov{position:absolute;inset:0;width:1600px;height:900px;pointer-events:none}
 .seg{flex-shrink:0}
 @media (max-width:720px){#voz,#time,#dots{display:none}#bar{gap:5px;padding:0 6px;justify-content:space-between}#bar button{min-width:34px;padding:0 8px;font-size:14px}}
 /* portada */
-#cover{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:rgba(3,5,11,.78);backdrop-filter:blur(4px)}
+#cover{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:linear-gradient(180deg,rgba(3,5,11,.55),rgba(3,5,11,.9)),url(img/sistema-actual-ilustracion.png) center/cover no-repeat}
 #cover .box{text-align:center;padding:30px}
 #cover h1{font-size:clamp(40px,7vw,86px);font-weight:800;text-transform:uppercase;line-height:.9} #cover h1 span{color:var(--lime)}
 #cover p{color:var(--muted);font-size:18px;margin:14px 0 26px}
@@ -105,14 +110,14 @@ const NARR = {
     'Los resultados se calculan solos: podio por categoría, tiempo de cada vuelta, la mejor vuelta, la velocidad promedio, y quien no terminó queda como DNF al cerrar el evento. Todo se exporta a Excel o PDF con un clic.',
     'El público escanea el código QR de la pantalla y consulta los resultados en su celular, sin descargar nada.',
     'Y cada evento queda guardado: tu serial completo, con podios y tiempos de todas las etapas, para consultarlo cuando quieras.',
-    'ChronoBike: solo necesitas un celular, resultados en tiempo real, y funciona aunque falle el internet. Agenda una demostración con nuestro equipo.',
+    'ChronoBike: cronometraje profesional y resultados en vivo para tus carreras. Agenda una demostración con nuestro equipo.',
   ],
   corta: [
     'ChronoBike: cronometraje y resultados en vivo, desde un celular.',
     'En la meta, tecleas el dorsal y registras el paso con un toque.',
     'Los resultados llegan en segundos a la pantalla y al celular del público.',
     'Podios, tiempos por vuelta y métricas, calculados solos.',
-    'Funciona aunque falle el internet. Agenda tu demostración.',
+    'ChronoBike. Agenda tu demostración con nuestro equipo.',
   ],
 };
 /* escena: [constructor, duración planeada (s), duración nominal del constructor (s), modo compacto] */
@@ -257,21 +262,29 @@ function finishLine(x, y, w = 470, h = 430) {
 /* ───────── Escenas ───────── */
 const SCENES = {
   apertura() {
-    el(`<svg class="ov" viewBox="0 0 1600 900">
-      <path d="M0 720 L220 520 L360 610 L560 380 L760 560 L940 330 L1130 540 L1300 430 L1600 650 L1600 900 L0 900Z" fill="#0d1527"/>
-      <path d="M0 790 L260 640 L470 730 L700 560 L930 700 L1160 590 L1400 690 L1600 610 L1600 900 L0 900Z" fill="#111c33"/>
-      <path id="trail" d="M-40 810 C 180 700, 300 760, 470 700 S 760 600, 930 660 S 1250 560, 1640 600" fill="none" stroke="var(--orange)" stroke-width="5" stroke-dasharray="14 12" opacity=".7"/>
-    </svg>`);
-    const bike = el(`<div class="ab" style="left:0;top:0;width:46px;height:46px;margin:-30px 0 0 -23px;offset-path:path('M-40 810 C 180 700, 300 760, 470 700 S 760 600, 930 660 S 1250 560, 1640 600');offset-rotate:auto;font-size:44px;line-height:46px;text-align:center;filter:drop-shadow(0 0 14px rgba(255,90,31,.9))">🚴</div>`);
-    A(bike, [{ offsetDistance: '0%' }, { offsetDistance: '100%' }], 0, 7, { e: 'linear' });
-    const ring = el(`<svg class="ab" style="left:560px;top:150px" width="480" height="480" viewBox="0 0 480 480"><circle cx="240" cy="240" r="220" fill="none" stroke="var(--line)" stroke-width="10"/><circle id="arc" cx="240" cy="240" r="220" fill="none" stroke="var(--lime)" stroke-width="10" stroke-linecap="round" stroke-dasharray="1383" transform="rotate(-90 240 240)"/></svg>`);
-    A($('#arc', ring), [{ strokeDashoffset: 1383 }, { strokeDashoffset: 0 }], 0.2, 2.2, { e: 'ease-in-out' });
-    A(ring, FADE, 0, 0.6);
-    const logo = el(`<div class="ab" style="left:0;right:0;top:300px;text-align:center"><h1 style="font-size:150px;font-weight:800;text-transform:uppercase;line-height:.9">Chrono<span style="color:var(--lime)">Bike</span></h1></div>`);
-    A(logo, POP, 0.6, 0.8);
-    A(el(`<div class="ab" style="left:0;right:0;top:450px;text-align:center;font-size:32px;font-weight:600;color:var(--muted)">Cronometraje de circuitos · resultados en vivo</div>`), IN, 1.4, 0.7);
-    const chips = el(`<div class="ab" style="left:0;right:0;top:560px;display:flex;gap:18px;justify-content:center"></div>`);
-    ['📱 Desde un celular', '⚡ En tiempo real', '📶 Aunque falle el internet'].forEach((t, i) => A(el(`<span class="chip">${t}</span>`, chips), POP, 2.8 + i * 0.4, 0.5));
+    // Plano real de la meta: enfoque, acercamiento de cámara y revelado del logo
+    const bg = el('<div class="bgimg"></div>');
+    A(bg, [{ transform: 'scale(1.45) translate(9%,-6%)', filter: 'blur(14px) brightness(.35) saturate(1.2)' }, { transform: 'scale(1.3) translate(7%,-5%)', filter: 'blur(0) brightness(.8) saturate(1.25)', offset: .3 }, { transform: 'scale(1.06) translate(0,0)', filter: 'blur(0) brightness(.55) saturate(1.2)' }], 0, 7, { e: 'cubic-bezier(.4,0,.2,1)' });
+    el('<div class="vig"></div>');
+    el('<div class="ab" style="inset:0;background:linear-gradient(180deg,rgba(3,5,11,.55) 0%,transparent 30%,transparent 55%,rgba(3,5,11,.92) 100%)"></div>');
+    // destello de luz que barre la escena
+    const sweep = el('<div class="ab" style="top:-20%;bottom:-20%;width:260px;background:linear-gradient(90deg,transparent,rgba(255,220,160,.28),transparent);transform:skewX(-18deg);mix-blend-mode:screen;z-index:5"></div>');
+    A(sweep, [{ left: '-400px' }, { left: '1900px' }], 2.4, 1.4, { e: 'ease-in-out' });
+    // logo letra por letra
+    const logo = el('<div class="ab" style="left:0;right:0;top:250px;text-align:center;z-index:6"><h1 class="lg" style="font-size:176px;font-weight:800;text-transform:uppercase;line-height:.9;text-shadow:0 10px 50px rgba(0,0,0,.85),0 0 40px rgba(255,90,31,.25)"></h1></div>');
+    const h = $('.lg', logo);
+    [...'CHRONOBIKE'].forEach((ch, i) => {
+      const sp = document.createElement('span'); sp.textContent = ch; sp.style.display = 'inline-block'; if (i >= 6) sp.style.color = 'var(--lime)'; h.appendChild(sp);
+      A(sp, [{ opacity: 0, transform: 'translateY(60px) scale(.8)', filter: 'blur(12px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], 1.1 + i * 0.07, 0.6);
+    });
+    // cronómetro que corre y se detiene
+    const clk = el('<div class="ab mono" style="left:0;right:0;top:440px;text-align:center;z-index:6;font-family:var(--display);font-weight:800;font-size:84px;letter-spacing:.06em;color:#fff;text-shadow:0 6px 30px rgba(0,0,0,.9)">00:00:00.0</div>');
+    A(clk, FADE, 1.8, 0.4);
+    tick((t) => { if (t < 2) return; const v = Math.min(t - 2, 2.2) / 2.2; const ms = Math.round((1 - Math.pow(1 - v, 2)) * 3090000); const hh = Math.floor(ms / 3600000), mm = Math.floor(ms / 60000) % 60, ss = Math.floor(ms / 1000) % 60, d = Math.floor(ms / 100) % 10; clk.textContent = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${d}`; });
+    at(4.25, () => { clk.style.color = 'var(--lime)'; });
+    A(clk, [{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], 4.2, 0.45, { fill: 'none' });
+    ripple(800, 490, 4.2, 'var(--lime)', 2, 520);
+    A(el('<div class="ab" style="left:0;right:0;top:560px;text-align:center;z-index:6;font-size:38px;font-weight:700;color:#fff;text-shadow:0 4px 20px rgba(0,0,0,.9)">Cronometraje de circuitos · resultados en vivo</div>'), IN, 4.6, 0.7);
   },
 
   problema() {
@@ -384,30 +397,32 @@ const SCENES = {
     const cloud = el(`<div class="ab" style="left:690px;top:360px;width:220px;text-align:center"><svg width="200" height="130" viewBox="0 0 200 130"><path d="M50 118 h108 a38 38 0 0 0 0-76 a52 52 0 0 0-98-8 a42 42 0 0 0-10 84z" fill="var(--surface2)" stroke="var(--orange)" stroke-width="5"/></svg><div style="font-family:var(--display);font-weight:800;font-size:28px;text-transform:uppercase">Nube</div></div>`);
     A(cloud, POP, 0.3, 0.6);
     const mkList = (n) => Array.from({ length: n }, () => '').join('');
-    const tv = el(`<div class="tv" style="left:1110px;top:150px;width:400px;height:220px"><div class="scr" style="border-radius:6px;padding:10px 12px"><div style="font-family:var(--display);font-weight:800;font-size:20px;color:var(--amber);text-transform:uppercase">📺 Pantalla de meta</div><div class="L"></div></div></div>`);
-    const pub = el(`<div class="phone" style="left:1190px;top:405px;width:150px;height:250px;padding:9px;border-radius:30px"><div class="scr" style="border-radius:22px;padding:30px 8px 8px"><div style="font-weight:800;font-size:13px;color:var(--cyan)">📱 Público</div><div class="L"></div></div></div>`);
-    const lap = el(`<div class="lap" style="left:1110px;top:690px;width:400px;height:150px"><div class="scr" style="border-radius:6px;padding:8px 12px"><div style="font-weight:800;font-size:15px;color:var(--lime)">💻 Panel de staff</div><div class="L"></div></div></div>`);
-    [tv, pub, lap].forEach((d, i) => A(d, IN, 0.5 + i * 0.25, 0.5));
-    link([[px + 14, py], [690, 440]]); link([[910, 440], [1100, 260]]); link([[910, 440], [1180, 530]]); link([[910, 440], [1100, 765]]);
+    const tv = el(`<div class="tv" style="left:1080px;top:140px;width:440px;height:260px"><div class="scr" style="border-radius:6px"><img class="shot" src="img/34-pantalla-tv-paso.png" alt=""></div><div class="ab" style="left:0;right:0;top:-34px;text-align:center;font-weight:800;font-size:20px;color:var(--amber)">📺 Pantalla de meta</div></div>`);
+    const pub = el(`<div class="phone" style="left:1190px;top:440px;width:160px;height:270px;padding:9px;border-radius:30px"><div class="scr" style="border-radius:22px"><img class="shot" src="img/08-publico-movil.png" alt=""></div><div class="ab" style="left:-60px;right:-60px;bottom:-30px;text-align:center;font-weight:800;font-size:18px;color:var(--cyan)">📱 Celular del público</div></div>`);
+    const lap = el(`<div class="lap" style="left:1080px;top:770px;width:440px;height:100px;opacity:0"></div>`);
+    const lap2 = el(`<div class="lap" style="left:770px;top:640px;width:280px;height:175px"><div class="scr" style="border-radius:6px"><img class="shot" src="img/28-resultados-tabla.png" alt=""></div><div class="ab" style="left:0;right:0;bottom:-48px;text-align:center;font-weight:800;font-size:18px;color:var(--lime)">💻 Panel del staff</div></div>`);
+    [tv, pub, lap2].forEach((d, i) => A(d, IN, 0.5 + i * 0.25, 0.5));
+    link([[px + 14, py], [690, 440]]); link([[910, 440], [1070, 270]]); link([[910, 440], [1180, 575]]); link([[850, 500], [905, 630]]);
     const people = [['127', 'Ana López', '1:08:20'], ['88', 'Luis Ortega', '1:08:31'], ['301', 'Diego Ramos', '1:09:02']];
     const send = (t, [b, n, tm]) => {
       M.bike(b, { 127: 'var(--pink)', 88: 'var(--orange)', 301: 'var(--lime)' }[b], [[t - 1.3, -150], [t, 135], [t + 0.9, 520]]);
       M.flash(t);
       fly([px, py], [690, 440], t + 0.1, 0.7);
-      [[1100, 260, tv, 22], [1180, 530, pub, 13], [1100, 765, lap, 15]].forEach(([x, y, dev, fs]) => {
+      [[1070, 270, tv, 19], [1180, 575, pub, 11], [905, 630, lap2, 13]].forEach(([x, y, dev, fs]) => {
         fly([910, 440], [x, y], t + 0.85, 0.6);
         at(t + 1.45, () => {
-          const L = $('.L', dev); const r = document.createElement('div');
-          r.style.cssText = `display:flex;gap:8px;align-items:center;font-size:${fs}px;font-weight:700;padding:${fs / 5}px 0;border-bottom:1px solid var(--line)`;
-          r.innerHTML = `<span class="bib" style="min-width:${fs * 2.2}px;font-size:${fs * .9}px">${b}</span><span style="flex:1;white-space:nowrap;overflow:hidden">${n}</span>${dev === pub ? '' : `<span class="mono muted">${tm}</span>`}`;
-          L.prepend(r); while (L.children.length > 4) L.lastChild.remove();
-          r.animate([{ background: 'rgba(198,244,50,.35)' }, { background: 'transparent' }], 1200);
-          dev.animate([{ boxShadow: '0 0 0 4px var(--lime),0 30px 80px rgba(0,0,0,.5)' }, { boxShadow: '0 0 0 2px #1d2740,0 30px 80px rgba(0,0,0,.5)' }], 900);
+          const scr = $('.scr', dev); scr.querySelector('.ntf')?.remove();
+          const r = document.createElement('div'); r.className = 'ntf';
+          r.style.cssText = `font-size:${fs}px;padding:${fs * .4}px ${fs * .6}px`;
+          r.innerHTML = `<span class="bib" style="min-width:${fs * 2.2}px;font-size:${fs * .95}px">${b}</span><span style="flex:1;white-space:nowrap;overflow:hidden">${n}</span>${dev === pub ? '' : `<span class="mono" style="color:var(--lime)">${tm}</span>`}`;
+          scr.appendChild(r);
+          r.animate([{ transform: 'translateY(-140%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 380, easing: EASE });
+          dev.animate([{ boxShadow: '0 0 0 5px var(--lime),0 0 60px rgba(198,244,50,.5)' }, { boxShadow: '0 0 0 2px #2d3a58,0 40px 90px rgba(0,0,0,.7)' }], 1000);
         });
       });
     };
     (c ? [1.2, 3.4] : [1.6, 4.6, 7.8]).forEach((t, i) => send(t, people[i]));
-    if (!c) A(el(`<div class="ab" style="left:560px;top:560px;font-size:26px;font-weight:800;color:var(--lime)">⚡ en segundos · sin recargar</div>`), IN, 3, 0.5);
+    if (!c) A(el(`<div class="ab" style="left:470px;top:180px;font-size:30px;font-weight:800;color:var(--lime)">⚡ en segundos · sin recargar</div>`), IN, 3, 0.5);
   },
 
   offline() {
@@ -473,19 +488,15 @@ const SCENES = {
 
   qr() {
     title('Para el público', 'Escanea y <i>listo</i>');
-    const tv = el(`<div class="tv" style="left:90px;top:200px;width:760px;height:430px"><div class="scr" style="border-radius:6px;display:grid;grid-template-columns:1fr 280px;gap:20px;padding:24px">
-      <div><div style="font-family:var(--display);font-weight:800;font-size:30px;color:var(--amber);text-transform:uppercase">Resultados en vivo</div>${['Ana López', 'Luis Ortega', 'Diego Ramos', 'Sofía Méndez', 'Iván Castro'].map((n, i) => `<div style="display:flex;gap:10px;font-size:22px;font-weight:700;padding:8px 0;border-bottom:1px solid var(--line)"><span style="color:var(--amber);font-family:var(--display);width:24px">${i + 1}</span><span>${n}</span></div>`).join('')}</div>
-      <div style="text-align:center"><div class="q">${qrSvg(220)}</div><div style="font-weight:800;font-size:20px;margin-top:12px">📱 Escanea para ver<br>los resultados</div></div>
-    </div></div>`);
+    const tv = el(`<div class="tv" style="left:70px;top:190px;width:800px;height:450px"><div class="scr" style="border-radius:6px"><img class="shot" src="img/33-pantalla-tv.png" alt=""><div class="ab" style="right:22px;bottom:22px;background:#fff;border-radius:14px;padding:10px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6);z-index:5">${qrSvg(170)}<div style="color:#0b1020;font-weight:800;font-size:15px;margin-top:4px">Escanea y sigue la carrera</div></div></div></div>`);
     A(tv, IN, 0.1, 0.6);
     const ph = el(`<div class="phone" style="left:1120px;top:170px;width:290px;height:560px"><div class="scr"><div class="cam" style="position:absolute;inset:0;background:#000;display:grid;place-items:center"><div style="width:200px;height:200px;border:4px solid rgba(255,255,255,.8);border-radius:20px;position:relative;overflow:hidden"><div class="ln" style="position:absolute;left:0;right:0;height:4px;background:var(--lime);box-shadow:0 0 14px var(--lime)"></div><div style="transform:scale(.8);transform-origin:0 0;opacity:.85">${qrSvg(230)}</div></div></div>
-      <div class="res" style="position:absolute;inset:0;padding:50px 14px 14px;opacity:0"><div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--cyan);text-transform:uppercase">Serial Sierra Alta · E3</div><div class="muted" style="font-size:13px;font-weight:700;margin-bottom:6px">Femenil · en vivo</div>${['Ana López', 'Karla Ruiz', 'Paola Díaz', 'Mónica Vela', 'Elena Soto', 'Rosa Gil'].map((n, i) => `<div class="r" style="display:flex;gap:8px;font-size:16px;font-weight:700;padding:8px 0;border-bottom:1px solid var(--line)"><span style="color:var(--amber);width:16px">${i + 1}</span><span style="flex:1">${n}</span><span class="mono muted">1:4${i}:${10 + i * 7}</span></div>`).join('')}</div>
+      <div class="res" style="position:absolute;inset:0;opacity:0"><img class="shot" src="img/08-publico-movil.png" alt=""></div>
     </div></div>`);
     A(ph, [{ transform: 'translateX(400px) rotate(8deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], 0.8, 0.8);
     A($('.ln', ph), [{ top: '0%' }, { top: '96%' }], 1.8, 0.6, { it: 3, dir: 'alternate', e: 'ease-in-out' });
     A($('.cam', ph), OUT, 3.6, 0.3);
     A($('.res', ph), FADE, 3.7, 0.4);
-    ph.querySelectorAll('.r').forEach((r, i) => A(r, IN, 3.9 + i * 0.12, 0.3));
     A(el(`<div class="ab" style="left:880px;top:420px;font-size:70px;color:var(--lime)">➜</div>`), POP, 1.6, 0.4);
     A(el(`<div class="ab" style="left:90px;top:690px;display:flex;gap:16px"><span class="chip">🚫 Sin descargar nada</span><span class="chip">🌐 Desde el navegador</span><span class="chip">🔄 Se actualiza solo</span></div>`), IN, 4.8, 0.5);
   },
@@ -508,15 +519,16 @@ const SCENES = {
   },
 
   cierre() {
-    const logo = el(`<div class="ab" style="left:0;right:0;top:80px;text-align:center"><h1 style="font-size:120px;font-weight:800;text-transform:uppercase;line-height:.9">Chrono<span style="color:var(--lime)">Bike</span></h1><div class="muted" style="font-size:26px;font-weight:600;margin-top:8px">Cronometraje de circuitos · resultados en vivo</div></div>`);
+    const bg = el('<div class="bgimg"></div>');
+    A(bg, [{ transform: 'scale(1.04)', filter: 'brightness(.3) saturate(1.2)' }, { transform: 'scale(1.14)', filter: 'brightness(.38) saturate(1.2)' }], 0, 11, { e: 'linear' });
+    el('<div class="vig"></div>');
+    const logo = el('<div class="ab" style="left:0;right:0;top:130px;text-align:center"><h1 style="font-size:150px;font-weight:800;text-transform:uppercase;line-height:.9;text-shadow:0 10px 50px rgba(0,0,0,.85)">Chrono<span style="color:var(--lime)">Bike</span></h1><div style="font-size:34px;font-weight:700;margin-top:12px;color:#fff;text-shadow:0 4px 20px #000">Cronometraje de circuitos · resultados en vivo</div></div>');
     A(logo, POP, 0.2, 0.8);
-    const b = el(`<div class="ab" style="left:0;right:0;top:330px;display:flex;gap:22px;justify-content:center"></div>`);
-    ['📱 Solo necesitas un celular', '⚡ Resultados en tiempo real', '📶 Funciona aunque falle el internet'].forEach((t, i) => A(el(`<span class="chip" style="font-size:26px;padding:16px 26px">${t}</span>`, b), POP, 1.2 + i * 0.8, 0.5));
-    const cta = el(`<div class="ab" style="left:0;right:0;top:470px;text-align:center"><span class="btn" style="height:92px;padding:0 50px;background:var(--orange);color:#1a0b02;font-size:44px;box-shadow:0 0 0 8px rgba(255,90,31,.22)">Agenda una demostración</span></div>`);
-    A(cta, POP, 5, 0.6);
-    A(cta.firstChild, [{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], 6, 1.2, { it: 4, fill: 'none', e: 'ease-in-out' });
-    const names = el(`<div class="ab" style="left:0;right:0;top:620px;display:flex;gap:70px;justify-content:center"></div>`);
-    ['Ricardo Salmeron', 'Jose Almada'].forEach((n, i) => A(el(`<div style="font-family:var(--display);font-weight:800;font-size:56px;letter-spacing:.02em"><span style="color:var(--lime);margin-right:4px">+</span>${n}</div>`, names), IN, 6.6 + i * 0.6, 0.6));
+    const cta = el('<div class="ab" style="left:0;right:0;top:420px;text-align:center"><span class="btn" style="height:104px;padding:0 60px;background:var(--orange);color:#1a0b02;font-size:50px;box-shadow:0 0 0 10px rgba(255,90,31,.25),0 20px 60px rgba(0,0,0,.6)">Agenda una demostración</span></div>');
+    A(cta, POP, 2.2, 0.6);
+    A(cta.firstChild, [{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], 3.2, 1.2, { it: 6, fill: 'none', e: 'ease-in-out' });
+    const names = el('<div class="ab" style="left:0;right:0;top:600px;display:flex;gap:80px;justify-content:center"></div>');
+    ['Ricardo Salmeron', 'Jose Almada'].forEach((n, i) => A(el(`<div style="font-family:var(--display);font-weight:800;font-size:64px;letter-spacing:.02em;text-shadow:0 6px 30px #000"><span style="color:var(--lime);margin-right:4px">+</span>${n}</div>`, names), IN, 3.8 + i * 0.6, 0.6));
   },
 };
 
@@ -590,7 +602,13 @@ function buildScene(i) {
   const [name, dur, nominal, compact] = plan()[i]; K = dur / nominal;
   const text = NARR[VERSION][i];
   narr = { started: false, done: false, endAt: 0, len: text.length, est: text.length / CPS, ci: 0, chunks: chunks(text), a: null, u: null };
+  if (name !== 'apertura' && name !== 'cierre') {
+    const bg = el('<div class="bgimg" style="filter:blur(16px) brightness(.22) saturate(1.3)"></div>');
+    A(bg, [{ transform: 'scale(1.08)' }, { transform: 'scale(1.16)' }], 0, nominal, { e: 'linear' });
+    el('<div class="vig"></div>');
+  }
   SCENES[name](!!compact);
+  A(root, [{ transform: 'scale(1)' }, { transform: 'scale(1.03)' }], 0, nominal, { e: 'linear' });
   root.animate(FADE, { duration: 350, fill: 'both' });
   renderDots(); $('#subs span').textContent = ''; $('#subs').style.visibility = 'hidden'; updateTime();
 }
