@@ -198,6 +198,62 @@ function qrSvg(size, seed = 7) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="background:#fff;padding:${c}px;box-sizing:content-box;border-radius:8px"><g fill="#000">${r}${f(0, 0)}${f(n - 7, 0)}${f(0, n - 7)}</g></svg>`;
 }
 
+
+/* Meta: arco, línea a cuadros, persona cronometrando y ciclistas que cruzan */
+function finishLine(x, y, w = 470, h = 430) {
+  const v = el(`<div class="ab card" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;overflow:hidden;padding:0;background:linear-gradient(180deg,#16274a,#0c1222 72%)">
+    <svg width="${w}" height="${h}" viewBox="0 0 470 430" preserveAspectRatio="none" style="position:absolute;inset:0">
+      <defs><pattern id="chk${x}" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#111"/><rect width="6" height="6" fill="#fff"/><rect x="6" y="6" width="6" height="6" fill="#fff"/></pattern></defs>
+      <path d="M0 240 L70 185 L150 225 L235 150 L320 215 L400 170 L470 200 L470 300 L0 300Z" fill="#101a30"/>
+      <rect x="0" y="292" width="470" height="14" fill="#2a3550"/>
+      <rect x="0" y="306" width="470" height="124" fill="#1b2232"/>
+      <line x1="0" y1="372" x2="470" y2="372" stroke="#3a4560" stroke-width="4" stroke-dasharray="26 18"/>
+      <rect x="228" y="306" width="24" height="124" fill="url(#chk${x})"/>
+      <rect x="150" y="84" width="10" height="222" fill="#cbd5e1"/><rect x="320" y="84" width="10" height="222" fill="#cbd5e1"/>
+      <rect x="140" y="70" width="200" height="50" rx="8" fill="#ff5a1f"/>
+      <text x="240" y="106" text-anchor="middle" font-family="Barlow Condensed,Inter" font-weight="800" font-size="34" fill="#1a0b02">🏁 META</text>
+    </svg>
+    <div style="position:absolute;left:18px;top:14px;font-family:var(--display);font-weight:800;font-size:24px;text-transform:uppercase">📍 En la meta</div>
+    <svg class="who" width="90" height="160" viewBox="0 0 90 160" style="position:absolute;left:352px;top:142px">
+      <rect x="30" y="100" width="11" height="56" rx="5" fill="#334155"/><rect x="47" y="100" width="11" height="56" rx="5" fill="#334155"/>
+      <rect x="24" y="44" width="42" height="64" rx="12" fill="#ff5a1f"/>
+      <text x="45" y="82" text-anchor="middle" font-size="10" font-weight="800" fill="#1a0b02" font-family="Inter">STAFF</text>
+      <circle cx="45" cy="26" r="15" fill="#d9a77c"/><path d="M30 24 a15 14 0 0 1 30 0 z" fill="#0f172a"/><rect x="16" y="20" width="18" height="5" rx="2" fill="#0f172a"/>
+      <path d="M32 56 L14 70 L10 60" stroke="#d9a77c" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect class="ph" x="1" y="42" width="15" height="24" rx="3" fill="#0b1020" stroke="#94a3b8" stroke-width="2"/>
+    </svg>
+    <div style="position:absolute;left:330px;top:308px;width:136px;text-align:center;font-size:14px;font-weight:800;color:var(--muted)">Registrador</div>
+  </div>`);
+  const ph = $('.ph', v);
+  return {
+    v,
+    phone: [x + 352 + 8, y + 142 + 54], // centro del celular de la persona, en coordenadas del escenario
+    flash(t, color = '#c6f432') {
+      A(ph, [{ fill: color }, { fill: color, offset: .6 }, { fill: '#0b1020' }], t, 0.7, { fill: 'none' });
+      const r = el(`<div style="position:absolute;left:${352 + 8 - 40}px;top:${142 + 54 - 40}px;width:80px;height:80px;border-radius:50%;border:4px solid ${color};opacity:0;pointer-events:none"></div>`, v);
+      A(r, [{ opacity: .9, transform: 'scale(.3)' }, { opacity: 0, transform: 'scale(1.4)' }], t, 0.7, { e: 'ease-out', fill: 'forwards' });
+    },
+    // pts: [[t, x], ...] — x es el borde izquierdo de la bici; la placa cruza la línea cuando x ≈ 135
+    bike(num, jersey, pts) {
+      const wheel = (cx) => `<g class="wh" style="transform-box:fill-box;transform-origin:center"><circle cx="${cx}" cy="78" r="18" fill="none" stroke="#e2e8f0" stroke-width="4"/><path d="M${cx - 17} 78h34M${cx} 61v34" stroke="#64748b" stroke-width="2"/></g>`;
+      const b = el(`<svg width="120" height="100" viewBox="0 0 120 100" style="position:absolute;left:0;top:304px;transform:translateX(-160px);z-index:2">
+        ${wheel(24)}${wheel(96)}
+        <path d="M24 78 L48 78 L74 50 L44 50 Z M48 78 L42 44 M74 50 L96 78 M74 50 L76 38" stroke="#94a3b8" stroke-width="5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M46 44 L58 62 L50 78" stroke="#1e293b" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M44 44 L70 24" stroke="${jersey}" stroke-width="13" stroke-linecap="round"/>
+        <path d="M70 26 L80 38" stroke="${jersey}" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="78" cy="16" r="8" fill="#d9a77c"/><path d="M67 15 a11 10 0 0 1 22 -2 z" fill="${jersey}"/>
+        <rect x="80" y="34" width="34" height="22" rx="3" fill="#fff" stroke="#111" stroke-width="1.5"/>
+        <text x="97" y="51" text-anchor="middle" font-size="16" font-weight="800" fill="#0b1020" font-family="Barlow Condensed,Inter">${num}</text>
+      </svg>`, v);
+      const t0 = pts[0][0], d = pts[pts.length - 1][0] - t0;
+      A(b, pts.map(([t, px]) => ({ transform: `translateX(${px}px)`, offset: (t - t0) / d })), t0, d, { e: 'linear' });
+      b.querySelectorAll('.wh').forEach((w) => A(w, [{ transform: 'rotate(0)' }, { transform: 'rotate(360deg)' }], t0, 0.45, { it: Math.ceil(d / 0.45), e: 'linear' }));
+      return b;
+    },
+  };
+}
+
 /* ───────── Escenas ───────── */
 const SCENES = {
   apertura() {
@@ -289,10 +345,14 @@ const SCENES = {
         at(1.05 + i * 0.5, () => { b.style.background = 'rgba(34,197,94,.15)'; b.style.color = '#5ee08f'; b.textContent = `● 10:0${i}:00`; });
       });
     }
+    const M = finishLine(80, c ? 170 : 190);
+    if (!c) { A(M.v, IN, 4.5, 0.5); A($('.card', root), OUT, 4.2, 0.35); } else A(M.v, IN, 0.1, 0.5);
     typeBib(P, '127', t0, g);
     at(t0 + 2 * g + 0.25, () => { P.disp.style.borderColor = 'var(--green)'; P.who.innerHTML = '<span style="color:#fff;font-size:18px">Ana López</span><br><span style="color:var(--pink)">Femenil</span> · vuelta <b style="color:var(--lime)">2 de 3</b>'; P.who.style.borderColor = 'var(--green)'; });
     if (!c) A(el(`<div class="ab" style="left:1000px;top:330px;font-size:22px;font-weight:700;color:var(--muted);width:240px">👀 Ve quién es<br>y qué vuelta lleva</div>`), IN, t0 + 1.4, 0.5);
     const tr = c ? 2.4 : 8.6;
+    M.bike('127', 'var(--pink)', c ? [[0.2, -150], [2.1, 110], [2.4, 135], [3.3, 520]] : [[4.7, -150], [7.2, 70], [8.3, 115], [8.6, 135], [9.6, 520]]);
+    M.flash(tr);
     press(P.reg, tr);
     ripple(800, 500, tr + 0.05, 'var(--lime)', 3, 520);
     A(P.ph, [{ transform: 'translateX(0)' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(9px)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(0)' }], tr + 0.05, 0.5, { fill: 'none', e: 'linear' });
@@ -306,7 +366,7 @@ const SCENES = {
     A(toast, OUT, 12, 0.3); A(icons, OUT, 12, 0.3);
     typeBib(P, '127', 12.3, 0.35);
     at(13.25, () => { P.disp.style.borderColor = 'var(--amber)'; P.who.innerHTML = '<span style="color:#fff;font-size:18px">Ana López</span><br><span style="color:var(--amber)">pasó hace 6 s</span>'; });
-    press(P.reg, 14);
+    press(P.reg, 14); M.flash(14, '#ffb21f');
     const warn = el(`<div class="ab" style="left:1010px;top:430px;width:470px;padding:20px 24px;border-radius:18px;background:rgba(255,178,31,.14);border:2px solid var(--amber);font-size:25px;font-weight:800;color:var(--amber)">⚠ ¿Paso duplicado?<div style="font-size:19px;color:#fff;margin:6px 0 14px;font-weight:600">#127 pasó hace 6 segundos</div><span class="btn d" style="height:46px;padding:0 18px;background:var(--surface2);border:1px solid var(--line2);color:#fff;font-size:20px;margin-right:10px">Descartar</span><span class="btn" style="height:46px;padding:0 18px;background:var(--amber);color:#1a1100;font-size:20px">Registrar igual</span></div>`);
     A(warn, POP, 14.2, 0.5);
     ripple(800, 500, 14.05, 'var(--amber)', 2, 460);
@@ -318,8 +378,9 @@ const SCENES = {
 
   vivo(c) {
     title(c ? '' : 'Paso 3', 'Todo en <i>tiempo real</i>');
-    const phone = el(`<div class="phone" style="left:110px;top:250px;width:210px;height:410px"><div class="scr" style="display:grid;place-items:center;text-align:center;padding:20px"><div><div style="font-family:var(--display);font-weight:800;font-size:58px" class="d">—</div><div class="btn" style="margin-top:16px;height:50px;width:150px;background:var(--lime);color:#13200a;font-size:20px">Registrar</div><div class="muted" style="font-size:14px;margin-top:12px;font-weight:700">Registrador</div></div></div></div>`);
-    A(phone, IN, 0.1, 0.5);
+    const M = finishLine(60, 250);
+    A(M.v, IN, 0.1, 0.5);
+    const [px, py] = M.phone;
     const cloud = el(`<div class="ab" style="left:690px;top:360px;width:220px;text-align:center"><svg width="200" height="130" viewBox="0 0 200 130"><path d="M50 118 h108 a38 38 0 0 0 0-76 a52 52 0 0 0-98-8 a42 42 0 0 0-10 84z" fill="var(--surface2)" stroke="var(--orange)" stroke-width="5"/></svg><div style="font-family:var(--display);font-weight:800;font-size:28px;text-transform:uppercase">Nube</div></div>`);
     A(cloud, POP, 0.3, 0.6);
     const mkList = (n) => Array.from({ length: n }, () => '').join('');
@@ -327,11 +388,12 @@ const SCENES = {
     const pub = el(`<div class="phone" style="left:1190px;top:405px;width:150px;height:250px;padding:9px;border-radius:30px"><div class="scr" style="border-radius:22px;padding:30px 8px 8px"><div style="font-weight:800;font-size:13px;color:var(--cyan)">📱 Público</div><div class="L"></div></div></div>`);
     const lap = el(`<div class="lap" style="left:1110px;top:690px;width:400px;height:150px"><div class="scr" style="border-radius:6px;padding:8px 12px"><div style="font-weight:800;font-size:15px;color:var(--lime)">💻 Panel de staff</div><div class="L"></div></div></div>`);
     [tv, pub, lap].forEach((d, i) => A(d, IN, 0.5 + i * 0.25, 0.5));
-    link([[330, 455], [690, 440]]); link([[910, 440], [1100, 260]]); link([[910, 440], [1180, 530]]); link([[910, 440], [1100, 765]]);
+    link([[px + 14, py], [690, 440]]); link([[910, 440], [1100, 260]]); link([[910, 440], [1180, 530]]); link([[910, 440], [1100, 765]]);
     const people = [['127', 'Ana López', '1:08:20'], ['88', 'Luis Ortega', '1:08:31'], ['301', 'Diego Ramos', '1:09:02']];
     const send = (t, [b, n, tm]) => {
-      at(t, () => { $('.d', phone).textContent = '#' + b; });
-      fly([330, 455], [690, 440], t + 0.1, 0.7);
+      M.bike(b, { 127: 'var(--pink)', 88: 'var(--orange)', 301: 'var(--lime)' }[b], [[t - 1.3, -150], [t, 135], [t + 0.9, 520]]);
+      M.flash(t);
+      fly([px, py], [690, 440], t + 0.1, 0.7);
       [[1100, 260, tv, 22], [1180, 530, pub, 13], [1100, 765, lap, 15]].forEach(([x, y, dev, fs]) => {
         fly([910, 440], [x, y], t + 0.85, 0.6);
         at(t + 1.45, () => {
@@ -344,8 +406,8 @@ const SCENES = {
         });
       });
     };
-    (c ? [0.7, 3.2] : [1.4, 4.6, 7.8]).forEach((t, i) => send(t, people[i]));
-    if (!c) A(el(`<div class="ab" style="left:440px;top:560px;font-size:26px;font-weight:800;color:var(--lime)">⚡ en segundos · sin recargar</div>`), IN, 3, 0.5);
+    (c ? [1.2, 3.4] : [1.6, 4.6, 7.8]).forEach((t, i) => send(t, people[i]));
+    if (!c) A(el(`<div class="ab" style="left:560px;top:560px;font-size:26px;font-weight:800;color:var(--lime)">⚡ en segundos · sin recargar</div>`), IN, 3, 0.5);
   },
 
   offline() {

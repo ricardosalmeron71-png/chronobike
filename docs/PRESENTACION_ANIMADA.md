@@ -27,8 +27,8 @@
 | 1 | Apertura | Ciclista en un circuito de montaña, logo y las tres ideas clave |
 | 2 | El problema | Libreta, Excel con errores, "+3 h" y las preguntas de los corredores |
 | 3 | Prepara tu evento | Alta del evento, importación de 256 corredores desde Excel y categorías con colores |
-| 4 | Cronometra desde la meta | Salidas por categoría, dorsal tecleado, quién es y qué vuelta lleva, registro con sonido y vibración, aviso de duplicado |
-| 5 | Tiempo real | El paso viaja a la nube y aparece en la pantalla de meta, el celular del público y el panel del staff |
+| 4 | Cronometra desde la meta | Salidas por categoría; en la meta, una ciclista cruza la línea y la persona del staff la registra; dorsal tecleado, quién es y qué vuelta lleva, registro con sonido y vibración, aviso de duplicado |
+| 5 | Tiempo real | Los ciclistas cruzan la meta y cada paso viaja a la nube y aparece en la pantalla de meta, el celular del público y el panel del staff |
 | 6 | Sin internet | Los pasos se guardan en cola y se envían solos al volver la señal |
 | 7 | Resultados automáticos | Podio, vueltas, mejor vuelta, velocidad promedio, DNF y exportación a Excel/PDF |
 | 8 | Para el público | Código QR en la pantalla y resultados en el celular, sin descargar nada |
