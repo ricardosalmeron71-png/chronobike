@@ -1,0 +1,11 @@
+# Mismas cabeceras que netlify.toml, para Cloudflare Pages (y Netlify, que también lee este archivo)
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self)
+
+/admin.html
+  X-Robots-Tag: noindex
+
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
